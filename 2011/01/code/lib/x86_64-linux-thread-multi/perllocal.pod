@@ -1,0 +1,44 @@
+=head2 Wed Nov 30 23:17:40 2011: C<Module> L<IO::CaptureOutput|IO::CaptureOutput>
+
+=over 4
+
+=item *
+
+C<installed into: /home/jls/myperl/lib>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 1.1102>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
+=head2 Wed Nov 30 23:45:17 2011: C<Module> L<IPC::System::Simple|IPC::System::Simple>
+
+=over 4
+
+=item *
+
+C<installed into: /home/jls/myperl/lib>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 1.21>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
