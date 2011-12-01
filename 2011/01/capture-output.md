@@ -6,7 +6,7 @@ This article was written by [Phil Hollenback](http://www.twitter.com/philiph)
 ## The Problem
 
 Like most veteran bash scripters, I have a tendency to abuse shell
-scripting.  In particular, I often fall in to the trap of collecting
+scripting.  In particular, I often fall into the trap of collecting
 and manipulating process output.  This works fine for the simple case
 of one or two lines of stdout, but falls down horribly for complex
 cases.  Pretty soon a simple
@@ -246,6 +246,7 @@ are portable across unix, mac, and windows.
 
 ## Further Reading
 
+* The code samples in this post are available at [github.com/jordansissel/sysadvent](https://github.com/jordansissel/sysadvent/tree/master/2011/01/code)
 * A StackOverflow post that [discusses capturing stdout and stderr in
 perl](http://stackoverflow.com/questions/109124/how-do-you-capture-stderr-stdout-and-the-exit-code-all-at-once-in-perl).
 * [Capturing stdout, stderr, and exit code in Perl](http://www.perlmonks.org/?node_id=454715) from Perl Monks.
