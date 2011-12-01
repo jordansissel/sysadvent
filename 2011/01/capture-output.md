@@ -1,4 +1,4 @@
-# Don't bash your process outputs
+# Day 1 - Don't bash your process outputs
 
 This article was written by [Phil Hollenback](http://www.twitter.com/philiph) 
 ([www.hollenback.net](http://www.hollenback.net))
