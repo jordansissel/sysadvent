@@ -1,4 +1,4 @@
-# Don't Use Bash to Capture Process Output!
+# Better process output capture
 
 This article was written by [Phil Hollenback](http://www.twitter.com/philiph) 
 ([www.hollenback.net](http://www.hollenback.net))
