@@ -79,7 +79,7 @@ management tool such as puppet, chef, or cfengine. The developers should be
 given a basic training so they can provide the systems team with the
 appropriate configuration templates.
 
-# Logs
+## Logs
 
 Logs are pretty important too, and very easy to neglect.  There are plenty of
 alternative tools around to log from a Java application: Log4j, Logback, etc ..
@@ -87,7 +87,7 @@ Use them and make sure that they are configured to log to syslog, then they
 can be collected centrally and parsed by tools much easier than if they were
 spread all over the filesystem.
 
-# Monitoring
+## Monitoring
 
 You also want your application to have some ways to monitor it besides
 just checking if it is running - it is usually insufficient to simply check if
