@@ -1,0 +1,8 @@
+%div{ :class => "alert-message #{@status}" }
+  %b Status:
+  = @status
+
+  %p{ :style => "whitespace: pre" }
+    = @output
+
+%a{:href => "/"} << Back

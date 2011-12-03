@@ -1,0 +1,15 @@
+!!! 5
+%html
+  %head
+    %title Self Service
+    %link{ :rel => "stylesheet", :href => "/bootstrap.min.css", :type => "text/css" }
+%body
+  .topbar
+    .topbar-inner
+      .container
+        .brand 
+          Self Service
+  .container
+    #content{ :style => "margin-top:60px;" }
+      = yield
+
