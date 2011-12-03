@@ -60,7 +60,7 @@ invocation, but you'll need a web server, html, and some code to make it
 happen. Luckily there's lots of open source tools available to make building
 this quicker.
 
-I'll start with a simple example that has a button restart Apache. I'll use Ruby,
+I'll start with a simple example that has a button restart Apache. I chose Ruby,
 [Sinatra](http://www.sinatrarb.com/) and
 [Bootstrap](http://twitter.github.com/bootstrap/) for this, but you can use any
 tool that helps you get the job done.
@@ -137,7 +137,7 @@ used as a human keyboard.
 
 Definitely a brilliant win-win situation for everyone.
 
-Putting permissions proxying and embedding your skills into code allows other
+Proxying permissions and embedding your skills into code allows other
 people to act with your permissions and skills in a controlled and repeatable
 way without the burden of knowledge or complex access controls. Reducing the
 knowledge required to perform a task will greatly reduce the amount of
