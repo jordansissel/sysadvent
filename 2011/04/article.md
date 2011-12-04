@@ -34,30 +34,30 @@ Terminology first, because knowing the right terms will help you find answers
 in search engines faster.
 
 * Tool terms:
-  * Red Hat: rpm, rpmbuild, spec file, yum
-  * Debian: dpkg, debuild, control file, dh_make, apt-get
-  * FreeBSD: ports, make, pkg_add
-  * Solaris: pkg, pkgadd, pkgmk, pkgtrans
+    * Red Hat: rpm, rpmbuild, spec file, yum
+    * Debian: dpkg, debuild, control file, dh_make, apt-get
+    * FreeBSD: ports, make, pkg_add
+    * Solaris: pkg, pkgadd, pkgmk, pkgtrans
 * Versioning terms:
-  * Red Hat: epoch, version, release
-  * Debian: version
-  * FreeBSD: epoch, version, revision
-  * Solaris: version
+    * Red Hat: epoch, version, release
+    * Debian: version
+    * FreeBSD: epoch, version, revision
+    * Solaris: version
 * Relationship terms:
-  * Red Hat: requires, obsoletes, provides
-  * Debian: depends, conflicts, provides, replaces
-  * FreeBSD: depends, requires
-  * Solaris: _nothing as far as I can tell_
+    * Red Hat: requires, obsoletes, provides
+    * Debian: depends, conflicts, provides, replaces
+    * FreeBSD: depends, requires
+    * Solaris: _nothing as far as I can tell_
 * Scripted action terms:
-  * Red Hat: %pre, %post, %preun, %postun
-  * Debian: preinst, postinst, prerm, postrm
-  * FreeBSD: pkg-install, pkg-deinstall, pkg-req
-  * Solaris: preinstall, postinstall, checkinstall
+    * Red Hat: %pre, %post, %preun, %postun
+    * Debian: preinst, postinst, prerm, postrm
+    * FreeBSD: pkg-install, pkg-deinstall, pkg-req
+    * Solaris: preinstall, postinstall, checkinstall
 * Support or repo tools
-  * Red Hat: mrepo, createrepo
-  * Debian: apt-ftparchive, reprepro, apt-file
-  * FreeBSD: portmaster, portupgrade, portsnap,
-  * Solaris: pkgbuild
+    * Red Hat: mrepo, createrepo
+    * Debian: apt-ftparchive, reprepro, apt-file
+    * FreeBSD: portmaster, portupgrade, portsnap,
+    * Solaris: pkgbuild
 
 As you can see, some things have very similar terms, some do not. FreeBSD calls
 'pkg-req' what Solaris calls 'checkinstall' but Red Hat and Debian lack this
@@ -78,16 +78,20 @@ dependencies of 'foo,' possibly aborting due to dependency conflicts, version
 mismatches, or other relationship problems.
 
 A common practice here is to mirror packages locally in your infrastructure.
-This enables you to survive upstream failures (like package corruption,
-outages, etc). Tools like mrepo (for rpm) and rsync will help you here as most
-package repositories support rsync.
+This enables you to survive upstream failures (like package removal, outages,
+etc). Tools like mrepo (for rpm) and rsync will help you here as most package
+repositories support rsync.
+
+Rolling your own package repository can be done with mrepo and creatrepo for
+rpm/yum. For Debian (dpkg/apt-get), apt-ftparchive or reprepro are useful.
 
 ## Building Packages
 
 Have you ever needed a piece of software (or specific version) not available in
 your upstream package repository?  You don't want to be at the mercy and whims
 of upstream. Your own software policies and needs are likely to be different
-(and even in conflict) with Debian or Ubuntu's packaging policies and culture.
+(and even in conflict), for example, with the packaging policies and cultures
+of Debian, Red Hat, FreeBSD, Ubuntu, or whoever is your package provider.
 
 Given this likely mismatch in your needs and upstream's available software, it
 is worth your time learning how to build packages and how to host them internally
@@ -124,24 +128,28 @@ What package translating tools are there?
   later with standard FreeBSD tools.
 * Python setuptools (the 'setup.py' stuff) usually responds nicely to 'python setup.py bdist_rpm'
 * Ruby has [gem2rpm](http://rubygems.org/gems/gem2rpm) will help you build rpms from gems
-* Perl has [cpan2rpm]http://perl.arix.com/cpan2rpm/
-
-It's pretty lame needing one tool for every conversion method you want to use.
-Further, the conversion tools don't often help you build the packages; for
-example, gem2rpm emits an 'rpm spec' which requires you know how to turn that
-into an rpm.
-
-All of this sums up to a burden of knowledge I think is silly.
+* Perl has [cpan2rpm](http://perl.arix.com/cpan2rpm/)
 
 ## Build Packages Easier
 
-There are easier ways to build packages. Two projects, in particular, aim to solve exactly the 'how to I build a package of this thing?' question.
+It's pretty lame needing one tool for every conversion method you want to use.
+While one tool doing one task well is deeply rooted in [Unix
+philosophy](http://www.faqs.org/docs/artu/ch01s06.html), there's still lots of 
+overhead in requiring many tools to do similar jobs.
+
+Further, the conversion tools don't often help you build the packages; for
+example, gem2rpm emits an 'rpm spec' which requires you know how to turn that
+into an rpm. All of this sums up to a burden of knowledge I think is silly.
+
+Luckily, there are projects addressing this problem. Two tools, in particular,
+aim to solve exactly the 'how to I build a package of this thing?' question.
 
 First, there is [CheckInstall](http://asic-linux.com.mx/~izto/checkinstall/)
 (which bears no relation to the Solaris packaging term). This project tries
 to make package creation a side effect of the normal "make install" task,
 certainly a nice touch if you are looking to keep you software building
-workflow the same.
+workflow the same. Using the same basic workflow that ends with 'make install,'
+CheckInstall will produce an rpm or deb for you.
 
 Second, there is [fpm](https://github.com/jordansissel/fpm#readme). The goal of fpm
 (caveat: I am the author) is to make a common tool for building packages
@@ -190,3 +198,4 @@ packaging systems you are using.
   pkgsrc system is supported on many different platforms including Solaris and Linux.
 * [Gentoo Prefix](http://www.gentoo.org/proj/en/gentoo-alt/prefix/) - The
   Gentoo Portage system but supported on other platforms (similar in idea to pkgsrc).
+* [Homebrew](http://mxcl.github.com/homebrew/) - A popular package manager for OS X.
