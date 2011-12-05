@@ -7,8 +7,8 @@ environment that didn't have tasks, work orders, requests, tickets or some
 other variant on that theme. Because my roles have always been rather customer
 facing, whether internal or external, the idea of a ticket system always
 appealed to me, so here are my reasons you should dive head first into a
-system, why I chose Request Tracker by Best Practical and a quick HOWTO on
-getting RT up and running on Ubuntu/Debian.
+ticket system, why I chose Request Tracker by Best Practical, and a quick HOWTO
+on getting RT up and running on Ubuntu/Debian.
 
 ## Why a Ticket System?
 
@@ -16,35 +16,36 @@ A ticket system is important because email, conversations, sticky notes, etc
 get lost and forgotten. That is it, plain and simple, but that just scratches
 the surface of the real power of a ticket system. For starters, tickets make
 great collaboration spaces for dealing with issues. Everyone involved gets
-updated when new info is available and it provides a great blow by blow when
+updated when new info is available, and it provides a great blow by blow when
 you are dealing with the postmortem. The other thing that comes from all of
-this effort is metrics. Metrics about which users or customers make the most
-requests, what kinds of requests happen regularly and how long it takes to get
-certain tasks accomplished. It becomes an easy way to justify the need for more
-staff, or more staff in specific areas, when there is a sustained volume of
-tickets.
+this effort is metrics: Metrics about which users or customers make the most
+requests, what kinds of requests happen with what frequency, and how long it
+takes to get certain tasks accomplished. These metrics provide an easy way to
+justify the need for improvements in ticket throughput like more staff or more
+staff in specific areas.
 
 ## Why RT?
 
-Request Tracker by Best Practical, or RT, is fairly simple to get up and
-running and is extremely easy to bend to meet the needs of most environments. I
-personally chose RT because of the general ease of setup (Debian has packages),
-it is email based, has a REST API and there is a mobile interface and iPhone
-app. Sure there are a bunch of other way cool things you can do with it, but
-those where my personal reasons. Being email based is a huge advantage because
-of the limited amount of retraining that will need to be done to get people
-started. Instead of sending mail to you they are going to send to this new
-address you create. The REST API is rather new, but I am looking forward to
-being able to automate ticket creation from scripts and events from Nagios or
-Munin.
+[Request Tracker](http://bestpractical.com/rt/), or RT, is fairly simple to get
+up and running and is extremely easy to bend to meet the needs of most
+environments. I personally chose RT because of the general ease of setup and
+the feature fit: Debian has packages for it, it is email based, it has a
+REST API, and there is a mobile interface and iPhone app. 
+
+Sure, there are a bunch of other way cool things you can do with it, but the
+above are my personal reasons. Being email-based is a huge advantage because of
+the limited amount of training required to get people started.  Instead of
+sending mail to you, they are going to send to a special email address you
+create. The REST API is rather new, and I am looking forward to being able to
+automate ticket creation from scripts and events from Nagios and Munin.
 
 ## Getting Dirty
 
 The easiest way to get this up and running is using Vagrant. If you aren't
-familiar with Vagrant I highly suggest taking a look at http://vagrantup.com to
-get it running, as it is much easier to use Vagrant to start playing with RT.
-Otherwise, I will provide instructions on getting it installed on Ubuntu and
-Debian.
+familiar with Vagrant, I highly suggest taking a look at [the Vagrant
+site](http://vagrantup.com/) to get it running, as it is much easier to use
+Vagrant to start playing with RT.  Otherwise, I will provide instructions below
+on getting it installed on Ubuntu and Debian.
 
 ## With Vagrant
 
@@ -57,14 +58,18 @@ Once you have Vagrant installed, perform the following steps:
 From there, wait for the instance to come up all the way and browse to
 http://10.0.0.10/rt
 
+Vagrant is neat, isn't it?
+
 ## Without Vagrant (The Manual Way)
 
-If this is Debian Squeeze, you will need the backports repo installed and
-setup. To do this, please see http://backports-master.debian.org/Instructions/
-for more details.
+If you are using Debian Squeeze, you will need the backports repo installed and
+setup. To do this, please see [the backports setup
+instructions](http://backports-master.debian.org/Instructions/) for more
+details.
 
-1. Install the packages. Add the password as you see fit. On Debian, you will
-   need the '-t squeeze-backport' option to be passed to apt-get
+1. Install the packages listed below. Add the password as you see fit. On
+   Debian, you will need the '-t squeeze-backport' option to be passed to
+   `apt-get`:
 
     apt-get install rt4-db-mysql rt4-clients rt4-apache2 mysql-server postfix request-tracker4
 
@@ -78,7 +83,7 @@ for more details.
 
     /etc/init.d/apache2 restart
 
-4. Add the aliases for the general queue to /etc/aliases and run newaliases
+4. Add the aliases for the 'general' ticket queue to /etc/aliases and run `newaliases`
 
     general: "|/usr/bin/rt-mailgate-4 general --action correspond --url http://localhost/rt"
     general-comment: "|/usr/bin/rt-mailgate-4 general --action comment --url http://localhost/rt"
@@ -99,15 +104,17 @@ look at:
 2. Add a group for administrative users. The interface for this can be found
    at: Tools > Configuration > Groups > Create
 3. Go back to Tools > Configuration > Global > Group Rights. Type the name of
-   the new group you just created in the box below Add Groups. Then grant all
+   the new group you just created in the box below 'Add Groups'. Then grant all
    of the permissions to that group as you see fit.
 4. Add a user for yourself. The interface for this is located Tools >
    Configuration > Users > Create. Once the user is created, you will likely
    want to visit the Memberships tab and add the user to the new admin group.
-5. Goto Tools > Configuration > Queues > Select. From there choose the General
-   queue and then the Watchers tab. From there, find the new user you created
+5. Goto Tools > Configuration > Queues > Select. From there, choose the General
+   queue and then the Watchers tab. Find the new user you created
    and add them as an AdminCC. This will cause that user to receive email
    messages when tickets are created or updated.
+
+And welcome to RT!
 
 ## Notes About Going Production
 
@@ -121,3 +128,9 @@ look at:
   command builds the /etc/request-tracker4/RT_SiteConfig.pm file. 
 * Because of the credentials and other potentially sensitive information, you
   should get an Apache vhost setup with SSL for this site.
+
+## Further Reading
+
+* [Redmine](http://www.redmine.org/) - a project and ticket tracking system
+* [Bugzilla](http://www.bugzilla.org/) - another ticket system
+* [List of Issue Tracking Systems on Wikipedia](http://en.wikipedia.org/wiki/Comparison_of_issue-tracking_systems)
