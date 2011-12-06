@@ -97,8 +97,8 @@ have a choice in the matter. This isn't a DevOps thing. It's just the reality
 of the situation. The 'new' crop of operations folk are already ahead of you.
 
 You might disagree with the above, and the future might prove it wrong, but
-what if you find you like writing code? What if by learning how to program
-improved your business value and thus reflected positively upon your salary and
+what if you find you like writing code? What if having programming skills
+improves your business value and thus reflects positively upon your salary and
 benefits?
 
 ## Career Flexiblity
@@ -117,12 +117,11 @@ experience and how I learn.
 
 ## Tight Feedback Loop
 
-Not having been formally educated in computer science, I find myself missing
-quite a bit. One thing that made learning to program eaiser was using a
-language with very quick feedback - how quickly can you verify something is
-working as you intended? How many steps does it take? I don't care what the
-language is that you start with, but my personal preference is either Python or
-Ruby.
+I was never formally educated in computer science, and I find myself missing
+quite a bit. One thing that made learning to program easier was using a
+language with very quick feedback - how quickly can you try something?
+How many steps does it take? I don't care what the language is that you start
+with, but my personal preference is either Python or Ruby.
 
 Both of these languages can work in the style you're familiar with in shell
 scripts, but also ease you into both functional and object-oriented programming
@@ -143,7 +142,7 @@ phrase 'Hate Driven Development' to [Jordan
 Sissel](https://twitter.com/jordansissel), but really sysadmins are more
 likely to practice NDD: Neccessity driven development. We don't typically sit
 down and write an application just to write one (not that you shouldn't do
-that).
+that) - generally solving a problem only when it needs to be solved.
 
 Once you've solved the problem, rewrite it to be a bit more flexible. Throw in
 some parameterization and configurability. Try and make it a little more
@@ -154,7 +153,8 @@ Don't just write one-offs.
 I know for a fact that a few scripts that I thought were one-offs are still
 being used, today, to keep some core business functionality running.
 
-Don't screw the person who comes after you.
+Don't screw yourself with bad solutions. Don't screw the person who comes after
+you.
 
 ## Practice
 
@@ -166,46 +166,47 @@ and rewrite the solution to be less fragile.
 
 ## Publish and Share
 
-Create public repo on Github or Bitbucket and start putting what you write
-there. Share it with the world. 
+Create public repo on [Github](https://github.com/) or
+[Bitbucket](https://bitbucket.org/) and start putting what you write there.
+Share it with the world. 
 
 Don't let ego get in the way. 
 
 You never know who you'll be helping down the road, and you never know who will
 be helping you in the future.
 
-## Next steps
+## Next Steps
 
 Remember, you should always be hacking. Here are a few things that I think we
 as sysadmins need to know beyond the basics
 
 * Perl
 
-Every sysadmin should know Perl. It's on every system. You might not be able to
-get the latest and greatest dynamic language on the system but Perl will always
-be there.
+Every sysadmin should know some Perl. It's on every system. You might not be
+able to get the latest and greatest dynamic language on the system, but Perl
+will always be there.
 
 * At least one functional language
 
 Don't know what 'functional' means? [This might
 help](http://www.haskell.org/haskellwiki/Functional_programming)
 
-I don't care which language, but you should learn one. Functional programming
-concepts provide a new way to look at problems and often can be a better way to
-solve them. If you're an emacs user and you've ever modified your config,
-there's no reason you shouldn't go learn [Clojure](http://clojure.org/ right
-now.
+Functional programming concepts provide a new way to look at problems and often
+can be a better way to solve them. If you're an emacs user and you've ever
+modified your config, there's no reason you shouldn't go learn
+[Clojure](http://clojure.org/ right now. Otherwise, it probably doesn't matter
+which language you use.
 
 * Learn to read Java
 
-You don't have to learn to WRITE Java but you should be able to navigate your
+You don't have to learn to WRITE Java, but you should be able to navigate your
 way through the basics of a Java program. Additionally, the JVM is becoming a
-popular platform outside of Java with projects like  Scala, JRuby, Clojure and
+popular platform outside of Java with projects like Scala, JRuby, Clojure and
 others. Those languages will often be coupled with leveraging the existing Java
-ecosystem.  Quite honestly, you should be able to at least read whatever
+ecosystem. Quite honestly, you should be able to at least read whatever
 language your company writes its applications in. 
 
-The dirty secret is that once you learn one, the rest become easier.
+The dirty secret is this: once you learn one language, the others become easier.
 
 * C
 
@@ -217,4 +218,12 @@ different Linux distros and 3 flavors of Unix, we can handle learning a few
 different languages.
 
 Remember that inside your head is the most amazing computer ever. Use it to the
-fullest and remember "Always Be Hacking".
+fullest and remember:
+
+Always Be Hacking.
+
+## Futher Reading
+
+* [Learn Python the Hard Way](http://learnpythonthehardway.org/) - Free online; teaches you how to program in Python
+* [Learn Ruby the Hard Way](http://ruby.learncodethehardway.org/) - Same as above, but with Ruby.
+* [Learn C the Hard Way](http://c.learncodethehardway.org/) - Same as above, but with C.
