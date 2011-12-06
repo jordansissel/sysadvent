@@ -20,10 +20,10 @@ Evidently, I've always been hacking, and you should be, too.
 
 ## Sysadmins of the Future
 
-[Adam Fletcher](http://www.thesimplelogic.com/) did an open space at DevOps
-Days Boston this year about what system administrators would look like ten
-years from now. The truth is that sysadmins in the future will look a lot like
-they did twenty or thirty years ago - programmers.
+[Adam Fletcher](http://www.thesimplelogic.com/) did an open space at [DevOps
+Days](http://devopsdays.org/) Boston this year about what system administrators
+would look like ten years from now. The truth is that sysadmins in the future
+will look a lot like they did twenty or thirty years ago - programmers.
 
 It wasn't too long ago that the same guy who ran the system also wrote the code
 that ran on the system.
@@ -35,7 +35,7 @@ course, you might be thinking, "I'm not a programmer! I can't do that stuff".
 In the words of [Stephen Nelson-Smith](http://agilesysadmin.net/), "With all
 due respect, I call bullshit".
 
-# You Already Program
+## You Already Program
 
 When someone tells me that they can't program, I ask them to show me the last
 shell script they wrote. Look back over the scripts you've taken from company
