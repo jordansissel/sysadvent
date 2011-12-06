@@ -50,8 +50,8 @@ Zeros"](http://itc.conversationsnetwork.org/shows/detail4566.html). Once you
 do, come back and reread this. If you weren't convinced before, you will be
 after listening. Bob Martin talks mainly about traditional programming languages
 and history in, but also talks about interpreted languages and the ever-common
-ground of sequence (aka assignment), selection (conditions), and iteration
-(looping)i - you thing you do anything else in shell scripts? ;)
+ground of sequence (assignment), selection (conditionals), and iteration
+(loops) - you think you don't do all of those in a shell script?
 
 The fact is that, as a system administrator, you probably know more about the
 inner workings of the systems you manage than anyone at your company. Not only
