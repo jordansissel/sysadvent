@@ -29,7 +29,7 @@ It wasn't too long ago that the same guy who ran the system also wrote the code
 that ran on the system.
 
 That's what sysadmins need to get back to, today, if they have any hope of being
-employable in the future. I'm not necesarilly talking about writing the
+employable in the future. I'm not necessarily talking about writing the
 application code that runs your business, but I'm not ruling it out either. Of
 course, you might be thinking, "I'm not a programmer! I can't do that stuff".
 In the words of [Stephen Nelson-Smith](http://agilesysadmin.net/), "With all
@@ -134,7 +134,7 @@ ever cracking open [vim](http://www.vim.org/). REPLs also provide instant
 gratification when you do something right. This provides encouragement to keep
 going.
 
-## Stratch AN Itch
+## Scratch an Itch
 
 Regardless of which language you pick, don't start theoretical. Find a problem
 you have or recently had and solve it using that language. I like to credit the
@@ -142,7 +142,7 @@ phrase 'Hate Driven Development' to [Jordan
 Sissel](https://twitter.com/jordansissel), but really sysadmins are more
 likely to practice NDD: Neccessity driven development. We don't typically sit
 down and write an application just to write one (not that you shouldn't do
-that) - generally solving a problem only when it needs to be solved.
+that).
 
 Once you've solved the problem, rewrite it to be a bit more flexible. Throw in
 some parameterization and configurability. Try and make it a little more
