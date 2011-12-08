@@ -150,3 +150,15 @@ know what is going on?
 
 ## Further Reading
 
+Like the example of car engine documentation being near the related area. There
+are many lessons we, as sysadmins and operations folks, can learn from other
+industries.
+
+* [John Allspaw on "Systems
+Engineering"](http://www.kitchensoap.com/2011/07/18/systems-engineering-great-definition/)
+which links to a [NASA
+Handbook](http://education.ksc.nasa.gov/esmdspacegrant/Documents/NASA%20SP-2007-6105%20Rev%201%20Final%2031Dec2007.pdf)
+on the subject.
+* [Matt Simmons on "Redundancy"](http://sysadvent.blogspot.com/2009/12/day-13-redundancy.html)
+wisdom we can learn from the airline industry, from SysAdvent 2009.
+
