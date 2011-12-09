@@ -1,6 +1,10 @@
 # Day 8 - systemd
 
-In the past 3 sysadvents, I've covered various process monitor tools like
+This was written by [Jordan Sissel](http://twitter.com/jordansissel)
+([semicomplete.com](http://semicomplete.com)).
+
+In the past three years of sysadvent, I've covered various process monitor
+tools like
 [monit](http://sysadvent.blogspot.com/2008/12/day-3-babysitting.html),
 [supervisord](http://sysadvent.blogspot.com/2009/12/day-15-replacing-init-scripts-with.html),
 and [upstart](http://sysadvent.blogspot.com/2010/12/day-19-upstart.html). A
@@ -58,7 +62,7 @@ Most of the above should be fairly straight forward, though the 'unit' and
 
 The 'Unit' section is documented in the `systemd.unit(5)` manpage. This section
 seems to cover things like ordering and dependencies. There's a separate section
-for defining the rsyslog service itself because systemd supports many mor things 
+for defining the rsyslog service itself because systemd supports many more things 
 than simply services, according to `systemd.unit(5)` -
 
 > A unit configuration file encodes information about a service, a socket, a
@@ -86,8 +90,9 @@ Check the status:
               CGroup: name=systemd:/system/rsyslog.service
 
 Remember that stop and start only affect the current run-time and don't impact
-other events that might cause rsyslog to start (like the system booting). You
-can disable things fairly intuitively:
+other events that might cause rsyslog to start (like the system booting). For
+that, you'll want enable and disable. You can disable things fairly
+intuitively:
 
     % sudo systemctl disable rsyslog.service
     rm '/etc/systemd/system/multi-user.target.wants/rsyslog.service'
@@ -130,7 +135,7 @@ has the output:
     % grep 'Hello' /var/log/messages
     Dec  7 17:45:26 nightfall sh[22616]: Hello World
 
-That's a nice feature and is similar features in supervisord and daemontools (with
+That's a nice feature and is similar to supervisord and daemontools (with
 multilog).
 
 Checking the status, I see it has died:
@@ -163,7 +168,7 @@ startup script. However, when I ran it, I saw this output:
     % sudo /etc/init.d/nagios start
     Starting nagios (via systemctl):                           [  OK  ]
 
-Huh? I thought that was strange, so when I dug into the script, I saw no
+Huh? I thought that was strange, and when I dug into the script, I saw no
 mention of systemctl. It loads `/etc/init.d/functions` which, by default,
 seems to pass itself into systemctl. Asking systemctl what's up, it says:
 
@@ -177,21 +182,22 @@ seems to pass itself into systemctl. Asking systemctl what's up, it says:
               CGroup: name=systemd:/system/nagios.service
                       └ 23601 /usr/sbin/nagios -d /etc/nagios/nagios.cfg
 
-Funky, though ignoring old SYSV start scripts, having an explicit 'ExecStart'
-and 'ExecStop' settings can be useful in putting together systemd and software
-that insists on being run with its own management tools to stop and start.
+Funky, though it shows two features of systemd. First, it supports old sysv
+init scripts. Second, having explicit 'ExecStart' and 'ExecStop' settings
+can be useful in putting together systemd and software that insists on being
+run with its own management tools to stop and start.
 
 ## Concerns
 
-This section is more sourced from my feelings on systemd than from facts as
-above, so take this with a grain of salt.
+This section is more sourced from my feelings on systemd than from facts, so
+take this with a grain of salt.
 
 My first problem with systemd is the huge feature list. It looks to be trying
-to replace /sbin/init, SYSV init scripts and runlevels, inetd, udevd,
+to replace `/sbin/init`, SYSV init scripts and runlevels, inetd, udevd,
 automount, and supports cgroups, inotify, and more. That's a pretty
 big feature space, and it reflects in the size of the code base. At this time
 of writing, the lines of code in systemd around 82000 lines of code. Of those,
-only about 1000 are tests. That's got me quite worried.
+only about 1000 are tests. Only 1.2% of the code appears to be tests? Yikes.
 
 Further, systemd is a major consolidation of several components of the system. 
 I don't really want software replacing major components (/sbin/init, cron, etc)
@@ -213,13 +219,15 @@ ships with RHEL or your preferred production Linux distribution?
 
 ## Conclusion
 
-As stated, please take my concerns detailed above with a grain of salt. I'm not
-writing off systemd as a failure by any stretch. Systemd itself has some
-fairly nice features for running services. Pretty much anything you'd want to
-configure for a service is available: cgroups, user, oom tuning, output
-logging, cpu and I/O tuning, etc. The command line tools and documentation
-are also pretty good. It's the default on all Fedora 15 and newer releases, and
-you can get it on many other Linux distributions, so go on and play with it!
+As stated, please take my opionated concerns detailed above for what they are -
+they are not facts. I'm not writing off systemd as a failure by any stretch.
+
+Systemd itself has some fairly nice features for running services. Pretty much
+anything you'd want to configure for a service is available: cgroups, user, oom
+tuning, output logging, cpu and I/O tuning, etc. The command line tools and
+documentation are also pretty good. It's the default on all Fedora 15 and newer
+releases, and you can get it on many other Linux distributions, so go on and
+play with it!
 
 ## Further Reading
 
