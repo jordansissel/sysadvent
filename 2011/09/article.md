@@ -1,8 +1,11 @@
 # Day 9 - Data in the Shell
 
+This was written by [Jordan Sissel](http://twitter.com/jordansissel)
+([semicomplete.com](http://semicomplete.com)).
+
 The shell is where I live most days, and the shell has pipes. Pipes simply
-transmit plain text and many pieces of data I deal with are structured data
-where staples like grep are not the best hammer to use.
+transmit plain text, and many pieces of data I deal with are structured data
+where staples like grep and sed are not the best.
 
 Fortunately, there are lots of tools available to help you deal with these
 structured formats.
@@ -11,10 +14,8 @@ structured formats.
 
 I'll start with data you're probably already familiar with, simple text
 delimited by some characters like spaces or commas. The general tools used
-here are awk and cut. A simple example of this would be to ....
-
-To augment any 'statistics' I might need to do, I have a few shell functions
-that lightly wrap awk to help me do sums and counts by a field.
+here are awk and cut. I often want to get some simple stats using awk, so I
+keep some handy shell functions to help me do sums and counts by field.
 
     function _awk_col() {
       echo "$1" | egrep -v '^[0-9]+$' || echo "\$$1"
@@ -62,7 +63,7 @@ It's not exactly pretty, but it lets me do things like this:
 
 Over the years, I've found awk to be useful for some cases, but the majority
 of my uses of cut (with cut -d) and awk were essentially setting the field
-separator and picking the Nth field. I wanted something with better syntax to
+separator and picking out a few fields. I wanted something with better syntax to
 solve some more complex field selection problems, so I wrote a tool called
 [fex](http://semicomplete.com/projects/fex/).
 
@@ -73,11 +74,12 @@ entry:
       | fex 1 '"2 2'
     208.36.144.8 /hello/world
 
-The above asks for two values. The first field (default delimiter is space) and 
-the 2nd field (delimited by doublequote), then inside that the 2nd field by space.
-In roughly 8 characters of syntax you can extract the client IP and the HTTP path
-from the event. Doing the same thing in awk (or worse, cut) would require much
-more effort to capture.
+The above asks for two values, the client ip and the request path. The first
+field (default delimiter is space) and the 2nd field (delimited by
+doublequote), then inside that the 2nd field by space. I believe this 
+tight syntax is still readable while being expressive enough to get most field
+splitting and selections done. Doing the same thing in awk (or worse, cut)
+would require much more effort to capture.
 
 ## Structured Data
 
@@ -86,23 +88,19 @@ with structured data formats.
 
 ## JSON
 
-Tool: jgrep, https://github.com/psy1337/JSON-Grep
+Lots of web APIs speak JSON these days, so there's an increasing likelihood
+that you will have to mangle it on the command line at some point
 
-Example:
+For this format, I use [jgrep](https://github.com/psy1337/JSON-Grep) to search
+json data.
 
-    % curl -s https://api.github.com/gists | jgrep "comments>0"
-    [
-      {
-        "comments": 1,
-        ...
-        "url": "https://api.github.com/gists/1450574",
-        "description": "My first Quine... I think this counts as a quine...",
-        ...
-        "created_at": "2011-12-09T07:10:16Z"
-      }
-    ]
+Let's use it to look for github public gists with comments:
 
-Boom, only seeing gists with comments. FYI, I trimmed the output for brevity.
+    % curl -s https://api.github.com/gists | jgrep 'comments>0' -s url     
+    https://api.github.com/gists/1450770
+    https://api.github.com/gists/1450726
+
+Boom, only seeing gist urls with comments.
 
 ## XML
 
@@ -115,9 +113,9 @@ The XPath language is in most cases fairly simple to learn. The other language
 you will likely see in these XML processing tools is XSLT, but that is a bit
 outside the scope of this article.
 
-Tool: xmlstarlet, http://xmlstar.sourceforge.net/
+Tool: [xmlstarlet](http://xmlstar.sourceforge.net/)
 
-Data: Hadoop configs, [example](...)
+Data: Hadoop [core-default.xml](https://github.com/jordansissel/sysadvent/blob/master/2011/09/code/core-default.xml
 
     # Get all the properties set in this file:
     % xmlstarlet sel -t -v '/configuration/property/name' core-default.xml
@@ -133,10 +131,13 @@ Data: Hadoop configs, [example](...)
     % xmlstarlet sel -t -v '//property[name/text() = "hadoop.tmp.dir"]/value' *.xml  
     /tmp/hadoop-${user.name}
 
+This kind of thing is very useful when you need to feed other tools from data
+in xml config files (like monitoring settings, etc)
+
 ## CSV
 
 In most cases, awk, cut, or fex will be sufficient in dealing with CSV or other
-delimited format files. There are edge cases in CSV (like quoting commas) that
+delimited format files. There are edge cases in CSV (like quoting) that
 make using normal delimiter tools insufficient.
 
 In this case, there's nicely a whole suite of tools for mangling CSV data, csvkit:
@@ -191,12 +192,16 @@ csv, it might be easy to convert to csv for use with csvkit.
 
 Sysadmins are often required to deal with multiple systems that speak different
 languages - one might log in plain text, another expose data over a HTTP API
-and send JSON, etc. Having the right data mangling tools in your toolbox will
+and send JSON, etc. 
+
+You're not alone, and having the right data mangling tools in your toolbox will
 help you answer the right questions faster without spending energy fighting with
-data formats, so you can be more effective and have more time at the pub with
+data formats. This lets you be more effective, and have more time at the pub with
 friends, at home with the family, or wherever you happen to find happiness.
 
 ## Further Reading
 
-* [A blog post on jgrep](http://www.devco.net/archives/2011/07/29/rich-data-on-the-cli.php)
+* [good coverage of jgrep](http://www.devco.net/archives/2011/07/29/rich-data-on-the-cli.php) and
+  reasons why it was created.
 * [csvkit docs](http://csvkit.readthedocs.org/en/latest/index.html) which are excellent
+* [Week of Unix Tools - Day 3: awk](http://semicomplete.com/blog/articles/week-of-unix-tools/day-3-awk.html)
