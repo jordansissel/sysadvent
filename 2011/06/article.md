@@ -194,7 +194,7 @@ help](http://www.haskell.org/haskellwiki/Functional_programming)
 Functional programming concepts provide a new way to look at problems and often
 can be a better way to solve them. If you're an emacs user and you've ever
 modified your config, there's no reason you shouldn't go learn
-[Clojure](http://clojure.org/ right now. Otherwise, it probably doesn't matter
+[Clojure](http://clojure.org/) right now. Otherwise, it probably doesn't matter
 which language you use.
 
 * Learn to read Java
