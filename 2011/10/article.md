@@ -65,7 +65,7 @@ The format of this JSON file is:
       "log-uri": "s3://somebucket.yourcompany.com/logs"
     }
 
-## Launching an EMR Cluster Running Pig
+## Running Pig on an EMR Cluster
 
 Here’s a script that will launch an EMR cluster with 1 master instance and 2
 slave instances, all m1.large, and will install Hadoop 0.20 and Pig. The
@@ -110,7 +110,7 @@ specified as an option to elastic-mapreduce:
     echo Master node: $MASTER
     echo Master node: $MASTER >> $LOG_FILE
 
-## Accessing the EMR cluster and running Pig interactively
+## Using Pig Interactively
 
 To ssh into the EMR master node, you can do:
 
@@ -250,7 +250,7 @@ The result looks something like this:
     (aol.com,User unknown,1L)
     (earthinlink.net,Deferred: Connection timed out with earthinlink.net.,1L)
 
-## Putting it together in a parameterized script
+## Making a Pig Script
 
 After experimenting with the `grunt` command line tool, it’s time to put together
 a script. You can find the statements you ran from the command line in the
@@ -390,7 +390,7 @@ deliver a given piece of mail. This will involve defining two relations, one for
 lines containing mail sources and one for lines containing mail destinations,
 then joining them together based on the sendmail ID.
 
-## Taking advantage of the elasticity of EMR
+## The Elasticity in EMR
 
 One of the nice things about using EMR is that you can launch an EMR cluster at
 night, process your data, then terminate the cluster, thus paying only for the
