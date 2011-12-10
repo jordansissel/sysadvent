@@ -2,7 +2,7 @@ Analyzing mail log files with Pig and Elastic MapReduce
 
 by [Grig Gheorghiu](http://agiletesting.blogspot.com)
 
-#### Why Pig ####
+## Why Pig
 
 Parsing and analyzing individual log files can be done fairly easily with
 standard Unix tools such as find, grep, sed, awk, wc etc. The difficult part is
@@ -251,7 +251,7 @@ The result looks something like this:
     (aol.com,User unknown,1L)
     (earthinlink.net,Deferred: Connection timed out with earthinlink.net.,1L)
 
-##### Putting it together in a parameterized script #####
+## Putting it together in a parameterized script
 
 After experimenting with the grunt command line tool, it’s time to put together
 a script. You can find the statements you ran from the command line in the
@@ -305,7 +305,7 @@ against all our mail logs for 2011, the most common errors where of the form
 `"someisp.com     User unknown"` followed by `"Some mail server     Connection
 timed out"`.
 
-##### Asking more questions of the data #####
+## Asking more questions of the data
 
 Here are some more questions you can ask from a mail log, together with short
 Pig examples:
@@ -389,7 +389,7 @@ deliver a given piece of mail. This will involve defining 2 relations, one for
 lines containing mail sources and one for lines containing mail destinations,
 then joining them together based on the sendmail ID.
 
-#### Taking advantage of the elasticity of EMR #####
+## Taking advantage of the elasticity of EMR
 
 One of the nice things about using EMR is that you can launch an EMR cluster at
 night, process your data, then terminate the cluster, thus paying only for the
@@ -447,7 +447,7 @@ Using this script, which launches 1 m1.large master node and 4 m1.xlarge slave
 nodes, I was able to process 100 GB worth of compressed mail logs in a little
 under 4 hours.
 
-#### Conclusion ####
+## Conclusion
 
 The combination Apache Pig + Elastic MapReduce is a pretty powerful one when it
 comes to doing large-scale data analysis. The learning curve for doing simple
@@ -455,7 +455,7 @@ but useful data analysis with Pig Latin is not very steep. Elastic MapReduce
 has the advantage of abstracting the operational details of a Hadoop cluster,
 and it also makes sense financially if you only use it a few hours per day.
 
-#### Resources ####
+## Resources
 
 * [Apache Pig Wiki](https://cwiki.apache.org/confluence/display/PIG/Index)
 * [Elastic MapReduce Developer Guide](http://docs.amazonwebservices.com/ElasticMapReduce/latest/DeveloperGuide/)
