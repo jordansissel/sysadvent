@@ -5,7 +5,7 @@ by [Grig Gheorghiu](http://agiletesting.blogspot.com)
 ## Why Pig
 
 Parsing and analyzing individual log files can be done fairly easily with
-standard Unix tools such as find, grep, sed, awk, wc etc. The difficult part is
+standard Unix tools such as find, grep, sed, awk, wc, etc. The difficult part is
 doing this at scale, when you are dealing with large quantities of logs.
 [Hadoop](http://http://hadoop.apache.org/) is a technology that has proven
 itself to be capable of scaling well as you are throwing more and more data at
