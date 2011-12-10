@@ -1,4 +1,4 @@
-Analyzing mail log files with Pig and Elastic MapReduce
+# Day 10 - Analyzing Logs with Pig and Elastic MapReduce
 
 by [Grig Gheorghiu](http://agiletesting.blogspot.com)
 
