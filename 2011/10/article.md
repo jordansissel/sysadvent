@@ -149,7 +149,7 @@ parsing of the log file. Pig supports regular expressions, so we’ll use that.
 Before I go into more detailed examples, let me say that I advise you to become
 familiar with the [Pig
 tutorial](https://cwiki.apache.org/PIG/pigtutorial.html) and the Pig Latin
-reference manuals, ([manual
+reference manuals ([manual
 1](http://pig.apache.org/docs/r0.7.0/piglatin_ref1.html) and [manual
 2](http://pig.apache.org/docs/r0.7.0/piglatin_ref2.html)).
 
