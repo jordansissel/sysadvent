@@ -1,19 +1,19 @@
 # Day 10 - Analyzing Logs with Pig and Elastic MapReduce
 
-by [Grig Gheorghiu](http://agiletesting.blogspot.com)
+This was written by [Grig Gheorghiu](http://agiletesting.blogspot.com)
 
 ## Why Pig
 
 Parsing and analyzing individual log files can be done fairly easily with
 standard Unix tools such as find, grep, sed, awk, wc etc. The difficult part is
-doing this at scale, when you are dealing with large quantities of logs.
-[Hadoop](http://http://hadoop.apache.org/) is a technology that has proven
-itself to be capable of scaling well as you are throwing more and more data at
-it. What makes it even better is the large ecosystem that has grown around it,
-with tools such as Hive and Pig which offer high-level programming constructs
-that make your life easier as a "data analyst". I chose Pig for this article
-because I find it a bit more friendly for programmers, whereas Hive is more
-appropriate for SQL die-hards.
+doing this at scale when you are dealing with large quantities of logs.
+[Hadoop](http://http://hadoop.apache.org/) is a suite of technology that has
+proven itself to be capable of scaling well as you are throwing more and more
+data at it. What makes it even better is the large ecosystem that has grown
+around it with tools such as Hive and Pig which offer high-level programming
+constructs that make your life easier as a "data analyst." I chose Pig for this
+article because I find it a bit more friendly for programmers, whereas Hive is
+more appropriate for SQL die-hards.
 
 Pig is an Apache project which, as the [official
 documentation](http://pig.apache.org) says, “is a platform for analyzing large
@@ -25,21 +25,22 @@ data sets.”
 
 Pig runs on top of Hadoop. You could build out your own Hadoop cluster, but for
 quick experimentation you would be advised to choose a platform like Amazon’s
-[Elastic MapReduce](http://aws.amazon.com/elasticmapreduce/) (EMR), which
+[Elastic MapReduce](http://aws.amazon.com/elasticmapreduce/) (EMR) which
 abstracts away the operational details of a Hadoop cluster and lets you focus
-on writing your data analysis scripts. In the rest of the article I’ll show you
+on writing your data analysis scripts. In the rest of the article, I’ll show you
 how to launch an EMR cluster running Pig, how to use Pig to analyze sendmail
 log files, and how to terminate the cluster once your data analysis is
-finished. A major help in my experiments with Pig was an AWS article called
-[Parsing Logs with Apache Pig and Elastic
+finished. 
+
+A major help in my experiments with Pig was an AWS article called [Parsing Logs
+with Apache Pig and Elastic
 MapReduce](http://aws.amazon.com/articles/2729). Although the article deals
 with Apache logs and not mail logs, the techniques it presents are the same.
 
 ## Launching an EMR cluster with Pig interactively
 
-In the examples that follow I’ll use the elastic-mapreduce Ruby command-line
-tool. Here are the steps you need to install and configure this tool, as I
-indicated in another blog post.
+In the examples that follow, I’ll use the `elastic-mapreduce` Ruby command-line
+tool. Here are the steps you need to install and configure this tool:
 
 ## Installing the EMR Ruby CLI
 
@@ -47,13 +48,13 @@ Download the zip file from
 [here](http://aws.amazon.com/developertools/Elastic-MapReduce/2264), then unzip
 it somewhere on an EC2 instance where you can store your AWS credentials (a
 management-type instance usually). I installed in /opt/emr on one of our EC2
-instances. At this point it's also a good idea to become familiar with the [EMR
+instances. At this point, it's also a good idea to become familiar with the [EMR
 Developer
 Guide](http://docs.amazonwebservices.com/ElasticMapReduce/latest/DeveloperGuide/),
 which has examples of various elastic-mapreduce use cases. I also found a good
 [README](https://github.com/tc/elastic-mapreduce-ruby) on GitHub.
-
-Next, create a credentials.json file containing some information about your AWS
+,
+Next, create a `credentials.json` file containing some information about your AWS
 credentials and the keypair that will be used when launching the EMR cluster.
 The format of this JSON file is:
 
@@ -70,11 +71,11 @@ The format of this JSON file is:
 
 Here’s a script that will launch an EMR cluster with 1 master instance and 2
 slave instances, all m1.large, and will install Hadoop 0.20 and Pig. The
-cluster can be accessed interactively via ssh because --pig-interactive is
+cluster can be accessed interactively via ssh because `--pig-interactive` is
 specified as an option to elastic-mapreduce:
 
-    # cat run_emr_pig.sh
     #!/bin/bash
+    # File name: run_emr_pig.sh
 
     TIMESTAMP=`date "+%Y%m%d%H%M"`
     EMR_DIR=/opt/emr
@@ -133,7 +134,7 @@ files in S3.
     grunt> DUMP RAW_LOGS;
 
 The above lines load a gzipped mail log file stored in S3 into what is called a
-Pig relation (a collection of tuples) which I named RAW_LOGS. Then the DUMP
+Pig relation (a collection of tuples) which I named `RAW_LOGS`. Then the `DUMP`
 statement prints the relation to standard out. Each element of the relation is
 a tuple with 1 element called line:
 
@@ -145,25 +146,25 @@ mail log file. This is the recommended way of experimenting with your data
 before analysing it at scale: **start small, understand the structure of your
 data, play with it**.
 
-There is not much analysis we can do at this point, unless we refine the
-parsing of the log file. Pig supports regular expressions, which is what we’ll
-use. Before I go into more detailed examples, let me say that I advise you to
-become familiar with the [Pig
+There is not much analysis we can do at this point unless we refine the
+parsing of the log file. Pig supports regular expressions, so we’ll use that.
+Before I go into more detailed examples, let me say that I advise you to become
+familiar with the [Pig
 tutorial](https://cwiki.apache.org/PIG/pigtutorial.html) and the Pig Latin
-reference manuals ([manual
+reference manuals, ([manual
 1](http://pig.apache.org/docs/r0.7.0/piglatin_ref1.html) and [manual
 2](http://pig.apache.org/docs/r0.7.0/piglatin_ref2.html)).
 
 We first register the "piggybank", which is a collection of useful Pig
 functions exposed via a jar file which gets installed automatically with Pig in
-EMR. We import the EXTRACT function which allows us to use regular expressions
+EMR. We import the `EXTRACT` function which allows us to use regular expressions
 for parsing the Pig relation. We then go through each tuple of the relation
-(with the FOREACH statement) and split it into fields by means of a
+(with the `FOREACH` statement) and split it into fields by means of a
 threatening-looking regular expression which will match all lines that contain
 a destination email address (a "to" field).
 
 Note that you need to escape the backslash everywhere. We save the result of
-this processing into another relation called LOGS_BASE.
+this processing into another relation called `LOGS_BASE`.
 
     grunt> REGISTER file:/home/hadoop/lib/pig/piggybank.jar;
     grunt> DEFINE EXTRACT org.apache.pig.piggybank.evaluation.string.EXTRACT();
@@ -186,7 +187,7 @@ this processing into another relation called LOGS_BASE.
     >> 	stat: chararray
     >> );
 
-If we dump the LOGS_BASE relation to stdout (via the DUMP statement), we see
+If we dump the LOGS_BASE relation to stdout (via the `DUMP` statement), we see
 something like this:
 
     (Nov,8,18:39:58,mail2,18817,pA8Ndvvm018807,user1,yahoo.com,00:00:00,00:00:00,mta6.am0.yahoodns.net.,Sent (ok dirdel))
@@ -197,8 +198,8 @@ something like this:
     (Nov,8,18:39:58,mail1,13466,pA8NdvaN013451,user2,gmail.com,00:00:00,00:00:00,gmail-smtp-in.l.google.com.,Sent (OK 1320795598 v8si2644603yhm.107))
     (Nov,8,18:39:58,mail1,13389,pA8NdtaN013380,user3,me.com,00:00:02,00:00:02,mx.me.com.akadns.net.,Sent (Ok, envelope id 	0LUD00A9Q8EK4BQ0@smtpin135.mac.com))
 
-Each tuple of the relation if either empty (if the regular expresssion doesn’t
-match the line) or contains the elements we specified in the EXTRACT statement
+Each tuple of the relation is either empty (if the regular expresssion doesn’t
+match the line) or contains the elements we specified in the `EXTRACT` statement
 (month, day, time, mailserver etc).
 
 Now that we have the lines split into individual fields, we can start thinking
@@ -207,12 +208,12 @@ is that often one of the hardest things to do is to ask meaningful questions.
 There may be wonderful stories waiting to be told by the data, but you need to
 be able to extract those stories.
 
-In the example that follows I want to see the most common scenarios where mail
+In the example that follows, I want to see the most common scenarios where mail
 did not get sent correctly. I will be looking for a status that does not start
-with "Sent" and I will want to see the top mail domains that were involved in
+with "Sent," and I will want to see the top mail domains that were involved in
 non-successful mail delivery.
 
-First we select only the mail domain and the status from the LOGS_BASE relation:
+First we select only the mail domain and the status from the `LOGS_BASE` relation:
 
     grunt> DOMAIN_STAT = FOREACH LOGS_BASE GENERATE dest_domain, stat;
 
@@ -229,14 +230,14 @@ their position in the NOT_SENT tuple (0 and 1 respectively):
 
     grunt> GROUPED = GROUP NOT_SENT by ($0, $1);
 
-The GROUPED relation contains tuples of this form:
+The `GROUPED` relation contains tuples of this form:
 
     ((alumni.myuniversity.edu,Deferred: 451 Requested mail action not taken: mailbox unavailable),{(alumni.myuniversity.edu,Deferred: 451 Requested mail action not taken: mailbox unavailable),(alumni.myuniversity.edu,Deferred: 451 Requested mail action not taken: mailbox unavailable)})
 
-The first element of a tuple in the GROUPED relation is the tuple we grouped
-by, containing the original fields $0 and $1. The second element is what is
-called a bag of tuples, which is a set of tuples denoted by {} bracketing. This
-bag contains as many instances of the group as were found in the GROUPED
+The first element of a tuple in the `GROUPED` relation is the tuple we grouped
+by containing the original fields `$0` and `$1`. The second element is what is
+called a "bag of tuples" which is a set of tuples denoted by `{}` bracketing. This
+bag contains as many instances of the group as were found in the `GROUPED`
 relation. This allows us to count those instances, sort by count in decreasing
 order and mail domain in increasing order (as specified by ‘ORDER COUNT BY num
 DESC, $0’), then limit to the top 50 results:
@@ -253,12 +254,13 @@ The result looks something like this:
 
 ## Putting it together in a parameterized script
 
-After experimenting with the grunt command line tool, it’s time to put together
+After experimenting with the `grunt` command line tool, it’s time to put together
 a script. You can find the statements you ran from the command line in the
 `~/.pig_history file` on the master node. You can simply copy and paste them
-into a script. I called mine mail_domain_stat.pig. I also parameterized the
-input and output of the script by including the variables $INPUT and $OUTPUT,
-which will be passed to the script when it will be called. Here’s the script:
+into a script. I called mine `mail_domain_stat.pig`. I also parameterized the
+input and output of the script by including the variables `$INPUT` and
+`$OUTPUT` which will be passed to the script when it will be called. Here’s
+the script:
 
     REGISTER file:/home/hadoop/lib/pig/piggybank.jar;
     DEFINE EXTRACT org.apache.pig.piggybank.evaluation.string.EXTRACT();
@@ -291,13 +293,14 @@ which will be passed to the script when it will be called. Here’s the script:
 
 Now I can call the script from the command line like this:
 
-    $ TIMESTAMP=`date "+%Y%m%d%H%M"`; pig -p INPUT="s3://pig.mycompany.com/mail/test.maillog.gz" -p OUTPUT="s3://pig.mycompany.com/mail/output/run_$TIMESTAMP" mail_domain_stat.pig
+    $ TIMESTAMP=`date "+%Y%m%d%H%M"`
+    $ pig -p INPUT="s3://pig.mycompany.com/mail/test.maillog.gz" -p OUTPUT="s3://pig.mycompany.com/mail/output/run_$TIMESTAMP" mail_domain_stat.pig
 
-The output will consist of a series of files called part-NN (00, 01, etc.)
-stored in the S3 bucket specified as the OUTPUT parameter. To get back the
+The output will consist of a series of files called `part-NN` (00, 01, etc.)
+stored in the S3 bucket specified as the `OUTPUT` parameter. To get back the
 final result, download the partial files and concatenate them.
 
-Note that INPUT can be an expression such as
+Note that `INPUT` can be an expression such as
 `INPUT="s3://pig.mycompany.com/mail/2011*.maillog.gz"` which would
 automatically read in all files in S3 matching the expression
 `2011*.maillog.gz`. As a matter of curiosity, when I ran the above Pig script
@@ -385,7 +388,7 @@ you are using a round-robin mechanism):
     STORE RELAY_COUNT_SORTED INTO '$OUTPUT';
 
 One other interesting question I am working on is finding out how fast we
-deliver a given piece of mail. This will involve defining 2 relations, one for
+deliver a given piece of mail. This will involve defining two relations, one for
 lines containing mail sources and one for lines containing mail destinations,
 then joining them together based on the sendmail ID.
 
@@ -393,10 +396,11 @@ then joining them together based on the sendmail ID.
 
 One of the nice things about using EMR is that you can launch an EMR cluster at
 night, process your data, then terminate the cluster, thus paying only for the
-period of time the cluster was in use. Here’s a script that does that. It
-launches a cluster, it copies your Pig scripts to the master node, then it runs
-a Pig script. When that finishes, it terminates the cluster. The results of the
-Pig script will have been stored in S3 at that point.
+period of time the cluster was in use. Here’s a script that does that. 
+
+It launches a cluster, it copies your Pig scripts to the master node, then it
+runs a Pig script. When that finishes, it terminates the cluster. The results
+of the Pig script will have been stored in S3 at that point.
 
     #!/bin/bash
 
@@ -443,21 +447,21 @@ Pig script will have been stored in S3 at that point.
     STOP=`date "+%Y-%m-%d %H:%M"`
     echo $STOP >> $LOG_FILE
 
-Using this script, which launches 1 m1.large master node and 4 m1.xlarge slave
-nodes, I was able to process 100 GB worth of compressed mail logs in a little
+Using this script (which launches 1 m1.large master node and 4 m1.xlarge slave
+nodes) I was able to process 100 GB worth of compressed mail logs in a little
 under 4 hours.
 
 ## Conclusion
 
 The combination Apache Pig + Elastic MapReduce is a pretty powerful one when it
-comes to doing large-scale data analysis. The learning curve for doing simple
-but useful data analysis with Pig Latin is not very steep. Elastic MapReduce
-has the advantage of abstracting the operational details of a Hadoop cluster,
-and it also makes sense financially if you only use it a few hours per day.
+comes to doing large-scale data analysis. The learning curve for doing simple,
+but useful, data analysis with Pig Latin is not very steep. Elastic MapReduce
+has the advantage of abstracting away the operational details of a Hadoop
+cluster, and it also makes sense financially if you only use it a few hours per
+day.
 
 ## Resources
 
 * [Apache Pig Wiki](https://cwiki.apache.org/confluence/display/PIG/Index)
 * [Elastic MapReduce Developer Guide](http://docs.amazonwebservices.com/ElasticMapReduce/latest/DeveloperGuide/)
 * [Programming Pig](http://ofps.oreilly.com/titles/9781449302641/) - O’Reilly book by Alan Gates
-
