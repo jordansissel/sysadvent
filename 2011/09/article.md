@@ -70,8 +70,9 @@ solve some more complex field selection problems, so I wrote a tool called
 The best example I can give of fex's power is by chopping up an apache log
 entry:
 
-    echo '208.36.144.8 - - [22/Aug/2007:23:39:05 -0400] "GET /hello/world HTTP/1.0" 200 3595' \
+    % echo '208.36.144.8 - - [22/Aug/2007:23:39:05 -0400] "GET /hello/world HTTP/1.0" 200 3595' \
       | fex 1 '"2 2'
+
     208.36.144.8 /hello/world
 
 The above asks for two values, the client ip and the request path. The first
