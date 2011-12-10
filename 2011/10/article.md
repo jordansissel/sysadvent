@@ -2,8 +2,6 @@
 
 This was written by [Grig Gheorghiu](http://agiletesting.blogspot.com)
 
-## Why Pig
-
 Parsing and analyzing individual log files can be done fairly easily with
 standard Unix tools such as find, grep, sed, awk, wc etc. The difficult part is
 doing this at scale when you are dealing with large quantities of logs.
