@@ -1,15 +1,14 @@
-## Simple Disk-Based Server Backups with rsnapshot
+# Simple Disk-Based Server Backups with rsnapshot
 
-
-[Phil Hollenback](http://www.twitter.com/philiph)  
+This was written by [Phil Hollenback](http://www.twitter.com/philiph)
 [www.hollenback.net](http://www.hollenback.net)
 
-### Introduction
+## Introduction
 
 I've helped a friend administer the network at his engineering firm
-for about 10 years.  For most of that time they've used a standard
+for about 10 years.  For most of that time, they've used a standard
 [Amanda](http://www.amanda.org/) configuration with a separate backup
-server and a DAT drive. That setup worked well enough, as long as
+server and a DAT drive. That setup worked well enough as long as
 someone remembered to swap the tape every day and occasionally run the
 cleaning tape.
 
@@ -22,26 +21,26 @@ There was also a desire to simplify the configuration and eliminate
 the standalone backup server.  With those goals
 in mind I set out to find a suitable replacement system.
 
-### Physical Media
+## Physical Media
 
 The big change compared to ten years ago is the easy
 availability of very large and inexpensive external hard drives.  This
 site is a small company so price is a major factor, and larger tape
 systems were just too expensive compared to large drives.  At the time
-this system was being considered (2008) you could buy 500GB SATA
+this system was being considered (2008), you could buy 500GB SATA
 drives for around US$120.  Compare this to many thousands of dollars
 for a larger capacity tape system and media.
 
-Based on this we purchased two 500GB SATA drives and two external
+Based on this, we purchased two 500GB SATA drives and two external
 SATA/USB enclosures for the backup system.  The plan was to rotate the
 drives every few days and assign someone to take the spare drive home
 in case the office burned down.
 
 I should also note that this site was and is connected to the internet
-with consumer DSL so the very slow upload speeds prevented use of
+with consumer DSL, so the very slow upload speeds prevented use of
 network backups.
 
-### Backup Software
+## Backup Software
 
 We knew we wanted a backup mechanism that would copy important user
 data to the external drive at regular intervals.  Bare metal restore
@@ -54,9 +53,9 @@ Of course the other criteria was that the software needed to be
 free as in beer and free as in Richard Stallman.  Google quickly told
 us we should look at [rsnapshot](http://rsnapshot.org/).
 
-### Hot Swap
+## Hot Swap
 
-This small site did not have a lot of technical expertise, other than
+This small site did not have a lot of technical expertise other than
 my friend who served as a part-time sysadmin.  We needed to find a
 solution that was as simple and bulletproof as possible, particularly
 for swapping out the external drives.  This meant hot swap and a
@@ -71,19 +70,19 @@ However, it refused to disconnect the drive and would spew console
 errors if you then manually unplugged it.  While I suspected this
 might be fixed in a newer Linux distro, we didn't want to go through
 the effort of upgrading the server to something like CentOS 5.
-Instead we tried a USB2.0 connection since the external drive
+Instead, we tried a USB2.0 connection since the external drive
 enclosures we had purchased supported that as well as eSATA.  USB
-hotplug worked just fine - as long as the filesystem wasn't mounted
+hotplug worked just fine - as long as the filesystem wasn't mounted,
 you could plug and unplug all day long.  Since this was just a backup
 system on a small office server, the speed of USB2.0 has proven to be
 just fine.
 
-### Configuring Filesystems and the Automounter
+## Configuring Filesystems and the Automounter
 
-For simplicity and robustness I configured the external backup drives
-with one large journaled ext3 filesystem.  Again, I didn't try to
+For simplicity and robustness, I configured the external backup drives
+with one large, journaled, ext3 filesystem.  Again, I didn't try to
 optimize for performance, the goal was just to create a large backup
-filesystem that wasn't terribly slow.  Note I did label the filesystem
+filesystem that wasn't terribly slow.  Note, I did label the filesystem
 on each disk as `backup1` and `backup2` respectively.  This is
 important because it provides an easy programmatic way to determine
 which drive is connected.  The format command was thus:
@@ -92,8 +91,8 @@ which drive is connected.  The format command was thus:
 
 By default CentOS detects the usb device and mounts it as
 `/media/<label>`.  This is not desirable for backups as I wanted to
-filesystem paths to always be consistent.  Remember I also wanted to
-use the automounter, so that the disk could be physically removed any
+filesystem paths to always be consistent.  Remember, I also wanted to
+use the automounter so that the disk could be physically removed any
 time it was not being actively used.
 
 Automounter setup was as follows:
@@ -113,7 +112,7 @@ After that I was able to verify the configuration by running
 `/etc/autofs start`, plugging in one of the backup drives, and
 verifying I could access it as `/misc/backup`.
 
-### Time for rsnapshot
+## Time for rsnapshot
 
 [rsnapshot](http://www.rsnapshot.org) uses rsync and hard links to make
 snapshots of a filesystem.  Since it uses hard links, only files
@@ -146,7 +145,7 @@ necessary to make a few edits to `/etc/rsnapshot` as follows:
     backup  /usr/           localhost/
     backup  /var/           localhost/
 
-That was about the extent of the customizations I needed. After this I
+That was about the extent of the customizations I needed. After this, I
 was able to enable hourly rsnapshot backups with an entry in
 `/etc/crontabs`:
 
@@ -193,14 +192,14 @@ drives get switched out on a regular basis.
 Here's what the 
 [daily report looks like](http://www.hollenback.net/junk/rsnapshot-usage.txt).
 
-### In Practice
+## In Practice
 
 This backup system has now been running on the main server for about
 two years, with great success.  In particular the ability for
 non-admins to recover files from the snapshots has been very popular.
 
-Initially we started with 2 500GB external drives in the rotation.
-After one year one of these drives failed, and space was getting a
+Initially we started with two 500GB external drives in the rotation.
+After one year, one of these drives failed, and space was getting a
 little tight, so we upgraded to 2TB drives.  The modular nature of the
 automounted disk backups makes this change (and switching backup
 drives in general) very simple.  All you need to tell an untrained
@@ -216,7 +215,7 @@ idle most of the time.  We have had no problems with rotating drives
 every few days, and the external cables and drive enclosures have held
 up just fine.
 
-### Conclusion
+## Conclusion
 
 The key things I want to emphasize about this setup are that it is
 cheap and reliable.  While this design would probably not scale well
