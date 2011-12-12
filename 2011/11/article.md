@@ -1,9 +1,7 @@
-# Simple Disk-Based Server Backups with rsnapshot
+# Day 11 - Simple Disk-Based Server Backups with rsnapshot
 
 This was written by [Phil Hollenback](http://www.twitter.com/philiph)
-[www.hollenback.net](http://www.hollenback.net)
-
-## Introduction
+([www.hollenback.net](http://www.hollenback.net))
 
 I've helped a friend administer the network at his engineering firm
 for about 10 years.  For most of that time, they've used a standard
@@ -77,7 +75,7 @@ you could plug and unplug all day long.  Since this was just a backup
 system on a small office server, the speed of USB2.0 has proven to be
 just fine.
 
-## Configuring Filesystems and the Automounter
+## Configuring File Systems and the Automounter
 
 For simplicity and robustness, I configured the external backup drives
 with one large, journaled, ext3 filesystem.  Again, I didn't try to
