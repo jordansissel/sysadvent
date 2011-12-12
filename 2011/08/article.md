@@ -219,7 +219,7 @@ ships with RHEL or your preferred production Linux distribution?
 
 ## Conclusion
 
-As stated, please take my opionated concerns detailed above for what they are -
+As stated, please take my opinionated concerns detailed above for what they are -
 they are not facts. I'm not writing off systemd as a failure by any stretch.
 
 Systemd itself has some fairly nice features for running services. Pretty much
