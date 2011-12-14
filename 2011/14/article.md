@@ -1,10 +1,10 @@
-# Write Your Resume In Markdown Already!
+# Day 14 - Write Your Resume in Markdown Already!
 
-This was written by [Phil Hollenback](http://www.twitter.com/philiph)  
+This was written by [Phil Hollenback](http://www.twitter.com/philiph)
 ([www.hollenback.net](http://www.hollenback.net))
 
 Like most of you, I hate dealing with my resume.  That means I don't
-keep it as current as I should.  Over the years I've kept my resume in
+keep it as current as I should.  Over the years, I've kept my resume in
 all sorts of formats: straight text, nroff, TeX, etc.  I think I might
 have even handcrafted a postscript resume once.
 
@@ -35,21 +35,21 @@ question of how a system administrator should be managing their resume
 in 2011.  I decided on a few criteria:
 
 * human-readable source format
-   * I should be able to look at the original document and understand
-     it.  That presumably means straight ASCII text.
-   * (yes I know that's US English only).
-   * This also eliminates the 'oops, my deleted text is still in the
-     file' problem with Word.
+    * I should be able to look at the original document and understand
+      it.  That presumably means straight ASCII text.
+    * (yes I know that's US English only).
+    * This also eliminates the 'oops, my deleted text is still in the
+      file' problem with Word.
 * PDF output
-   * PDFs seem the most portable way to exchange documents and ensure
-     that formatting remains intact.
+     * PDFs seem the most portable way to exchange documents and ensure
+       that formatting remains intact.
 * HTML output
-   * I want a version of my resume I can post on a website.
+     * I want a version of my resume I can post on a website.
 * Open-source tools
-   * No lockdown in proprietary formats.
+     * No lockdown in proprietary formats.
 * the _cool factor_
-   * I wanted something fresh and interesting that I could (for example)
-     blog about.
+     * I wanted something fresh and interesting that I could (for example)
+       blog about.
 
 With these constraints, it was pretty clear I'd have to choose
 something like [Markdown](https://en.wikipedia.org/wiki/Markdown) or
