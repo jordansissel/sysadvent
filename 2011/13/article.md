@@ -1,12 +1,17 @@
-# Test Driven Infrastructure with Vagrant, Puppet and Guard
+# Day 13 - Test Driven Infrastructure with Vagrant, Puppet and Guard
 
-Lots has been written about [Vagrant](http://vagrantup.com). It simply is [a
+This was written by [Patrick Debois](https://twitter.com/patrickdebois)
+([www.jedi.be](http://www.jedi.be/blog/))
+
+What's the next step once you implement some config management tools? Testing,
+right? Wouldn't you like to automate that with some nice clean and sandboxed
+environment for testing your config management changes?
+
+You can use [Vagrant](http://vagrantup.com) to help ease the VM management. It is [a
 great
-tool](http://www.slideshare.net/jedi4ever/vagrant-devopsdays-mountain-view-2011):
-people use it as a sandbox environment to develop their Chef recipes or Puppet
-manifests in a safe environment.
-
-The workflow usually looks like this:
+tool](http://www.slideshare.net/jedi4ever/vagrant-devopsdays-mountain-view-2011)
+often used as a sandbox environment to develop Chef recipes or Puppet
+manifests, and this workflow usually looks like this:
 
 * you create a vagrant vm
 * share some puppet/chef files via a shared directory
@@ -24,10 +29,10 @@ more info at [Puppet unit testing like a
 pro](http://www.jedi.be/blog/2011/12/05/puppet-unit-testing-like-a-pro/).
 
 So we got code, and we got tests, what else are we missing? **Automation** of
-this process: it's funny if you think of it that we automate the hell out of
-server installations, but haven't automated the previous described process.
+this process: it's funny, if you think of it, that we automate the hell out of
+server installations, but we haven't automated the previous described process.
 
-The need to run `vagrant provision` or `rake rspec` actually breaks my
+The need to manually run `vagrant provision` or `rake rspec` actually breaks my
 development flow: I have to leave my editor to run a shell command and then
 come back to it depending on the output.
 
