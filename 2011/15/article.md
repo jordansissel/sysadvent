@@ -1,4 +1,4 @@
-# Automating WordPress with CFEngine 3
+# Day 15 - Automating WordPress with CFEngine
 
 Internet use is growing and new services are appearing hourly. The number of
 servers (both physical and virtual) is becoming uncountable. Automation of
@@ -16,16 +16,10 @@ implements differently: the how and why of system setup, how and why of
 maintenance, and the how and why of disaster recovery and growth.
 
 Automating system administration addresses all the above and makes new things
-possible.
-
-For example, a software tool can respond faster than a human sysadmin to a
-deviation from configuration policy (something being broken). The corrective
-action can be automated, so chaos is kept to a minimum while not requiring
-human action.
-
-CFEngine 3 is modern configuration management tool that uses a descriptive
-language to document the intended end state of the system -- its desired
-configuration -- as well as why it is being configured this way.
+possible. For example, a software tool can respond faster than a human sysadmin
+to a deviation from configuration policy (something being broken). The
+corrective action can be automated, so chaos is kept to a minimum while not
+requiring human action.
 
 An introduction to CFEngine is out of scope for this post, but you can learn more
 [here](http://www.verticalsysadmin.com/config2010/),
@@ -33,16 +27,16 @@ An introduction to CFEngine is out of scope for this post, but you can learn mor
 and
 [here](http://sysadvent.blogspot.com/2009/12/day-24-config-management-with-cfengine.html).
 
-## Automating WordPress Installation
-
 Why WordPress?  Installing WordPress involves coordinating multiple
 system components into a harmonious whole.  It is a great demonstration
 of the power of automated configuration management.  It involves copying and
 editing files, installing packages, and starting and restarting services.  
 
-To manually install WordPress often takes tens of minutes.  An automated
-install under CFEngine cuts that time by an order of magnitude, and most
-importantly, it is repeatable and auditable.
+Manually installing WordPress often takes tens of minutes.  An automated
+install under CFEngine greatly shortens the time required and most
+importantly provides a repeatable and auditable experience.
+
+## Automating WordPress Installation
 
 The two main parts of infrastructure involved in making WordPress work are
 a web server and a database.
