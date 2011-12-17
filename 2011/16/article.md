@@ -96,7 +96,7 @@ don't just treat your logs like they're a painful artifact that can only be
 managed with aggressive log rotation policies.
 
 Centralize your logs somewhere and build some tools around them. You'll get
-faster at debugging problems nd be able to better answer business and
+faster at debugging problems and be able to better answer business and
 operations questions.
 
 ## Further Reading
