@@ -1,5 +1,8 @@
 # Day 16 - Shipping Some Logs
 
+This was written by [Jordan Sissel](http://twitter.com/jordansissel)
+([semicomplete.com](http://semicomplete.com)).
+
 Logging is messy. Ever have logs fill up your disk and crash services as a
 result? Me too, and that sucks.
 
@@ -11,17 +14,17 @@ access those logs later when you need to debug or do analytics.
 There are plenty of tools in this area to help you solve log transport
 problems. Common syslog servers like [rsyslog](http://rsyslog.com/) and
 [syslog-ng](http://www.balabit.com/network-security/syslog-ng/opensource-logging-system/overview)
-are useful if syslog is your preferred transport. Other tools like Apache Flume
-[Facebook's Scribe](https://github.com/facebook/scribe/wiki), and
-[logstash](http://logstash.net) provide an infrastructure for reliable robust
-log transport. Many tools that help solve log transportation problems also
-solve other problems, for example, rsyslog can do more than simply moving a log
-event to another server.
+are useful if syslog is your preferred transport. Other tools like [Apache
+Flume](https://cwiki.apache.org/FLUME/), [Facebook's
+Scribe](https://github.com/facebook/scribe/wiki), and
+[logstash](http://logstash.net) provide an infrastructure for reliable and
+robust log transport. Many tools that help solve log transportation problems
+also solve other problems, for example, rsyslog can do more than simply moving
+a log event to another server.
 
 ## Starting with Log Files
 
-For all of these systems, one pleasant feature is that they integrate often
-without requiring any application changes. In most cases, you don't
+For all of these systems, one pleasant feature is that in most cases, you don't
 need to make any application-level changes to start shipping your logs
 elsewhere: If you already log to files, these tools can read those files and
 ship them out to your central log repository.
@@ -87,12 +90,13 @@ called 'hoptoad') focuses on helping you analyze logged errors.
 
 ## And then?
 
-Companies like Splunk have figured out that there is money in your logs, so
+Companies like Splunk have figured out that there is money to be made from your
+logs, and web advertising companies log everything because logs are money, so
 don't just treat your logs like they're a painful artifact that can only be
 managed with aggressive log rotation policies.
 
 Centralize your logs somewhere and build some tools around them. You'll get
-faster at debugging problems and be able to better answer business and
+faster at debugging problems nd be able to better answer business and
 operations questions.
 
 ## Further Reading
