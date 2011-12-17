@@ -1,31 +1,15 @@
 # Day 15 - Automating WordPress with CFEngine
 
-Internet use is growing and new services are appearing hourly. The number of
-servers (both physical and virtual) is becoming uncountable. Automation of
-system administration is a must to handle the deluge; else many swarms of
-sysadmins would be needed to handle all these systems.
-
-In companies with multiple sysadmins working the old way, in interactive root
-sessions, there is a potential for sysadmins who are making changes at the same
-time to step on each other's toes (and on the config!).
-
 System administration is a relatively new profession. Without a standard
 curriculum, practitioners have different philosophies and practices.
 It is challenging for new sysadmins because every organization
 implements differently: the how and why of system setup, how and why of
 maintenance, and the how and why of disaster recovery and growth.
 
-Automating system administration addresses all the above and makes new things
-possible. For example, a software tool can respond faster than a human sysadmin
+A software tool can respond faster than a human sysadmin
 to a deviation from configuration policy (something being broken). The
 corrective action can be automated, so chaos is kept to a minimum while not
 requiring human action.
-
-An introduction to CFEngine is out of scope for this post, but you can learn more
-[here](http://www.verticalsysadmin.com/config2010/),
-[here](http://www.verticalsysadmin.com/cfengine/Getting_Started_with_CFEngine_3.pdf),
-and
-[here](http://sysadvent.blogspot.com/2009/12/day-24-config-management-with-cfengine.html).
 
 Why WordPress?  Installing WordPress involves coordinating multiple
 system components into a harmonious whole.  It is a great demonstration
@@ -36,19 +20,21 @@ Manually installing WordPress often takes tens of minutes.  An automated
 install under CFEngine greatly shortens the time required and most
 importantly provides a repeatable and auditable experience.
 
+Lastly, an introduction to CFEngine is out of scope for this post, but you can
+learn more [here](http://www.verticalsysadmin.com/config2010/),
+[here](http://www.verticalsysadmin.com/cfengine/Getting_Started_with_CFEngine_3.pdf),
+and
+[here](http://sysadvent.blogspot.com/2009/12/day-24-config-management-with-cfengine.html).
+
+
 ## Automating WordPress Installation
 
-The two main parts of infrastructure involved in making WordPress work are
-a web server and a database.
+The two main parts of infrastructure involved in making WordPress work are a
+web server and a database. In this example, we'll use Apache httpd and MySQL as
+well as assume a Red Hat (or derivative) system.
 
-In this example, we'll assume that Apache httpd is our web server and mysqld is
-our database server. We'll also assume we're running on Red Hat or a derivative.
-
-## Installing WordPress
-
-Target: Our deliverable is a new blog ready for the owner to configure it.
-
-The most up to date version of the cfengine implementation of this post can be found here: 
+The most up to date version of the cfengine implementation of this post can be
+found here:
 <https://github.com/cfengine/contrib/raw/master/wordpress_installer.cf>
 
 You can run this policy with: 
@@ -79,12 +65,11 @@ what sequences to examine and keep bundles (collections) of promises.
                               };
 
             inputs =>        { "/var/cfengine/inputs/cfengine_stdlib.cf" };
-
     }
 
 ## Get the Right Packages
 
-With that order framed above, let's make sure we have all the necessary
+With that order given above, let's start by ensuring we have all the necessary
 packages. We will use the "yum" `package_method` since we are using a Red Hat
 derivative.
 
@@ -111,7 +96,6 @@ but "php" and "php-mysql" are missing, and Cfengine installs them.
       packages_added::
       "/sbin/service httpd graceful"
         comment => "Restarting httpd so it can pick up new modules.";
-
     }
 
 ## Apache and MySQL
@@ -120,7 +104,6 @@ Now let's make sure httpd and mysqld are running with the `services_up` bundle
 shown below:
 
     bundle agent services_up {
-
     processes:
       "^mysqld" restart_class => "start_mysqld";
       "^httpd"  restart_class => "start_httpd";
@@ -154,7 +137,6 @@ no action will be taken.
 
     bundle agent wordpress_tarball_is_present
     {
-
     classes:
       "wordpress_tarball_is_present" expression =>
         fileexists("/root/wordpress-latest.tar.gz");
@@ -190,19 +172,14 @@ state drift.
 
     bundle agent wordpress_tarball_is_unrolled
     {
-
     classes:
       "wordpress_directory_is_present" expression =>
         fileexists("/var/www/html/wordpress/");
-
     reports:
       wordpress_directory_is_present::
         "WordPress directory is present.";
-
     commands:
-
       !wordpress_directory_is_present::
-
         "/bin/tar -C /var/www/html -xvzf /root/wordpress-latest.tar.gz"
           comment => "Unrolling wordpress tarball to /var/www/html/.";
     }
@@ -214,7 +191,6 @@ for the application data store as well as credentials to access it:
 
     bundle agent configuration_of_mysql_db_for_wordpress
     {
-
     commands:
       "/usr/bin/mysql -u root -e \"
         CREATE DATABASE IF NOT EXISTS wordpress;
@@ -223,7 +199,6 @@ for the application data store as well as credentials to access it:
         IDENTIFIED BY 'lopsa10linux';
         FLUSH PRIVILEGES;\"
       ";
-
     }
 
 
@@ -252,17 +227,14 @@ by copying it from wp-config-sample.php
     classes:
       "wordpress_config_file_exists"
       expression => fileexists("/var/www/html/wordpress/wp-config.php");
-
     reports:
       wordpress_config_file_exists::
         "WordPress config file /var/www/html/wordpress/wp-config.php is present";
-
     commands:
       !wordpress_config_file_exists::
       "/bin/cp -p /var/www/html/wordpress/wp-config-sample.php \
         /var/www/html/wordpress/wp-config.php"
         comment => "Creating wp-config.php from wp-config-sample.php";
-
     }
 
 Here is the `wp-config-sample.php` sample config:
@@ -327,20 +299,16 @@ accessible to examination if needed.
         edit_line => insert_HTTP_allow_rule_before_the_accept_established_tcp_conns_rule,
         comment => "insert HTTP allow rule into /etc/sysconfig/iptables",
         classes => if_repaired("iptables_edited");
-
     commands:
       iptables_edited::
       "/sbin/service iptables restart"
         comment => "Restarting iptables to load new config";
-
     }
 
     bundle edit_line insert_HTTP_allow_rule_before_the_accept_established_tcp_conns_rule
     {
-
     vars:
       "http_rule" string => "-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT";
-
     insert_lines: "$(http_rule)",
       location => before_the_accept_established_tcp_conns_rule;
     }
