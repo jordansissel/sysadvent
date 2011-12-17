@@ -1,4 +1,7 @@
-# Speaking the Same Language
+# Day 17 - Speaking the Same Language
+
+This was written by [Jordan Sissel](http://twitter.com/jordansissel)
+([semicomplete.com](http://semicomplete.com)).
 
 Language is important.
 
@@ -18,9 +21,9 @@ default font size?
 
 Legal documents are long for many reasons, but the main reason I believe is to
 reduce loopholes or confusion by defining and using a common language and
-vocabulary. Vocabulary is important. Most documents have embedded definitions
-of just about every major term used. Look at your current employment contract -
-how much of it is simply defining words?
+vocabulary. Vocabulary is important. Most of these documents have embedded
+definitions of just about every major term used. Look at your current
+employment contract - how much of it is simply defining words?
 
 Centrally defining all words allows two parties who speak different languages
 to speak on a common ground. Look at the
@@ -35,9 +38,8 @@ definitions embedded.
 ## Verbal Communication
 
 In your average day, it is unlikely you have the time or energy to spend
-defining terms in the middle of every conversation. Trying to do this flow very
-well in speech, does it?  Most of the time you might assume the other person
-(or people) know what you mean when you say it.
+defining terms in the middle of every conversation. Most of the time you might
+assume the other person (or people) know what you mean when you say it.
 
 I propose that the likelihood of one person understanding your words is in
 inversely related to their distance from your context, job role, and other
@@ -50,13 +52,15 @@ knee-jerk reaction is often to assume the other person is stupid. They aren't
 understanding you! It sucks. It increases tension and distrust.
 
 Like I said, you probably don't have time to work with each person (or group)
-to design a common terminology. You have stuff to do.
+to design a common terminology. You have stuff to do. What other options do you
+have?
 
 My best recommendation here is to study everyone. Watch what they say, how they
-say it, and what you think they mean. Study their reactions when you say things.
-If they appear confused, ask and clarify. Don't treat them like they're an idiot.
-Speaking loudly and slowly doesn't help anyone, ask what is confusing, ask what 
-needs clarification and definition.
+say it, and what you think they mean when they say something.
+Study their reactions when you say things. If they appear confused, ask and
+clarify. Don't treat them like they're an idiot.  Speaking loudly and slowly
+doesn't help anyone; ask for what is confusing, and ask what needs
+clarification and definition.
 
 Know your audience.
 
@@ -67,16 +71,22 @@ not a truck"](http://en.wikipedia.org/wiki/Series_of_tubes) failure. If you have
 bidirectional communication with a person, instead of making an analogy, why
 not ask for clarification and definition? 
 
-Pictures can help, too. Bought anything from Ikea recently? All the Ikea
-furniture assembly manuals I've seen are only pictures. No words.
+## Visual Communication
+
+Pictures can help, too. Bought anything from Ikea recently? If not, [check them
+out](http://www.ikea.com/ms/en_US/customer_service/assembly_instructions.html),
+or just look at this [table assembly
+manual](http://www.ikea.com/ms/en_US/customer_service/assembly/E/E70162862.pdf).
+All the Ikea furniture assembly manuals I've seen are pretty effective with
+only pictures. No words. 
 
 Study your audience.
 
 If you study and interact with a given set of folks frequently enough, you should
-more easily speak a language they understand. Marketing and PR folks probably
-don't care about disks being full, but they care about the external impact of
-that problem. Try to understand what a person knows and what they care about
-and frame your words accordingly.
+learn to more easily speak a language they understand. Marketing and PR folks
+probably don't care about disks being full, but they care about the external
+impact of that problem. Try to understand what a person knows and what they
+care about and frame your words accordingly.
 
 ## Software Similarity and Language Problems
 
