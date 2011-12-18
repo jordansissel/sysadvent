@@ -109,8 +109,9 @@ language-equivalent of [vendor
 lock-in](http://en.wikipedia.org/wiki/Vendor_lock-in), and it sucks.
 
 Puppet calls it a module and manifest; Chef calls it a cookbook and recipe.
-You can reduce learning curves if you use a common language in your systems and
-projects. 
+Ruby and Python use the word "yield" to mean different things, and this causes
+much confusion for people trying to learn both languages. You can reduce
+learning curves if you use a common language in your systems and projects. 
 
 ## When to Define Terms
 
