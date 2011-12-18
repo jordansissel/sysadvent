@@ -1,4 +1,7 @@
-# Why are we doing this?
+# Day 18 - Why Businesses Do Things
+
+This was written by [Joseph Kern](https://twitter.com/josephkern)
+([www.semafour.net](http://www.semafour.net/)).
 
 Imagine your whole professional career as a sysadmin and you never understood
 the OSI model. Those seven simple layers that allow you to build an effective
@@ -42,7 +45,7 @@ matter at all.
 in fact creates a disadvantage. Time, attention, and resources are being
 funneled into a project that creates no value from a business standpoint. The
 business does not (and should not) care about innovating in services that they
-consider neutralizing.*
+consider neutralizing. (See footnote #1)
 
 Building services that create competitive differentiation is much different
 than neutralization as most of these services are built rather than bought.
@@ -65,13 +68,13 @@ equally well across all devices all the time and requires no client
 installation. Now other businesses must appear to neutralize the differential
 advantage by creating their own services to match. Norton, for example, has
 followed suit with their Norton Everywhere product offering DNS services that
-largely mirror OpenDNS.**
+largely mirror OpenDNS. (See footnote #2)
 
 OpenDNS must now continue to differentiate their services from their
 competitors. OpenDNS recently started offering DNSCrypt, which creates an
 encrypted channel for DNS queries between the client and the DNS server.
 Consider it to be SSL for DNS. No doubt, there will be other service providers
-that follow suit, creating their own DNSCrypt implementations.***
+that follow suit, creating their own DNSCrypt implementations. (See footnote #3)
 
 Why do businesses seemingly chase the tail of their competiors? This is
 because if organization declines the opportunity to neutralize the advantage of
@@ -80,8 +83,10 @@ and may be locked out of the market entirely. A technical term for this is a
 "feature". As the differentiation of services increases, the cost to enter the
 market (the table stakes) increases accordingly. 
 
+## Why Should You Care?
+
 Senior sysadmins and engineers need to not only understand how to build a
-service, we must understand why we are building it and what the business
+service, but we must also understand why we are building it and what the business
 requires from this deployment. Understanding the complete picture, we will
 understand what technology is required, how it needs to be implemented, and how
 much effort we should put into a project.
@@ -91,13 +96,29 @@ understanding - keeping time and attention focused on important projects. The
 next time you are asked to deploy a new service ask yourself (and your
 management) one simple question:
 
-"Is this a service that neutralizes or differentiates?"
+> "Is this a service that neutralizes or differentiates?"
 
-* Why do you think sharepoint is so popular? It's not because it does
+Knowing this helps you set your own expectations. If you find yourself wanting
+to spend energy improving a service, knowing whether it is neutralizing or
+differentiating will help you make the case to your team and managers that you
+should be working on it. Knowing it is a neutralizing service might help you
+set expectations such that you don't spend time and energy thinking hard about
+how to improve a service that doesn't benefit the business if improved, and
+having that knowledge and expectations can help keep you from burning out
+optimizing things that effectively are unimportant.
+
+## Footnotes
+
+1. Why do you think sharepoint is so popular? It's not because it does
   everything well ...
 
-** In the light of Windows 8 coming preloaded with Anti-Virus
+2. In the light of Windows 8 coming preloaded with Anti-Virus
    software, Norton is facing an almost complete lockout of their
    traditional market.
 
-*** The great thing about standards, there are so many to choose from.
+3.  The great thing about standards, there are so many to choose from.
+
+## Further Reading 
+
+* [Geoffrey Moore on
+Neutralization](http://www.kepplerspeakers.com/2011/07/business-strategy-expert-geoffrey-moore-on-neutralizing-your-competitors/) - ok, so this isn't reading, it's video!
