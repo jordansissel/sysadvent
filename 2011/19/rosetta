@@ -1,0 +1,64 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
+Configuration Management Rosetta Stone
+
+
+Purpose: To encourage sysadmins to start using Policy-Based Configuration Management by demonstratiing what policies look like in common open-source server configuration management tools compared to the traditional Bourne shell, the lingua franca of system administration.
+
+
+                                                                     
+
+* How to use the examples
+  * Bourne shell
+      Can be run on the command line or via cron
+  * CFengine
+      Follow the quick start guide at http://cfengine.com/manuals/cf3-quickstart.html
+      (In a nutshell, put into a promise bundle inside a policy file (example.cf)
+      and run from the command line with "cf-agent -f example.cf -b $bundlename"; or
+      integrate into the default policy set in promises.cf in
+      the CFEngine work directory, often found in /var/cfengine/inputs)
+  * Chef
+      Follow the quick start guide at http://wiki.opscode.com/display/chef/Quick+Start
+      (In a nutshell, upload the recipe to Chef Server.)
+  * Puppet
+      Follow the Getting Started guide at http://docs.puppetlabs.com/mcollective/reference/basic/gettingstarted.html
+      (In a nutshell, Can be run as client of Puppet master, via
+      cron or locally via the command line or triggered
+      via Orchestration using MCollective.)
+
+                                                                     
+                                                                     
+                                             
+
+
+* Set permissions on a file
+  * Bourne shell
+      chmod 600 /tmp/testfile
+  * CFengine
+      files:
+                        
+          "/tmp/testfile"
+      
+               comment => "/tmp/testfile must
+                           be mode 600 as it
+                           contains sensitive
+                           data",
+               perms   => m("600");
+  * Chef
+      file "/tmp/testfile" do
+       mode "0600"          
+      end                  
+  * Puppet
+      file { "/tmp/testfile":
+         mode => 0600,
+      }
+  
+
+
+* Create and edit a file
+  * Bourne shell
+      echo 'Server will be down for maintenance 2 AM - 4 AM' > /etc/nologin
+  * CFengine
+
