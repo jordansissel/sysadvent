@@ -1,6 +1,9 @@
 Thoughts On Load Testing
 ========================
 
+This was written by [Adam Fletcher](https://twitter.com/adamfblahblah)
+([www.thesimplelogic.com](http://www.thesimplelogic.com))
+
 One task that often falls on the lonely sysadmin is load testing. In this
 article I'm going to talk about some philosophies and processes I used when
 doing load tasting in my past roles.
