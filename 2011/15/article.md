@@ -1,5 +1,7 @@
 # Day 15 - Automating WordPress with CFEngine
 
+This was written by Aleksey Tsalolikhin.
+
 System administration is a relatively new profession. Without a standard
 curriculum, practitioners have different philosophies and practices.
 It is challenging for new sysadmins because every organization
