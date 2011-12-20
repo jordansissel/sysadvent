@@ -1,5 +1,4 @@
-Thoughts On Load Testing
-========================
+# Day 20 - Thoughts On Load Testing
 
 This was written by [Adam Fletcher](https://twitter.com/adamfblahblah)
 ([www.thesimplelogic.com](http://www.thesimplelogic.com))
@@ -13,22 +12,19 @@ optimize the client side experience, and it is very important that you are aware
 the client side and server side tuning changes so that you can give the customer the best 
 experience. 
 
-Use Science 
------------
+## Use Science 
 
 ![Science](stand_back_square_0.png)
 
 (credit to XKCD. [Buy the shirt!](http://store.xkcd.com/xkcd/#StandBackScience))
 
-
 What I mean by that is that load testing is really experimentation. You're
 testing a hypothesis: Is setup A better than setup B?  Develop your hypothesis,
 experiment, and measurements, and make conclusions based on data, not feelings.
 Don't forget that you need to control as many variables as possible. Don't test
-on your VMs, or your staging server that the customer is also using.
+on your VMs or your staging server that the customer is also using.
 
-Have Defined Targets 
----------------------
+## Have Defined Targets 
 
 You can't determine if your architecture scales/is fast enough/can handle
 traffic during a disaster/won't crash when you launch/etc. without have
@@ -40,8 +36,7 @@ performing actions every x seconds on y series of pages."  You will then know
 when you are done load testing because all the measurements you are taking show
 you have achieved success.
 
-Scale First
------------
+## Scale First
 
 If the y axis is latency and the x axis is number of workers, then scaling is
 keeping y constant while you increase x to infinity.  This is much harder
@@ -49,8 +44,7 @@ than keeping the number of workers constant and lowering latency. The first
 thing to look at during load testing is the shape of your latency curve as load
 increases. Keep that curve flat and you're most of the way there.
 
-Understand Your Traffic
------------------------
+## Understand Your Traffic
 
 If you're already suffering a load problem in production, great! Track the
 pages being requested and the path of the requests through your system. Use a
@@ -77,30 +71,26 @@ users to use HTTP pipelining or inlining Javascript versus loading the
 Javascript in another HTTP request. Making the server scale requires you
 understanding the client. 
 
-
-Know Your Resource Limits
--------------------------
+## Know Your Resource Limits
 
 You don't have infinite computing power. You don't have infinite money. Most
 importantly, you don't have infinite time. Be smart about how you use that
 time.  
 
 It's expensive to have people do all the load testing science we're talking
-about in this article. With a little thought you can probably guess where your
-bottleneck is (and I'm going to guess it is something related to your data
-storage). Use your systems knowledge to make your first hypothesis "If I remove
+about in this article. With a little thought, you can probably guess where your
+bottleneck is - I'm going to guess it is something related to your data
+storage. Use your systems knowledge to make your first hypothesis "If I remove
 the obvious bottleneck, the system will be faster".
 
 Also, to paraphrase Artur Bergman, don't be a backwards idiot - 
 [buy some SSDs](http://www.livestream.com/oreillyconfs/video?clipId=pla_3beec3a2-54f5-4a19-8aaf-35a839b6ecaa).
 They are expensive per GB but they are dead cheap per IOP/S. They're also
-cheaper than the time you are spending doing the load testing. You'll want to 
-use these SSDs in the machines that have the highest IO load (and you know which
-means those are, because you're measuring IO load, right?).
+cheaper than the time you are spending doing the load testing. You'll want to
+use these SSDs in the machines that have the highest IO load (and you know
+which machines those are, because you're measuring IO load, right?).
 
-
-Graphs Lie
-----------
+## Graphs Lie
 
 There was an excellent talk at Velocity this year about the dangers of trusting
 your graphs given by John Rauser entitled [Look at Your Data](http://www.youtube.com/watch?v=coNDCIMH8bk). 
@@ -129,26 +119,25 @@ Here's an example of Smokeping telling me that my home internet connection has s
 
 ![Comcast ICMP Ping Latency](smokeping_example.png)
 
-I've also put a 
-gist up with the R code used to generate the graphs above [here](https://gist.github.com/1043012).
+I've also put a gist up with the R code used to generate the graphs above
+[here](https://gist.github.com/1043012).
 
-Measure Time and Resources Spent in Each Component
---------------------------------------------------
+## Measure Time and Resources Spent in Each Component
 
 If you aren't instrumenting each piece of software in your stack you should 
 start doing so. Instrument the entry point to your software and the exit point
-and graph this data over time. Combine this with even simple data from sar or *stat
-you can learn a lot about your code without ever firing up a profiler. 
+and graph this data over time. Combine this with even simple data from `sar`,
+iostat, other *stat tools, etc, and you can learn a lot about your code without
+ever firing up a profiler. 
 
-Learn And Use The Right Tools
------------------------------
+## Learn And Use The Right Tools
 
 Good tools will allow you to export the raw data in such a way that you can
 then do analysis on it.  Tools that expose your system resource consumption
 metrics are critical, and it probably doesn't matter what you use as long as
-you storing and graphing roughly what iostat, sar, vmstat, netstat and top give
-you you'll be good. Learn what each metric really means - do you know why your
-software is context switching 4000 a second? Do you know if that is bad (hint:
+you are storing and graphing roughly what iostat, sar, vmstat, netstat and top
+give you. Learn what each metric really means - do you know why your software
+is context switching 4000 a second? Do you know if that is bad (hint:
 probably)? How would that manifest itself in top?
 
 Learn to use the profiler that comes with your product's implementation
@@ -156,14 +145,18 @@ language.  Profilers are amazing things. If you can't use a language-specific
 profiler try a system-wide profiler such as oprofile or similar. 
 
 When you have all this data, use a real data analysis tool to look at it. Learn
-some R or NumPy/SciPy. Instead of using Excel or a clone for data analysis, 
-consider learning a numerical computing language such as R. 
-For example, in R or NumPy you can write a script that takes all of your raw
-resource consumption data (CPU, RAM, IOPS, etc) and runs correlation tests
-against the latency data. Try to do that in Excel. Oh, you can then use that
-script in your monitoring. 
+some R or NumPy/SciPy. Instead of using Excel or a clone for data analysis,
+consider learning a numerical computing language such as R.  For example, in R
+or NumPy you can write a script that takes all of your raw resource consumption
+data (CPU, RAM, IOPS, etc) and runs correlation tests against the latency data.
+Try to do that in Excel! Oh, you can then use that script in your monitoring. 
 
 People often call load testing an art, but all that really means is that
-they're not doing science. Load testing can be challenging but hopefully
-this article has given you some things to think about to make your load
-testing easier and more effective. 
+they're not doing science. Load testing can be challenging, but hopefully this
+article has given you some things to think about to make your load testing
+easier and more effective. 
+
+## Further Reading
+
+* [Learning R](http://learnr.wordpress.com) - a blog covering lots of cool visualizations and
+  techniques in R.
