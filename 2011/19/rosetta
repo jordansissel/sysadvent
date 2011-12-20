@@ -1,0 +1,163 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
+Configuration Management Rosetta Stone
+
+
+Purpose: To encourage sysadmins to start using Policy-Based Configuration Management by demonstratiing what policies look like in common open-source server configuration management tools compared to the traditional Bourne shell, the lingua franca of system administration.
+
+
+                                                                     
+
+* How to use the examples
+  * Bourne shell
+      Can be run on the command line or via cron
+  * CFengine
+      Follow the quick start guide at http://cfengine.com/manuals/cf3-quickstart.html
+      (In a nutshell, put into a promise bundle inside a policy file (example.cf)
+      and run from the command line with "cf-agent -f example.cf -b $bundlename"; or
+      integrate into the default policy set in promises.cf in
+      the CFEngine work directory, often found in /var/cfengine/inputs)
+  * Chef
+      Follow the quick start guide at http://wiki.opscode.com/display/chef/Quick+Start
+      (In a nutshell, upload the recipe to Chef Server.)
+  * Puppet
+      Follow the Getting Started guide at http://docs.puppetlabs.com/mcollective/reference/basic/gettingstarted.html
+      (In a nutshell, Can be run as client of Puppet master, via
+      cron or locally via the command line or triggered
+      via Orchestration using MCollective.)
+
+                                                                     
+                                                                     
+                                             
+
+
+* Set permissions on a file
+  * Bourne shell
+      chmod 600 /tmp/testfile
+  * CFengine
+      files:
+                        
+          "/tmp/testfile"
+      
+               comment => "/tmp/testfile must
+                           be mode 600 as it
+                           contains sensitive
+                           data",
+               perms   => m("600");
+  * Chef
+      file "/tmp/testfile" do
+       mode "0600"          
+      end                  
+  * Puppet
+      file { "/tmp/testfile":
+         mode => 0600,
+      }
+  
+
+
+* Create and edit a file
+  * Bourne shell
+      echo 'Server will be down for maintenance 2 AM - 4 AM' > /etc/nologin
+  * CFengine
+      files:
+           
+          "/etc/nologin" 
+                        
+               create     => "true",
+               edit_line  => down_for_maintenance,
+               # the details of the file editing policy are abstracted into a separate block 
+               comment    => "Prevent non-root users from logging on during maintenance window";
+               # the comment attribute is visible in verbose mode and in CFEngine reports, it
+               # documents the intention of the policy.
+      
+      
+      bundle edit_line down_for_maintenance {
+      # this is the separate block of the details of the file contents
+          delete_lines:
+              ".*";
+          # empty entire file first
+      
+          insert_lines:
+              "Server will be down for maintenance 2 AM - 4 AM";
+              # make sure it contains just this one line
+      }
+  * Chef
+      file "/etc/nologin" do
+       content 'Server will be down for maintenance 2 AM - 4 AM' 
+      end 
+  * Puppet
+      file { "/etc/nologin":
+        ensure => present,
+        content => "Server will be down for maintenance 2 AM - 4 AM", 
+      }
+
+
+
+                                                                     
+                                                                     
+                                             
+
+
+* Install a package
+  * Bourne shell
+      yum -y install httpd
+  * CFengine
+      packages:  
+                
+          "httpd"
+
+              package_policy => "add",
+              package_method => yum,
+              comment=> "Our web app is useless without the 'httpd' package";
+  * Chef
+      package "httpd" 
+  * Puppet
+      package { "httpd":
+        ensure => present, 
+      }
+  
+ 
+
+  
+
+  
+* Make sure a service daemon is running
+  * Bourne shell
+      ps -ef | grep httpd >/dev/null 
+
+      if [ $? -ne 0 ]  
+        then /etc/init.d/httpd start 
+      fi                            
+  * CFengine
+      processes:                            
+                                           
+          "httpd"                         
+      
+               restart_class => "restart_httpd";
+                # set "restart_httpd" to true if
+                # "httpd" not found in process table
+      
+      
+      commands:
+      
+        restart_httpd:: 
+        # proceed only if "restart_httpd" is true
+      
+          "/etc/init.d/httpd start"
+      
+              comment=> "httpd must be up to enable access to our Web app";
+  * Chef
+      service "http" do 
+       action :start   
+      end             
+  * Puppet
+      service { "httpd":
+        ensure => running, 
+      }
+
+
+Thanks, Jordan!!  :)
+
+Aleksey

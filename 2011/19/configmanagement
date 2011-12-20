@@ -1,0 +1,39 @@
+What is Configuration Management?
+
+Configuration management tools (such as Bcfg2, Cfengine, Chef, and Puppet, all open source tools), increase sysadmin efficiency and make sysadmin life better. As the systems we are responsible for grow larger and more complex, we need these tools to help us handle this new scale of computer quantity and compexity.
+
+The traditional approaches to configuration management have been:
+
+Configuring systems manually, in interactive root sessions, which is error-prone and extremely labor-intensive.
+Semi-automated by scripting pushing changes (for example shell "for" loops that ssh to servers and push changes). If a system is down for maintenance while the change is being pushed out, it will miss that change, and "state drift" will occur between it and other systems in the same class that did receive the change.
+Using homegrown tools which differ from site to site (such as Spine from Ticketmaster).
+System imaging: make a copy of a system image, label it "gold master", and clone it to make new systems. This approach, while it helps to crank out identically configured systems, has the weakness that updating the master image can be a pain and it does not KEEP the systems configured after the initial deploy.
+Today, most sysadmins still configure their systems traditionally.
+
+The purpose of these next-gen CM tools is:
+
+To increase the "extropy" potential of the system to combat the natural tendency of this universe toward entropy (extropy, as the opposite of entropy, is a state of high order and organization and complexity) -- in other words, keep complex system operational and keep them from devolving, and
+To document the intended state of the system to enable sysadmins to know and control it
+Why do we care to do this? Well, why do we administer systems? Correct configuration helps keep computer systems *in use by human civilization*.
+
+CM tools free sysadmin's time for more challenging and creative system engineering and architecture work, and for taking naps which power such work.
+
+Ways CM tools save time:
+
+Minimizing manual configuration setup time by automatically configuring new systems. (Repeatable rote work is best left to computers. They don't get bored and they don't forget steps.)
+Reducing debug time by automatically bringing the system back to correct state when data drift occurs.
+Documenting the systems' "desired state", including Why is the system configured this way, what the interdependencies are, and Who cares (the stakeholders). This documenting capability helps counteract knowledge loss attendant to Ops staff turnover. Moving configuration knowledge out of individual sys admins' heads alone and into a version control system facilitates alignment of efforts on a multi-sysadmin team. This idea is known as "Infrastructure as Code" and brings us benefits of being able to apply proven Dev tools and methods (such as leveraging release engineering methodology) - tag a new policy as "unstable", test it, then move the new policy into the "stable" branch where servers will download and use it.
+Reporting on current system state and any deviations from "desired state" as specified in the policy to help debug anything the system wasn't able to fix automatically.
+Sysadmins can greatly increase their effectiveness by using these powerful tools. Whereas before you might have one sysadmin effectively caring for 50 servers, now it could be 50,000.
+
+Benefits of Transitioning to Automated System Configuration Management
+
+1. Sys Admin configures a server manually, ad hoc, and hands-on.
+
+
+2. Sys Admin writes a configuration management tool program to configure a server. Then the CM tool (like a little sysadmin robot) configures the server.
+
+
+3. Sys Admin takes a nap, while the CM tool configures more servers, and keeps checking and re-configuring the servers (as needed) to keep them in compliance with the program.
+
+
