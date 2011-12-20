@@ -102,7 +102,8 @@ understanding.
     or integrate into the default policy set in promises.cf in the CFEngine
     work directory, often found in `/var/cfengine/inputs`.
 * Chef:
-    Follow the [Chef Solo guide](http://wiki.opscode.com/display/chef/Chef+Solo)
+    Follow the [Chef Fast Start
+    guide](http://wiki.opscode.com/display/chef/Fast+Start+Guide)
 * Puppet:
     Follow the [Getting Started guide](http://docs.puppetlabs.com/learning/).
     For quick testing of these examples, you can write them to a file 'foo.pp'
