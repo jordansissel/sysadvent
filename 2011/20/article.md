@@ -14,7 +14,7 @@ experience.
 
 ## Use Science 
 
-![Science](stand_back_square_0.png)
+![Science](https://lh5.googleusercontent.com/-hw-HGdbj1YM/TvBKGsVetrI/AAAAAAAAABU/rKsIV_eZE5s/s300/stand_back_square_0.png)
 
 (credit to XKCD. [Buy the shirt!](http://store.xkcd.com/xkcd/#StandBackScience))
 
@@ -104,20 +104,20 @@ distribution of the latencies at X.
 
 John's video explains it better, but if you look at this graph:
 
-![Request Latency Over Time](mean_latency.png)
+![Request Latency Over Time](https://lh6.googleusercontent.com/-VCg2m9qnuW4/TvBKG4JKkMI/AAAAAAAAABk/JLN3CMwNjs4/s550/mean_latency.png)
 
 You'd think from this graph that everything is great - your latency went down!
 
 But if we look at the distribution of our data at each sampling point:
 
-![Request Latency Over Time With Sample Distribution](mean_latency_and_distribution.png)
+![Request Latency Over Time With Sample Distribution](https://lh5.googleusercontent.com/-IfvuUvcU2Ew/TvBKHYmTqzI/AAAAAAAAABs/k8tIo-lq0CM/s466/mean_latency_and_distribution.png)
 
 We see that some of users are having a really bad experience on our site. 
 
 A good example of a tool that doesn't have this problem is [Smokeping](http://oss.oetiker.ch/smokeping/). 
 Here's an example of Smokeping telling me that my home internet connection has some jitter in latency:
 
-![Comcast ICMP Ping Latency](smokeping_example.png)
+![Comcast ICMP Ping Latency](https://lh5.googleusercontent.com/-slTLwMGanV8/TvBKGq2yx-I/AAAAAAAAABY/pFm7U6uLgPQ/s727/smokeping_example.png)
 
 I've also put a gist up with the R code used to generate the graphs above
 [here](https://gist.github.com/1043012).
