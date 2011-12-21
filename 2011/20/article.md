@@ -1,11 +1,11 @@
 # Day 20 - Thoughts On Load Testing
 
 This was written by [Adam Fletcher](https://twitter.com/adamfblahblah)
-([www.thesimplelogic.com](http://www.thesimplelogic.com))
+([@adamfblahblah](https://twitter.com/adamfblahblah)
 
 One task that often falls on the lonely sysadmin is load testing. In this
 article I'm going to talk about some philosophies and processes I used when
-doing load tasting in my past roles.
+doing load testing in my past roles.
 
 I'm going to focus on testing the server side. There's a lot of articles on how to 
 optimize the client side experience, and it is very important that you are aware of both
@@ -32,14 +32,14 @@ something measurable that determines success. For example, instead of saying
 "make each page load in 400 milliseconds", it is better to say something like
 "Every page load must have also resources loaded within an average 400
 milliseconds with a standard deviation of 25 milliseconds with 1000 clients
-performing actions every x seconds on y series of pages."  You will then know
+performing actions every X seconds on Y series of pages."  You will then know
 when you are done load testing because all the measurements you are taking show
 you have achieved success.
 
 ## Scale First
 
-If the y axis is latency and the x axis is number of workers, then scaling is
-keeping y constant while you increase x to infinity.  This is much harder
+If the Y axis is latency and the X axis is number of workers, then scaling is
+keeping Y constant while you increase X to infinity.  This is much harder
 than keeping the number of workers constant and lowering latency. The first
 thing to look at during load testing is the shape of your latency curve as load
 increases. Keep that curve flat and you're most of the way there.
@@ -127,17 +127,17 @@ I've also put a gist up with the R code used to generate the graphs above
 If you aren't instrumenting each piece of software in your stack you should 
 start doing so. Instrument the entry point to your software and the exit point
 and graph this data over time. Combine this with even simple data from `sar`,
-iostat, other *stat tools, etc, and you can learn a lot about your code without
-ever firing up a profiler. 
+`iostat`, other *stat tools, etc, and you can learn a lot about your code
+without ever firing up a profiler. 
 
 ## Learn And Use The Right Tools
 
 Good tools will allow you to export the raw data in such a way that you can
 then do analysis on it.  Tools that expose your system resource consumption
 metrics are critical, and it probably doesn't matter what you use as long as
-you are storing and graphing roughly what iostat, sar, vmstat, netstat and top
-give you. Learn what each metric really means - do you know why your software
-is context switching 4000 a second? Do you know if that is bad (hint:
+you are storing and graphing roughly what `iostat`, `sar`, `vmstat`, `netstat`
+and `top` give you. Learn what each metric really means - do you know why your
+software is context switching 4000 a second? Do you know if that is bad (hint:
 probably)? How would that manifest itself in top?
 
 Learn to use the profiler that comes with your product's implementation
