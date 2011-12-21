@@ -120,8 +120,6 @@ understanding.
 
         files:
             "/tmp/testfile"
-                 comment => "/tmp/testfile must be mode 600 as it contains
-                             sensitive data",
                  perms   => m("600");
 
 * Chef
@@ -145,24 +143,9 @@ understanding.
 * CFengine
 
         files:
-            "/etc/nologin" 
-                 create     => "true",
-                 edit_line  => down_for_maintenance,
-                 # the details of the file editing policy are abstracted into a separate block 
-                 comment    => "Prevent non-root users from logging on during maintenance window";
-                 # the comment attribute is visible in verbose mode and in CFEngine reports, it
-                 # documents the intention of the policy.
-        
-        bundle edit_line down_for_maintenance {
-        # this is the separate block of the details of the file contents
-            delete_lines:
-                ".*";
-            # empty entire file first
-        
-            insert_lines:
-                "Server will be down for maintenance 2 AM - 4 AM";
-                # make sure it contains just this one line
-        }
+           "/etc/nologin"
+                create     => "true",
+                edit_line  =>  insert_lines("Server will be down for maintenance 2 AM - 4 AM");
 
 * Chef
 
@@ -188,8 +171,7 @@ understanding.
         packages:  
             "httpd"
                 package_policy => "add",
-                package_method => yum,
-                comment=> "Our web app is useless without the 'httpd' package";
+                package_method => yum;
 
 * Chef
 
@@ -213,16 +195,13 @@ understanding.
 
 * CFengine
 
-        processes:                            
-            "httpd"                         
-                 restart_class => "restart_httpd";
-                  # set "restart_httpd" to true if
-                  # "httpd" not found in process table
+        processes:
+           "httpd"
+                restart_class => "restart_httpd";
+
         commands:
-          restart_httpd:: 
-          # proceed only if "restart_httpd" is true
-            "/etc/init.d/httpd start"
-                comment=> "httpd must be up to enable access to our Web app";
+         restart_httpd::
+           "/etc/init.d/httpd start";
 
 * Chef
 
