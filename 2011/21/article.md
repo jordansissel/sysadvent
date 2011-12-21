@@ -1,43 +1,48 @@
-This article is written by [Brandon Burton](http://www.inatree.org), who can mostly be found posting lolcats and retweeting on Twitter as [solarce](http://www.twitter.com/solarce), though he occasionally posts interesting links to things sysadmin, devops, and unix.
+# Day 21 - Automating Web Monitoring
 
-# Introduction #
+This article is written by [Brandon Burton](http://www.inatree.org), who can
+mostly be found posting lolcats and retweeting 
+[@solarce](http://www.twitter.com/solarce), though he occasionally posts
+interesting links to things sysadmin, devops, and unix.
 
-As systems administrators, we all know that it's not in production until it's
-monitored, but this isn't always as simple a rule to live by as it may sound.
-Not all web applications are easily monitored through traditional monitoring
-solutions, such as Nagios, Zenoss, or various commercial tools.  These tools
+As systems administrators, we all know that [it's not in production until it's
+monitored](https://twitter.com/#!/griggheo/status/62239661568958464), but this
+isn't always as simple a rule to live by as it may sound.  Not all web
+applications, for example, are easily monitored through traditional monitoring
+solutions such as Nagios, Zenoss, or various commercial tools.  These tools
 tend to take a "curl | grep" style monitoring, or they may support somewhat
 more complex POSTing of XML or JSON data and validation of the returned data.
 But often the most key parts of applications being deployed into production
-involve complex browser interactions, AJAX, or some other session or
-transaction that traditional monitoring frameworks don't have an easy way to
-accommodate.
+involve complex browser interactions and behaviors - AJAX, or some other
+session or transaction that traditional monitoring frameworks don't have an
+easy way to accommodate.
 
 Enter [Selenium](http://seleniumhq.org/).
 [Selenium](http://en.wikipedia.org/wiki/Selenium_%28software%29) is a mature
 and robust framework for doing complex interactions with web applications. It
-originated as a tool at the consulting company ThoughtWorks, as a way to do
-testing against web applications through driving a web browser. Since its
-release it has seen the development of numerous tools, including browser
-plugins to make it easy to develop Selenium tests quickly and easily, language
-bindings to write tests in pretty much every major language, and tools to run
-many browsers across many operating systems, in parallel. 
+originated as a tool at the consulting company ThoughtWorks as a way to do
+testing against web applications by driving a web browser. Since its release,
+it has seen the development of numerous tools, including browser plugins to
+make it easy to develop Selenium tests quickly and easily, language bindings to
+write tests in pretty much every major language, and tools to run many browsers
+across many operating systems, in parallel. 
 
 Additionally, services, such as [BrowserMob](http://www.browsermob.com) and
-[Sauce Labs](http://www.saucelabs.com) have grown around the Selenium ecosystem
-to help you do testing and monitoring in scalable and offsite fashions. It is
-these services that we'll focus on utilizing in this blog post.
+[Sauce Labs](http://www.saucelabs.com), have grown around the Selenium
+ecosystem to help you do testing and monitoring in a scalable and offsite
+fashion. It is these services that we'll focus on utilizing in this blog post.
 
 So what does all this mean? It means that we have a mature and robust toolset
-that we can utilize to perform testing and ultimately monitoring of the complex
-web applications that we are deploying into production.
+that we can utilize and perform testing and monitoring of the complex web
+applications that we are deploying into production.
 
-# Getting started #
+## Getting started
 
 So how do we get started? My preferred method is to begin by developing tests
-locally. The fine folks over at [Sauce Labs](http://www.saucelabs.com) maintain
-a Firefox extension called [Sauce Builder](http://saucelabs.com/docs/builder),
-that makes it a snap to build and run your first test locally.
+locally. You can use the [Selenium IDE](http://seleniumhq.org/projects/ide/), but
+for this example I'll show a Firefox extension called [Sauce
+Builder](http://saucelabs.com/docs/builder) which makes it a snap to build and
+run your first test locally.
 
 To get started you'll need Firefox installed, then go to the [Sauce Builder
 download
@@ -55,18 +60,21 @@ I'm going to walk you through building a test to search for jelly beans on
 3. Enter ''amazon.com'' in the Start Record prompt and click Go
 4. Enter ''jelly beans'' for the search term
 5. Click Go
-6. Click on the first search result, for me this was '''Kirkland Signature Jelly Belly Jelly Beans 49 Flavors (4 Lbs)'''
+6. Click on the first search result, for me this was '''Kirkland Signature
+   Jelly Belly Jelly Beans 49 Flavors (4 Lbs)'''
 7. Go back to the Sauce Builder window and click Stop recording.
-8. Now that we've recorded a test, we should save it for safe keeping. Click File -> Save or Export -> Choose HTML as the format and name it, then click Save.
+8. Now that we've recorded a test, we should save it for safe keeping. Click
+   File -> Save or Export -> Choose HTML as the format and name it, then click
+   Save.
 
 As you can see from the test we've recorded. The test is composed of a series
 of actions and each action will have one or more options associated with it.
 
-#### [A short video of recording your first test](http://www.screencast.com/t/ufRm1SfMbEo)
+[Here is a short video of recording your first test](http://www.screencast.com/t/ufRm1SfMbEo)
 
 Digging into how to modify and adapt tests is beyond the scope of what I want
-to cover in this post, but the following links are some good places to dig
-deeper into this.
+to cover in this post, but the following links are some good places to go
+deeper:
 
 * [Sauce Builder documentation](http://saucelabs.com/docs/builder)
 * [Selenium Docs - Test Design Considerations](http://seleniumhq.org/docs/06_test_design_considerations.html)
@@ -80,12 +88,12 @@ Now that we've recorded our first test, it is time to run it.
    including go through adding it to a cart, checking out, and buying the
    order. But for the purposes of getting started, it's a good place to stop.
 
-#### [A video of running your first test](http://www.screencast.com/t/2bQlCLPKUGOr)
+[Here is a video of running your first test](http://www.screencast.com/t/2bQlCLPKUGOr)
 
 The next thing we want to do, since our focus is on monitoring, is add some
 verification steps to each page load. This step is crucial in making our test
 doing the same kind of checking that your traditional `curl URL | grep STRING`
-style monitoring did, but now it's integrated into our browser driven mode of
+style monitoring did, but now it's integrated into our browser-driven mode of
 execution.
 
 1. Go to the Sauce Builder window
@@ -103,7 +111,7 @@ execution.
 11. Click on Run and Run test locally
 
 The test should run successfully, if it does not, then you may want to click on
-locator and choose Find a different Target and use the tool to select the
+`locator` and choose `Find a different Target` and use the tool to select the
 element you're asserting text with. 
 
 This is a critical step as the assertions are somewhat brittle and must be
@@ -111,19 +119,20 @@ maintained as your application changes over time. For more details, see [help
 on choosing good
 locators](http://release.seleniumhq.org/selenium-core/1.0/reference.html).
 
-#### [A video of adding the assertion to your test and running it locally(http://www.screencast.com/t/JIQnnbD6MX)
+[Here is a video of adding the assertion to your test and running it
+locally](http://www.screencast.com/t/JIQnnbD6MX)
 
-# Using Sauce Labs for testing #
+## Using Sauce Labs for Testing
 
 Now that you've gotten your test running locally and you've added some
 assertions to make the test useful for monitoring, it is a good idea to run the
 test externally. As previously mentioned, the [Sauce
 Labs](http://www.saucelabs.com/) folks run a service to run your tests in the
-*Cloud* and are nice enough to offer a free plan that gives you 200 "execution"
-minutes per month and the ability to run your tests under multiple browsers and
-operating systems with ease. Plus you'll get your jobs stored, logs,
-screenshots, and a video recorded of the whole test for later review and
-analysis. So now that you're thinking "where do I sign up?!", we'll tell you.
+*Cloud*, and they are nice enough to offer a free plan that gives you 200
+"execution" minutes per month and the ability to run your tests under multiple
+browsers and operating systems with ease. Plus you'll get your jobs stored,
+logs, screenshots, and a video recorded of the whole test for later review and
+analysis. So now that you're thinking "where do I sign up?!"
 
 To sign up for the free plan, do the following.
 
@@ -195,7 +204,7 @@ Now upload and verify your first test.
 8. If it passes validation, you should then see Revalidate, View Log, and Screenshot links
 9. Check out the log and screenshot to get an idea of what will be recorded for each monitoring test run.
 
-#### [Below is a short video of uploading and verifying your first test](http://www.screencast.com/t/fmt9oswX)
+[Here is a short video showing  uploading and verifying your first test](http://www.screencast.com/t/fmt9oswX)
 
 Let's configure an email address for notifications
 
@@ -232,19 +241,19 @@ Now let's set up a monitoring job.
     every 12 hours so that when you're trial expires you won't be over your
     credits, or just pause/delete the monitoring job.
 
-#### [A video of creating the monitoring job](http://www.screencast.com/t/vpkz9XepvrYn)
+[Here is a video of creating the monitoring job](http://www.screencast.com/t/vpkz9XepvrYn)
 
 So now that that test has run, let's take a look at what it looks like.
 
 1. Click on Dashboard
 2. Mouse over the name of the job and click on the URL, it should look like
-   [https://browsermob.com/monitoring/view/0d059faa32564f45aaf99fa2a8310014](https://browsermob.com/monitoring/view/0d059faa32564f45aaf99fa2a8310014)
+   something like this: https://browsermob.com/monitoring/view/{some_id_here}
 3. You should see a chart that defaults to 1 day and shows you each test, with
    a bar showing each data point, based on the overall time it took to run the
    test.  * This gives you some quick insight to how performance (as measured
-   by execution time) is doing over time
-4. You can drill into each data point and you'll get a waterfall style break
-   down of each test run, how long each element of the page took to load, etc
+   by execution time) is doing over time.
+4. You can drill into each data point, and you'll get a waterfall style break
+   down of each test run: how long each element of the page took to load, etc.
 
 Below is a screenshot of a test that has run for a few days.
 
@@ -265,12 +274,10 @@ as is, so you'd need to break out a bit of your own JS-fu if you want to use
 part of a response, but here's how I did it. The code below also shows using a
 previously declared variable in your request.
 
-```
-var response = c.get("http://api.example.com:8080/id?"+zipcode)
-var testid = response.getBody()
-```
+    var response = c.get("http://api.example.com:8080/id?"+zipcode)
+    var testid = response.getBody()
 
-At this point the `testid` variable contents the string returned in the
+At this point the `testid` variable contains the string returned in the
 response from the request to
 [http://api.example.com:8080/id?90210](http://api.example.com:8080/id?90210)
 
@@ -280,18 +287,16 @@ BrowserMob's JS API has a nice function called `browserMob.log()` which lets
 you log arbitrary data and it will show up in the raw logs that BrowserMob
 keeps for each test run. An example of this is
 
-```
-browserMob.beginStep("Step 2");
-selenium.waitForPageToLoad(60000);
-selenium.type("id=twotabsearchtextbox", "jelly beans");
-browserMob.log('searched for jelly beans')
-browserMob.endStep();
-```
+    browserMob.beginStep("Step 2");
+    selenium.waitForPageToLoad(60000);
+    selenium.type("id=twotabsearchtextbox", "jelly beans");
+    browserMob.log('searched for jelly beans')
+    browserMob.endStep();
 
 For more info on these and more functions, check out the [BrowserMob API
 Documentation](http://static.browsermob.com/api/)
 
-# Wrapping it all and where to go next #
+## What Next?
 
 At this point you've successfully built a test, run it locally, run it in the
 "cloud", and deployed it to monitor every 12 hours and are getting alerted by
@@ -311,9 +316,9 @@ repository](https://github.com/solarce/sysadvent_2011_examples) with my
 Amazon.com example. 
 
 As a challenge and a way to motivate people to contribute and give feedback,
-**the 5 most interesting tests that people submit as pull requests on Github, I
+the 5 most interesting tests that people submit as pull requests on Github, I
 will send them a package of stickers, including SysAdvent, Github, Riak, and
-more!**
+more!
 
 I hope you've found this post to be informative and would love feedback via
 email or Twitter on how you do end up using any or all of the services in this
