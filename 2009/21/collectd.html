@@ -1,0 +1,42 @@
+Day 21 - collectd
+
+<a href="http://collectd.org/">Collectd</a> is a statistics collection tool I've recently found quite useful. Other tools in this space include Munin, Cacti, and Ganglia. For starters, collectd can collect at fairly high frequencies (the default is every 10 seconds) relative to other collection tools. The config syntax is consistent and looks similar to Apache httpd's config syntax. As a bonus, it comes with almost a hundred <a href="http://collectd.org/wiki/index.php/Table_of_Plugins">plugins</a> to help you get statistics from devices and applications and into RRD files (and other outputs, if you want). Each plugin has a host of different configuration options it can support, including changing the collection interval.  <p>
+ Reading over the <a href="http://collectd.org">project's website</a>, I noticed a few things that struck me as good things. It's important to mention that the reason I noticed these things was because the project has quite good documentation.   <p>
+ First, there is the the <a
+href="http://collectd.org/wiki/index.php/Networking_introduction">network plugin</a>., which allows you to send and receive collectd data to and from other collectd instances, or anything that speaks the collectd <a href="http://collectd.org/wiki/index.php/Binary_protocol"> network protocol</a>. Many networking scenarios are supported: unicast, multicast, and even proxying. Second, many plugins have reasonable configuration defaults. For example, the <a
+href="http://collectd.org/wiki/index.php/Plugin:Interface">interface plugin</a> defaults to capturing stats on all interfaces. Addtionally, the default plugin set includes ones to capture data from other systems like <a
+href="http://collectd.org/wiki/index.php/Plugin:gmond">Ganglia</a> and <a
+href="http://collectd.org/wiki/index.php/Plugin:GenericJMX">JMX</a>. Other base plugins allow you to easily fetch values from <a
+href="http://collectd.org/wiki/index.php/Plugin:DBI">databases (DBI)</a>, <a
+href="http://collectd.org/wiki/index.php/Plugin:cURL">web servers (cURL)</a>, and <a
+href="http://collectd.org/wiki/index.php/Plugin:Exec">scripts (Exec)</a>.  <p>
+ The DBI and cURL plugins cover a pretty wide area of uses, and the Exec plugin is useful when you can't find a plugin that does exactly what you want. The benefit here is that you may not have to write a complex script just to fetch a value from a database or webserver just to store that data with collectd. The <a
+href="http://collectd.org/documentation/manpages/collectd.conf.5.shtml#plugin_dbi">DBI plugin</a> even supports using specific column values as fields and others as collectd values, rather than having statically defined fields. I like.  <p>
+ Other nice features include the ability to <a
+href="http://collectd.org/wiki/index.php/Chains">filter</a> collected data, possibly modifying it before it gets written to disk. The project also comes with a useful tool called <a
+href="http://collectd.org/documentation/manpages/collectd-nagios.1.shtml">collectd-nagios</a> which allows you to use collectd data for nagios checks. This lets you make collectd do the hard work of collecting the data and lets you use the nagios plugin to simply set alert thresholds.  <p>
+ When playing with collectd and when reading the docs, I haven't seen any points where I have found myself worrying about the difficulty in automating collectd's configuration.  <p>
+ So, what's bad? Collectd itself doesn't do graphs for you; it acts as a data collection system only. If you want graphs from the RRDs it stores, you'll need to use the decent-but-not-superb web interface called 'collection3' that comes with   collectd in the contrib directory. There are other projects, like <a
+  href="http://auxesis.github.com/visage/">Visage</a>, that are working on   providing a better interface to the data collectd records. I started with   collection3, which looks like this:  <p>
+ <a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_u-5lMShiO40/Sy9QJaY525I/AAAAAAAAADg/USSUMA7cI5Q/s1600-h/collectd-collection3.png"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 314px; height: 320px;" src="http://4.bp.blogspot.com/_u-5lMShiO40/Sy9QJaY525I/AAAAAAAAADg/USSUMA7cI5Q/s320/collectd-collection3.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5417636999382817682" /></a>  <p>
+ I circled the navigation overlay that collection3 puts on the graphs. These allow you to pan/zoom around to various time views - a very important feature of any graph view system. Definitely a win.   <p>
+ For fun, I decided to use the cURL plugin to fetch a random number from random.org. That configuration looks like this:  <pre>&lt;Plugin curl>
+  &lt;Page "random_number">
+    URL "http://www.random.org/integers/?num=1&min=1&max=100&col=1&base=10&format=plain&rnd=new"
+    &lt;Match>
+      Regex "([0-9]+)"
+      DSType "GaugeAverage"
+      Type "percent"
+      Instance "randomvalue"
+    &lt;/Match>
+  &lt;/Page>
+&lt;/Plugin>
+</pre>
+<p>
+ Resulting graph looks like this after letting collectd run for a few minutes:  <a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_u-5lMShiO40/Sy9Ov03xxOI/AAAAAAAAADQ/nkwuL6xBPm4/s1600-h/collectd-randomdotorg.png"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 320px; height: 112px;" src="http://2.bp.blogspot.com/_u-5lMShiO40/Sy9Ov03xxOI/AAAAAAAAADQ/nkwuL6xBPm4/s320/collectd-randomdotorg.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5417635460303406306" /></a>  <p>
+ The good documentation and nice set of features were what convinced me to try collectd. The default configuration includes a few plugins and writes out RRDs as expected, and it was easy to add new collections from different plugins (like the random.org curl one, above).   <p>
+ Further reading:  <ul>
+<li> <a href="http://oss.oetiker.ch/rrdtool/">RRDtool</a> - data storage and graphing system for time series data. Used by collectd, Munin, Ganglia, Cacti, etc... </li>
+<li> <a href="http://curl.haxx.se/">cURL</a> is a tool and library for fetching URLs</li>
+<li> <a href="http://collectd.org/related.shtml">things related to collectd</a> on collectd's wiki </li>
+</ul>
