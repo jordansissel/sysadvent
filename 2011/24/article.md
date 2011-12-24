@@ -1,20 +1,20 @@
-# Day 24 - Implementing Configuration Management to Legacy Environments
+# Day 24 - Implementing Configuration Management in Legacy Environments
 
-This was written by Dean Wilson (www.unixdaemon.net).
+This was written by [Dean Wilson](https://twitter.com/unixdaemon)
+([www.unixdaemon.net](http://www.unixdaemon.net)).
 
-Learning or just implementing configuration management is perfect for green
-field projects where you can have freedom to choose 
-technical solutions free from most existing technical debt. It's a time where
-there are no old inconsistencies, and you have a window to build, deploy and
-test all the manifests and recipes without risking user visible outages or
-interruptions. 
+Implementing configuration management is perfect for green field projects where
+you can have freedom to choose technical solutions free from most existing
+technical debt. It's a time where there are no old inconsistencies and you
+have a window to build, deploy and test all the manifests and recipes without
+risking user visible outages or interruptions. 
 
 Unfortunately, most of us don't have the luxury of starting from scratch in a
 pristine environment. We have to deal with the oddities, the battle scars, and
 the need to maintain a good quality of service while evolving and maintaining
 the platform.
 
-In this article, we'll discuss some of the key points to consider as you
+In this article, I'll discuss some of the key points to consider as you
 begin the journey implementing a configuration management tool in an existing
 environment. I happen to use puppet and mcollective, but any config management
 tools will do - find one that works for you.
@@ -22,15 +22,13 @@ tools will do - find one that works for you.
 ## Discovery
 
 You'll need to start with some discovery (manual, automated, whatever) to
-learn how your current systems are configured.
-
-You'll be asking questions: How many differences are there across
-the sshd_config files? Where do we use that backup users key? What's the log
-retention setting of the apache servers? Is it identical between those we
+learn how your current systems are configured. How many differences are there
+across the sshd_config files? Where do we use that backup users key? What's the
+log retention setting of the apache servers? Is it identical between those we
 upgraded from apache 1 and the fresh apache 2?
 
 When I first started to bring puppet in to my systems, I wrote custom
-scripts, ssh loops, and inventory-updating cronjobs to find the information I
+scripts, ssh loops, and inventory-reporting cronjobs to find the information I
 needed. Now, there is an excellent solution to gather information you need in
 real time: [MCollective](http://puppetlabs.com/mcollective/introduction/).
 
@@ -40,7 +38,6 @@ nearly every aspect of your infrastructure. The
 agent, for example, will show you groups of hosts that identical config files.
 Using this, you can partition the environment and the work, section by section.
 This will help you find smaller amounts of work to build into puppet.
-to control the settings.
 
 One of my favourite current tricks is to query config file settings using
 [Augeas](http://augeas.net/) in the 
@@ -55,13 +52,12 @@ agent.
         {:matched=>["no"]}
 
     test2.example.com: OK
-        {:matched=>["no"]}
+        {:matched=>["yes"]}
 
 No more crazy regexes to find config settings!
 
 You can learn more about how the [Blueprint](http://devstructure.com/) tool can help you with this
-configuration discovery process in ["Reverse-engineer Servers with
-Blueprint](http://sysadvent.blogspot.com/2011/12/day-12-reverse-engineer-servers-with.html)
+configuration discovery process in ["Reverse-engineer Servers with Blueprint"](http://sysadvent.blogspot.com/2011/12/day-12-reverse-engineer-servers-with.html) (SysAdvent 2011, Day 12).
 
 ## Short Cycles
 
@@ -87,16 +83,16 @@ enable you to rapidly verify your changes.
 The short version is: version control everything.
 
 There's no reason, whether you are in a team or working alone (especially when
-working alone!), not to keep your work in a version control system like
-[subversion](http://subversion.apache.org/) or [git](http://git-scm.com/).
-"That change didn't work, so I've rolled it back".  Really? By hand? Are you
-sure you didn't forget to remove one of the additions?  Why would you shoulder
-the mental burden of knowing all the things you changed recently when there are
-so many excellent tools that will do it for you, and allow seamless rollbacks
-to old revisions?
+working alone!), to not keep your work in a version control system
+(such as [subversion](http://subversion.apache.org/) or
+[git](http://git-scm.com/)).  "That change didn't work, so I've rolled it
+back".  Really? By hand? Are you sure you didn't forget to remove one of the
+additions?  Why would you shoulder the mental burden of knowing all the things
+you changed recently when there are so many excellent tools that will do it for
+you and allow easier, auditable rollbacks to old revisions?
 
-Beyond the benefits of providing an ever present safety net, using a VCS
-provides an easy way to hook your exact change into incident, audit, or change
+Beyond the benefits of providing an ever-present safety net, using a VCS
+provides a nice way to tie your exact change into incident, audit, or change
 control systems - a perfect place to do smaller code reviews and a basic, but
 permanent, collection of institutional knowledge. Being able to search through
 the puppet logs / reports when debugging an issue to find exactly which
@@ -107,25 +103,24 @@ evidence.
 
 On a positive note, it's amazing how much you can learn from reading through
 commits from things like DBAs doing performance tuning. Seeing which settings
-were changed, the reasons why and, in some failed cases, explanations for them
-being reverted can save you, new staff, and even the same staff in six months
-time from redoing parts of the work again.
+were changed and why can save you and your team from forgetting something or
+making the same mistake or redoing parts of the work again in the future.
 
 ## Use Packages
 
-A lot of older environments have fallen in to the habit of pushing tarred
+Many older environments have fallen in to the habit of pushing tarred
 applications around (and sometimes compiling software on the hosts
-as needed). This isn't the best way to deploy in general and it will
-make your manifests ugly, complicated, sprawling messes. In most cases
-it's not that hard to produce native packages and tools like
+as needed). This isn't the best way to deploy in general, and it will
+make your manifests ugly, complicated, sprawling messes. In most cases,
+it's not that hard to produce native packages, and tools like
 [fpm](https://github.com/jordansissel/fpm) make the process even easier.
 
 By actually packaging software and running local repositories you can 
 use native tools, such as yum and apt, in a more powerful way. Processes
 become shorter and have simpler moving parts, more meta information
-becomes available and importantly it's possible to trace the origin of
-files. You can then use other tools, such as puppet and MCollective to ease
-upgrades, additions, and reporting.
+becomes available, and it's possible to trace the origin of files. You can then
+use other tools, such as puppet and MCollective to ease upgrades, additions,
+and reporting.
 
 You can learn more about the world of software packages from ["A Guide to
 Package
@@ -268,6 +263,5 @@ Take small steps, master your tools and good luck.
 ## Further Reading
 
 
-* [Planet Puppet](http://www.planetpuppet.org/)
-  * especially posts by Masterzen and R.I.Pienaar
+* [Planet Puppet](http://www.planetpuppet.org/) (especially posts by Masterzen and R.I.Pienaar)
 * [PlanetDevops](http://www.planetdevops.net/)
