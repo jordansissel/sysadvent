@@ -1,0 +1,63 @@
+Day 25 - Introducing UNIX 4.0!
+
+<i> I know. Advent is only 24 days. Continuing from last year's "Jordan had no idea advent was only 24 days" tradition, here is a bonus 25th article to wrap up this year's sysadvent. Enjoy! :)</i>  <p>
+ I have these two nearly-30-year old computer manuals that were given to me by a coworker who thought I'd be interested. Boy was I! I'm that kind of nerd. Anyway, these books were internal Bell Labs manuals/guides for helping folks do stuff on UNIX. They were printed before I was born and contain great content for interviews because they document UNIX shell, editor, system programming, and other pieces that are still here, today. You'll find few of the topics covered have changed since UNIX, 30 years ago; FreeBSD, Linux, and Solaris all have fairly clear heritage here.  <p>
+ Welcome to UNIX Release 4.0!  <p>
+ <a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://www.flickr.com/photos/jordansissel/4212102567/in/set-72157622941472311"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 240px; height: 180px;" src="http://farm5.static.flickr.com/4004/4212102567_f30d744f38_m_d.jpg" border="0" alt="" /></a>   <p>
+ The books themselves contain multiple sections covering a range of topics. With respect to the UNIX version covered, the intro says it is relevant to UNIX 4 (1974), but I think most of it is relevant UNIX version 7 (1979) which was released nearer to the print dates in these books.  <p>
+ The intro to the book, which discusses notation and conventions, explains this: <blockquote>
+Entries in Section <i>n</i> of the UNIX User's Manual are referred to by <i>name</i>(n). </blockquote>
+I always did think that the name(n) notation for manpages was useful, and now I have a better understanding of how old this stuff really is.  <p>
+ One of these books is "UNIX Programming Starter Package." It includes "UNIX Shell Tutorial" by G. A. Snyder and J. R. Mashey.  The copy I have is dated January 1981. It starts with talking about the filesystem. "If a path name begins with a /, the search for the file begins at the root of the entire tree; otherwise, it begins at the user's current directory." It goes on to discuss absolute vs relative path nomenclature.  <p>
+ Next, it discusses processes: how a fork of will spawn an identical copy of the original process, that both can continue to execute in parallel, and that either may call exec(2) to abandon the current program and start a new one. It also talks about wait(2) and how the parent might use it, and includes a diagram of it:  <p>
+ <a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_u-5lMShiO40/SzR8JkOvxfI/AAAAAAAAADo/TFMSSPq_2rU/s1600-h/forkwait.jpg"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 400px; height: 154px;" src="http://4.bp.blogspot.com/_u-5lMShiO40/SzR8JkOvxfI/AAAAAAAAADo/TFMSSPq_2rU/s400/forkwait.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5419092755419743730" /></a>  <p>
+ Continuing the process discussion, this tutorial explains that child processes inherit open files and signals. You'll learn about process termination, including the 8-bit exit status value and about success (zero) and failure (non-zero). Signals are also explained: a signal may come from "another process, from the terminal, or by UNIX itself." Signals can be ignored or caught by programs and the book makes special highlight of the interrupt signal, which can come from a user pressing the right key sequence. The tutorial explains 3 ways the signals are generally handled in a shell: the active program might die due to interrupt, the shell itself ignores the interrupt signal, and tools like ed(1) catches the signal and uses it to abort the current action (like printing) without exiting.  <p>
+ In case you were really wondering about the origins of the SIGHUP signal, this book's "UNIX for Beginners" chapter explains that "hanging up the phone will stop most programs."  <p>
+ Also covered are position parameters ($1, $2, ...), variables such as PATH, HOME, and PS1 (your shell prompt), "Command substitution" aka `stuff in backticks`, special variables like $#, $?, $$, and more. Keyword paramters also are documented here and how they relate to the environment (things  like "FOO=hello ./mycommand arg1..." where FOO is an environment variable passed to ./mycommand.  <p>
+ Pipes, input redirection, process backgrounding, nohup, etc. All talked about here.It also has a pile of sample scripts, including this one called "null" which is a 1980's UNIX version of the modern touch(1) command:  <pre>#       usage: null file
+#       create each of the named files as an empty file
+for eachfile
+do
+        > $eachfile
+done
+</pre>
+When we run this on Ubuntu 9.04 in /bin/sh, it still works. <pre>% sh null.sh a b c d e
+% ls
+a  b  c  d  e  null.sh*
+</pre>
+<p>
+ Basically, The unix shell (linux, freebsd, etc, too) hasn't changed much in 30 years. The concepts, implementations, and syntax are, for the most part, exactly the same.   Some important quotes from this tutorial from a section titled "Effective and Efficient Shell Programming:"  <blockquote>
+  "In the author's opinion, the primary reason for choosing the shell procedure   as the implementation method is to achieve a desired result at a minimum   <i>human</i> cost." </blockquote>
+<blockquote>
+"One should not worry about optimizing shell procedures unless they are intolerably slow or are known to consume a lot of resources." </blockquote>
+<blockquote>
+"Emphasis should always be placed on simplicity, clarity, and readability." </blockquote>
+Other sections in the "UNIX Programming Starter Package" includes a C reference and UNIX system reference, which details important concepts such as "everything is a file descriptor" among the general programming library reference.  <p>
+ I skipped the first section in this book, which contains a very excellent introduction to ed(1), which, as you should guess by now, is still totally valid documentation today. If you've never used ed(1), learning about it shows distinct ancestry to ex(1) and it's successor, vi(1).  <p>
+ The second Bell Labs UNIX manual I have is "UNIX Text Editing & Phototypesetting Starter Package." That's quite a mouthful of title! It goes extensively into how to use ed(1) and other tools that would help you edit stuff. Past that, it dives head first into troff/nroff, mm, tbl (table formatting), and eqn (math formulas). Reflecting on the general syntax of troff/nroff, and comparing that with HTML, Markdown, whatever random wiki markups are floating about, etc, I don't really feel like we've made progress much progress since troff.  <p>
+ In case you weren't aware, all your manpages are written in modern nroff.  <pre>% gzip -dc /usr/share/man/man1/sh.1.gz | less
+&lt; I skipped the copyright stuff &gt;
+.Dd January 19, 2003
+.Os
+.Dt SH 1
+.Sh NAME
+.Nm sh
+.Nd command interpreter (shell)
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl aCefnuvxIimqVEb
+.Op Cm +aCefnuvxIimqVEb
+</pre>
+So, besides a fun history lesson, what are the take aways? Personally, I use some of this material for interview questions. Pillars of UNIX that are still valid today are quite meaningful and useful to know, and I just might expect you to understand them if the position demands it.  <p>
+ I have a few photos of the books and content <a href="http://www.flickr.com/photos/jordansissel/sets/72157622941472311/">on Flickr</a>.  <p>
+ Further reading:  <ul>
+<li> <a href="http://www.levenez.com/unix/redirect_unix_a4_pdf.html">UNIX history timeline</a> (pdf) </li>
+<li> <a href="https://www.mirbsd.org/htman/i386/manUSD/01.begin.htm">UNIX for Beginners</a> - Updated for 4.3 BSD (Very similar to my print copy)</li>
+<li> <a href="https://www.mirbsd.org/htman/i386/manUSD/09.edtut.htm">A Tutorial Introduction to the UNIX Text Editor</a> - Meet ed(1). (Again, quite similar to my print copy, but updated for 4.3 BSD) </li>
+<li> Couldn't find a copy of the "UNIX Shell Tutorial" by Snyder and Mashey, but these are relatives (found by googling for phrases from my paper copy):     <ul>
+<li> <a href="http://grosskurth.ca/bib/1976/mashey-command.pdf"> http://grosskurth.ca/bib/1976/mashey-command.pdf </a> </li>
+<li> <a href="http://www.in-ulm.de/~mascheck/bourne/PWB/"> http://www.in-ulm.de/~mascheck/bourne/PWB/ </a>
+<li> <a href="http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V51B_HTML/MAN/MAN1/0643___B.HTM"> http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V51B_HTML/MAN/MAN1/0643___B.HTM </a>     </ul>
+</li>
+</ul>
