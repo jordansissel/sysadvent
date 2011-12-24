@@ -1,6 +1,6 @@
 # Day 2 - Strategies for Java Deployment
 
-This article was written by [Kris Buytaert](https://twitter.com/krisbuytaert)
+This was written by [Kris Buytaert](https://twitter.com/krisbuytaert)
 ([www.krisbuytaert.be/blog](http://www.krisbuytaert.be/blog/)).
 
 After years of working in Java-based environments, there are a number of

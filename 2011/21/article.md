@@ -1,6 +1,6 @@
 # Day 21 - Automating Web Monitoring
 
-This article is written by [Brandon Burton](http://www.inatree.org), who can
+This was written by [Brandon Burton](http://www.inatree.org), who can
 mostly be found posting lolcats and retweeting 
 [@solarce](http://www.twitter.com/solarce), though he occasionally posts
 interesting links to things sysadmin, devops, and unix.
