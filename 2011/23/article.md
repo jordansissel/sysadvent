@@ -71,6 +71,7 @@ As an example, if I wanted to find overloaded webservers I could construct a
 query like `highestAverage(webservers.*.load.longterm, 3)` producing:
 
 ![highestAverage graph](https://lh5.googleusercontent.com/-EGuYH5jOcb8/TvQ03KuohlI/AAAAAAAAACU/CL3kWP7YL6U/s510/load-highest3.jpg)
+[higher resolution graph here](https://github.com/tabletcorry/sysadvent-articles/raw/master/load-highest3.png)
 
 ## Stacking example
 
@@ -79,6 +80,7 @@ webservers (time for more memcached if so!)
 `movingAverage(webservers.*.memory.free, 10)` producing:
 
 ![memory movingaverage graph](https://lh4.googleusercontent.com/-aiLnKh6FmNk/TvQ02z8IMEI/AAAAAAAAACQ/YZYiDWZIu28/s510/memory-3.jpg)
+[higher resolution graph here](https://github.com/tabletcorry/sysadvent-articles/raw/master/memory-3.png)
 
 Note that I am also creating a moving average over 10 datapoints here. Also,
 the series are stacked to produce a sum while still showing the responsible

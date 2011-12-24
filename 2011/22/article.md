@@ -21,7 +21,7 @@ Another issue that comes up all the time in the context of load balancing is
 SSL termination. Ideally you would like the load balancer to act as an SSL
 end-point, in order to offload the SSL computations from your Web servers, and
 also for easier management of the SSL certificates. HAProxy does not support
-SSL termination, but Pound does (note that you can still pass SSL traffic
+SSL termination, but Pound does (note: that you can still pass SSL traffic
 through HAProxy by using its TCP mode, you just cannot terminate SSL traffic
 there.)
 
@@ -35,17 +35,16 @@ running HAProxy, which in turn delegate traffic to your Web server farm.
 
 ## Elastic Load Balancing and the DNS Root Domain
 
-One other issue that comes up all the time in conversations around the ELB
-service is that an ELB is only available as a CNAME (this is due to the fact
-that Amazon needs to scale the ELB service in the background depending on the
-traffic that hits it, so they cannot simply provide an IP address). A CNAME is
-fine if you want to load balance traffic to www.yourdomain.com, since that name
-can be mapped to a CNAME. However, the root or apex of your DNS zone,
-yourdomain.com, can only be mapped to an A record, so for yourdomain.com you
-could not use an ELB in theory. In practice, however, there are DNS providers
-that allow you to specify an alias for your root domain (I know
-[Dynect](http://dyn.com/dns/dynect-managed-dns/) does this, and Amazon’s own
-[Route 53](http://aws.amazon.com/route53/) DNS service).
+One other issue that comes up all the time is that an ELB is only available as
+a CNAME (this is due to the fact that Amazon needs to scale the ELB service in
+the background depending on the traffic that hits it, so they cannot simply
+provide an IP address). A CNAME is fine if you want to load balance traffic to
+www.yourdomain.com, since that name can be mapped to a CNAME. However, the root
+or apex of your DNS zone, yourdomain.com, can only be mapped to an A record, so
+for yourdomain.com you could not use an ELB in theory. In practice, however,
+there are DNS providers that allow you to specify an alias for your root domain
+(I know [Dynect](http://dyn.com/dns/dynect-managed-dns/) does this, and
+Amazon’s own [Route 53](http://aws.amazon.com/route53/) DNS service).
 
 ## Elastic Load Balancing and SSL ####
 
@@ -68,61 +67,68 @@ java.lang.NoClassDefFoundError when trying to run the tools.
 
 1) Install and configure the AWS Elastic Load Balancing command-line tools
 
-- download ElasticLoadBalancing.zip from http://aws.amazon.com/developertools/2536
-- unzip ElasticLoadBalancing.zip; this will create a directory named ElasticLoadBalancing-version (latest version at the time of this writing is 1.0.15.1)
-- set environment variable AWS_ELB_HOME=/path/to/ElasticLoadBalancing-1.0.15.1 (in .bashrc)
-- add $AWS_ELB_HOME/bin to your $PATH (in .bashrc)
+    * download [ElasticLoadBalancing.zip](http://aws.amazon.com/developertools/2536)
+    * unzip `ElasticLoadBalancing.zip`; this will create a directory named
+      ElasticLoadBalancing-version (latest version at the time of this writing is
+      1.0.15.1)
+    * set environment variable
+      `AWS_ELB_HOME=/path/to/ElasticLoadBalancing-1.0.15.1` (in .bashrc) 
+    * add `$AWS_ELB_HOME/bin` to your `$PATH` (in `.bashrc`)
 
 2) Install and configure the AWS Identity and Access Management (IAMCli) tools
-- download IAMCli.zip from http://aws.amazon.com/developertools/AWS-Identity-and-Access-Management/4143
-- unzip IAMCli.zip; this will create a directory named IAMCli-version (latest version at the time of this writing is 1.3.0)
-- set environment variable AWS_IAM_HOME=/path/to/IAMCli-1.3.0 (in .bashrc)
-- add $AWS_IAM_HOME/bin to your $PATH (in .bashrc)
+
+    * download [`IAMCli.zip`](http://aws.amazon.com/developertools/AWS-Identity-and-Access-Management/4143)
+    * unzip `IAMCli.zip`; this will create a directory named IAMCli-version
+      (latest version at the time of this writing is 1.3.0)
+    * set environment variable `AWS_IAM_HOME=/path/to/IAMCli-1.3.0` (in `.bashrc`)
+    * add `$AWS_IAM_HOME/bin` to your `$PATH` (in `.bashrc`)
 
 3) Create AWS credentials file
 
-- create file with following content
-AWSAccessKeyId=your_aws_access_key
-AWSSecretKey=your_aws_secret_key
-- if you named this file aws_credentials, set environment variable AWS_CREDENTIAL_FILE=/path/to/aws_credentials (in .bashrc)
+    * create file with following content
+            AWSAccessKeyId=your_aws_access_key
+            AWSSecretKey=your_aws_secret_key
+    * if you named this file `aws_credentials`, set environment variable
+      `AWS_CREDENTIAL_FILE=/path/to/aws_credentials` (in .bashrc)
 
 4) Get DNS name for ELB instance you want to modify
 
-We will use the ElasticLoadBalancing tool called elb-describe-lbs:
+    We will use the ElasticLoadBalancing tool called elb-describe-lbs:
 
-	# elb-describe-lbs
-	LOAD_BALANCER  mysite-prod  mysite-prod-2639879155.us-east-1.elb.amazonaws.com  2011-05-24T22:38:31.690Z
-	LOAD_BALANCER  mysite-stage   mysite-stage-714225413.us-east-1.elb.amazonaws.com    2011-09-16T18:01:16.180Z
+        # elb-describe-lbs
+        LOAD_BALANCER  mysite-prod  mysite-prod-2639879155.us-east-1.elb.amazonaws.com  2011-05-24T22:38:31.690Z
+        LOAD_BALANCER  mysite-stage   mysite-stage-714225413.us-east-1.elb.amazonaws.com    2011-09-16T18:01:16.180Z
 
-In our case, we will modify the ELB instance named mysite-stage.
+    In our case, we will modify the ELB instance named mysite-stage.
 
 5) Upload SSL certificate to AWS
 
-I assume you have 3 files:
-- the SSL private key in a file called stage.mysite.com.key
-- the SSL certificate in a file called stage.mysite.com.crt
-- an intermediate certificate from the SSL vendor, in a file called stage.mysite.com.intermediate.crt
+    I assume you have 3 files:
 
-We will use the IAMCli tool called iam-servercertupload:
+    * the SSL private key in a file called `stage.mysite.com.key`
+    * the SSL certificate in a file called `stage.mysite.com.crt`
+    * an intermediate certificate from the SSL vendor, in a file called `stage.mysite.com.intermediate.crt`
 
-	# iam-servercertupload -b stage.mysite.com.crt -c stage.mysite.com.intermediate.crt -k stage.mysite.com.key -s stage.mysite.com
+    We will use the IAMCli tool called `iam-servercertupload`:
+
+        # iam-servercertupload -b stage.mysite.com.crt -c stage.mysite.com.intermediate.crt -k stage.mysite.com.key -s stage.mysite.com
 
 6) List the SSL certificates you have uploaded to AWS
 
-We will use the IAMCli tool called iam-servercertlistbypath:
+    We will use the IAMCli tool called `iam-servercertlistbypath`:
 
-	# iam-servercertlistbypath
-	arn:aws:iam::YOUR_IAM_ID:server-certificate/stage.mysite.com
-	arn:aws:iam::YOUR_IAM_ID:server-certificate/www.mysite.com
+        # iam-servercertlistbypath
+        arn:aws:iam::YOUR_IAM_ID:server-certificate/stage.mysite.com
+        arn:aws:iam::YOUR_IAM_ID:server-certificate/www.mysite.com
 
 7) Associate the ELB instance with the desired SSL certificate
 
-We will use the ElasticLoadBalancing tool called elb-set-lb-listener-ssl-cert:
+    We will use the ElasticLoadBalancing tool called `elb-set-lb-listener-ssl-cert`:
 
-	# elb-set-lb-listener-ssl-cert mysite-stage --lb-port 443 --cert-id arn:aws:iam::YOUR_IAM_ID:server-certificate/stage.mysite.com
-	OK-Setting SSL Certificate
+        # elb-set-lb-listener-ssl-cert mysite-stage --lb-port 443 --cert-id arn:aws:iam::YOUR_IAM_ID:server-certificate/stage.mysite.com
+        OK-Setting SSL Certificate
 
-That's it. At this point the SSL certificate for stage.mysite.com will be
+That's it! At this point, the SSL certificate for stage.mysite.com will be
 associated with the ELB instance handling HTTP and SSL traffic for
 stage.mysite.com. Not rocket science, but not trivial to put together all these
 bits of information either.
@@ -135,5 +141,3 @@ bits of information either.
   Guide](http://docs.amazonwebservices.com/IAM/latest/UserGuide/)
 * Blog post by Werner Vogels on [New Route 53 and ELB
   features](http://www.allthingsdistributed.com/2011/05/aws_ipv6.html)
-
-
