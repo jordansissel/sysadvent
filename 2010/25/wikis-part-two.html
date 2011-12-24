@@ -1,0 +1,193 @@
+Day 25 - Wikis and Documentation Part 2
+
+<h2>
+Intro</h2>
+<p>
+This article is part two of a two part series and a collaboration between <a href="http://www.twitter.com/solarce">Brandon Burton</a> and <a href="http:///www.twitter.com/philiph">Philip J. Hollenback</a> where they explore the problems with <a href="http://www.mediawiki.org/">Mediawiki</a>, the challenges of writing good documentation with today's tools, improvements that <a href="http://www.twitter.com/solarce">Brandon</a> has implemented, and ideas for further improvements.</p>
+<p>
+In part two, we focus on overcoming Mediawiki's poor defaults by covering existing improvements that Brandon has implemented at work and exploring a number of additional ideas for ways to improve it further. </p>
+<h2>
+Things I've implemented at work</h2>
+<p>
+As I mentioned, I have implemented a number of improvements to the Mediawiki installation at work, they fall into two categories.</p>
+<ol>
+<li>Visual Improvements</li>
+<li>Layout/Style Improvements</li>
+</ol>
+<h3>
+Visual Improvements</h3>
+<p>
+The first you'll notice about a default Mediawiki installation is that is <strong>ugly</strong>, it's very <em>Web 1.0</em> in all the worst ways. I chose to improve on this with four things</p>
+<ol>
+<li>A better theme</li>
+<li>Tweaking the fonts</li>
+<li>Tweaking the URL colors</li>
+<li>Finding some better CSS for the tables, as we use tables heavily</li>
+</ol>
+<h4>
+Theme</h4>
+<p>
+Choosing a visually appealing, but not <em>crazy</em>, theme is very important. I chose the <a href="http://www.mediawiki.org/wiki/File:Daddio_1.0.jpg">daddio</a> because it has a simple color scheme and the shiny blue in the navigation bar adds some <em>pop</em> but doesn't distract. I also liked how it put the <em>User</em> links at the top as a navigation aid. This particular design choice offers a lot of possibilities if you want to do custom navigation along the top.</p>
+<h4>
+Fonts</h4>
+<p>
+The default font for the daddio theme is just <code>font-family: sans-serif;</code>, which isn't very pleasant to look at for long periods of time. I improved this with <code>font-family: Verdana;</code>. Of course, a picture is worth a thousand words, so -</p>
+<p>
+Before:</p>
+<p>
+<img alt="beforefonts" src="http://lh5.ggpht.com/_u-5lMShiO40/TRXCgm898AI/AAAAAAAAAHc/yVDd_q3PPZs/fontsbefore.png" title="Before font change" /></p>
+<p>
+After:</p>
+<p>
+<img alt="afterfonts" src="http://lh4.ggpht.com/_u-5lMShiO40/TRXCgjBwXzI/AAAAAAAAAHY/lnOqaIRr9Bo/s912/fontsafter.png" title="After font change" /></p>
+<h4>
+URL Colors</h4>
+<p>
+I found, and I think most people would agree, that the default URL colors of Mediawiki to be pretty much an eye sore, so I chose to do something a little more pleasant.</p>
+<p>
+There are three main <em>kinds</em> of links in Mediawiki and I adjusted the colors for all three. They are:</p>
+<ol>
+<li>Visited</li>
+<li>Normal</li>
+<li>Page Doesn't exist</li>
+</ol>
+<p>
+By default they have the following colors:</p>
+<ol>
+<li>Visited = Purple</li>
+<li>Normal = Dark Blue</li>
+<li>Page Doesn't Exist = Red</li>
+</ol>
+<p>
+<img alt="beforeurlcolors" src="http://lh5.ggpht.com/_u-5lMShiO40/TRXCuANripI/AAAAAAAAAHs/KoTcr5mNvio/urlcolorsbefore.png" title="Before URL Colors" /></p>
+<p>
+After I finished tweaking them, they were</p>
+<ol>
+<li>Visited = Dark Green</li>
+<li>Normal = Light Blue</li>
+<li>Page Doesn't Exist = Light Orange</li>
+</ol>
+<p>
+<img alt="afterurlcolors" src="http://lh3.ggpht.com/_u-5lMShiO40/TRXCg7vKp6I/AAAAAAAAAHo/TPbtRhZUwP0/urlcolorsafter.png" title="After URL Colors" /></p>
+<h4>
+Tables</h4>
+<p>
+I think that the kind of documentation we produce as systems administrators, and so the kind we produce a lot of at my work, is best formatted in two ways.
+</p>
+<ol>
+<li>Lists (Bulleted or Numbered)</li>
+<li>Tables</li>
+</ol>
+<p>
+I'm a big fan of tables, and having memorized the table syntax for the <a href="http://www.mediawiki.org/wiki/Help:Formatting">Mediawiki markup</a>, I use a lot of tables. Unfortunately, the default table style is pretty bad. It didn't take a lot of CSS to fix that though. There isn't much else to say, so I'll show you the difference.</p>
+<p>
+Before:</p>
+<p>
+<img alt="beforetable" src="http://lh4.ggpht.com/_u-5lMShiO40/TRXCgw0zt8I/AAAAAAAAAHk/wjH9g8pgkj4/tablesbefore.png" title="Before Table CSS" /></p>
+<p>
+After:</p>
+<p>
+<img alt="aftertable" src="http://lh3.ggpht.com/_u-5lMShiO40/TRXCgyyWq6I/AAAAAAAAAHg/CIMXsOPvBa8/tablesafter.png" title="After Table CSS" /></p>
+<p>
+In the spirit of sharing, I've put the CSS I used and the change I made to the <a href="http://www.mediawiki.org/wiki/File:Daddio_1.0.jpg">daddio</a> up as a <a href="https://gist.github.com/88f35f1481932ef9a269">Gist</a>.</p>
+<h2>
+Layout/Style Improvements</h2>
+<p>
+A default Mediawiki is a wide open thing, and if consistent structure and style is not enforced from the beginning, it becomes a giant pile of chaos.</p>
+<p>
+The two key things we did to prevent these were the creation of:</p>
+<ol>
+<li>Templates</li>
+<li>Style Guidelines</li>
+</ol>
+<h3>
+Templates</h3>
+<p>
+One of the keys to effective documentation and increasing people's likelihood of producing good documentation is consistency. And, as any good systems administrator knows, a key to consistency is templates.</p>
+<p>
+Now, I want to stop and clarify, the templates I'm talking about here are not the <a href="http://www.mediawiki.org/wiki/Help:Templates">Mediawiki templates</a>, but are just pages in Mediawiki with all the markup written, so each user can just copy and paste them as make new pages. I investigated the Mediawiki templates, but they serve a slightly different function from what I was aiming for.</p>
+<p>
+For my work, we have three main types of documentation that we made templates for:</p>
+<ol>
+<li>Customer Infrastructure</li>
+<li>Software Specific</li>
+<li>Procedure Specific</li>
+</ol>
+<p>
+What I did was to make a specific <code>/Templates/</code> <em>section</em> of our wiki and make a <em>template</em> for each type of documentation. This coupled with a set of guidelines on how we should document, meant that as each of us created a new page, perhaps for a new customer or a new piece of software we've begun using, we just need to edit the template page, <code>Ctrl-A Ctrl-C</code>, change the tab, and <code>Ctrl-V</code> and you've got all your structure in place.</p>
+<p>
+An example of the template we use for software specific page is available as a <a href="https://gist.github.com/89264dd5240f2d6a5a41">Gist</a></p>
+<h3>
+Style Guidelines</h3>
+<p>
+Finally, we put together some basic guidelines on how we were going to document things. A lot of these ideas came from the <a href="http://opensolaris.org/os/community/documentation/doc_collab/style_guide/editorial_guidelines/">OpenSolaris Guidelines</a>, which says</p>
+<blockquote>
+<p>
+Readers project some significance onto every change in language, tone, or typographic convention. A consistent style enables readers to internalize the language and text conventions of the document. As a result, understanding occurs more easily and significant points stand out more clearly. Consistency is one of the most valuable aspects of good style. In addition, consistency improves clarity for translation purposes.</p>
+</blockquote>
+<p>
+I'll highlight some of the guidelines we came up with were:</p>
+<ol>
+<li>Always start from a template.</li>
+<li>Update the templates as new items that should exist in them are discovered</li>
+<li>Lists are used to break out information from the paragraph format and to structure the information into an easier-to-read format. Lists must include at least two items. If a list has more than nine items, try to identify a way to divide the list into two or more lists. Use unnumbered (bulleted) lists when the items are not dependent on the sequence in which you present them. When the items are dependent on sequence, use numbered lists with numerals and letters to build the hierarchy.</li>
+<li>The purpose of many technical documents is to explain how to use a product to accomplish specific tasks. In such documents, detailed instructions on how to accomplish tasks are often provided in the form of procedures. Procedures contain an ordered set of steps.</li>
+</ol>
+<p>
+Those are the steps that we've taken so far to improve our Mediawiki installation, a combination of:</p>
+<ol>
+<li>Visual Improvements</li>
+<li>Layout/Style Improvements</li>
+</ol>
+<h2>
+Additional ideas</h2>
+<p>
+The improvements we've made are by no means the limit of what can be done with Mediawiki. In fact, I have a number of ideas for further improvements:</p>
+<h3>
+Extensions</h3>
+<p>
+Some of the potential extensions are</p>
+<ol>
+<li><a href="http://www.mediawiki.org/wiki/Extension:DynamicPageList_(Wikimedia)">Dynamic Page List</a></li>
+<li>This extension has a simple query language you can use to generate a list from any other wiki content</li>
+<li>Can be used with either a tag or as a parser function</li>
+<li><a href="http://www.mediawiki.org/wiki/Extension:Pdf_Export">PDF Export</a></li>
+<li><a href="http://www.mediawiki.org/wiki/Extension:SyntaxHighlight_GeSHi">Syntax highlighting</a></li>
+<li><a href="http://www.mediawiki.org/wiki/Manual:Extensions">Make your own</a></li>
+<li>Building your own extensions is relatively easily</li>
+<li>Extensions that query other database or data sources to integrate into your wiki</li>
+</ol>
+<h3>
+TODO Tracker</h3>
+<ul>
+<li>A TODO is a "bread crumb" that you leave which indicates further action, improvements, etc, that should be done for a specific piece of documentation.</li>
+<li> <p>
+An example is shown below:</p>
+<p>
+<code>TODO: Write more detail instructions on how to document DNS records for a customer.</code></p>
+</li>
+<li> <p>
+The idea is that you leave "TODO: foo" whenever there is something left to be done. Then we have an external script which will crawl the wiki and generate a report of Documentation TODOs.</p>
+</li>
+<li>This allows use to embed the action in the relevant context, but still generate a total view of the actions for assignment and should help guarantee documentation does not grow stale.</li>
+</ul>
+<h3>
+Categories</h3>
+<p>
+<a href="http://www.mediawiki.org/wiki/Help:Categories">Categories</a> to create "Automagic index pages"</p>
+<h3>
+Automation</h3>
+<p>
+The <a href="http://pywikipediabot.sourceforge.net/">pywikipediabot</a> toolkit offers a lot of potential for doing automation.</p>
+<h2>
+Conclusion</h2>
+<p>
+In conclusion, though wikis have a number of poor defaults and drawbacks and while producing good documentation is difficult, with a good base like Mediawiki, some customizations, and some good guidelines, you can go a long way towards making things easier and more fun to use.</p>
+<h3>
+Further Reading</h3>
+<ol>
+<li><a href="http://oreilly.com/catalog/9780596519681">Mediawiki Book</a></li>
+<li><a href="http://www.amazon.com/gp/product/0321492668/">The Practice of System and Network Administration</a></li>
+<li><a href="http://jacobian.org/writing/great-documentation/what-to-write/">Writing Great Documentation, what to write</a></li>
+<li><a href="http://blogs.usenix.org/2010/11/10/documentation-techniques-for-sysadmins/">Documentation Tips for Sysadmins</a></li>
+</ol>

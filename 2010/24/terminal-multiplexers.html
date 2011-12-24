@@ -1,0 +1,120 @@
+Day 24 - Terminal Multiplexers
+
+<p>
+<em>Written by <a href="http://twitter.com/jubei">Jon Heise</a></em></p>
+<p>
+In the grand world of the command line and in dealing with servers, persistence is key. To that end, there are ways to run stuff that lives beyond your current ssh session, this article will focus on screen and tmux. These tools help you run shell sessions that persist across logins (among other awesome capabilities).</p>
+<p>
+GNU Screen is by far the older of the two being first released in 1987. Tmux was released much more recently in 2007. </p>
+<h2>
+Similarities</h2>
+<p>
+First off, let's talk similarities. They both have the core functionality of being able to “detach” a session from active usage by a user. Let's say a user wants to run irssi (an irc client) and detach it - the workflow would be as follows:</p>
+<p>
+<em>Note: screen and tmux are generally controlled by multiple keystrokes. In the examples below, <code>C-a</code> means pressing "control + a" keys. A sequence 'C-a d' means press "control + a", release, then press 'd'. This syntax is common in screen and tmux documentation.</em></p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>     <th> goal </th>     <th> screen </th>     <th> tmux </th>   </tr>
+<tr>     <td> run irssi </td>     <td> <code> screen -S irc irssi</code> </td>     <td> <code> tmux new irssi</code> </td>   </tr>
+<tr>     <td> detach </td>     <td> <code> C-a d </code> </td>     <td> <code> C-b d </code> </td>   </tr>
+<tr>     <td> attach again </td>     <td> <code>screen -r irc</code> </td>     <td> <code>tmux attach</code> </td>   </tr>
+</table>
+<p>
+FYI: The default <code>screen</code> command key is C-a, while the default <code>tmux</code> command key is C-b. Most things you do in screen and tmux, by default, will always start by pressing the command key.</p>
+<p>
+The above examples create a screen session called 'irc' and an unnamed tmux session.  Both tmux and screen also support multiple terminals in one session, that is, you can run multiple commands in separate windows in the same screen or tmux session.</p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th> goal </th><th> screen </th><th> tmux </tr>
+<tr>     <td> create new window </td>     <td> <code>C-a c</code>     <td> <code>C-b c</code>   </tr>
+<tr>     <td> go to previous window </td>     <td> <code>C-a p</code>     <td> <code>C-b p</code>   </tr>
+</table>
+<p>
+Using multiple windows in tmux is a bit easier, by default, as there is an omnipresent status bar at the bottom of the terminal showing open windows.</p>
+<p>
+You can get a list of all known sessions:</p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>     <td> <code>screen -ls</code> </td>     <td> <code>tmux ls</code> </td>   </tr>
+</table>
+<p>
+That's the basics of each - first: creating, attaching, and detaching sessions, and second: creating new windows in a session.</p>
+<h2>
+Differences</h2>
+<p>
+Having listed features that they both share, it is time to discuss features that one posses that the other does not. </p>
+<p>
+Screen has special features like serial port support and multiuser access. Screen can directly open serial connections from other machines, network gear, or anything that wants to spew data forward on a serial terminal. This feature can be handy for sysadmins with macbooks that need to configure some network gear as there is no good mac specific terminal emulator software. Connection to a serial port is simple:</p>
+<pre><code>screen /dev/ttyN
+</code></pre>
+<p>
+Additionally, you can share your screen sessions with other users on the system with screen's "multiuser" feature. This allow you to share terminals with remote coworkers to do pair debugging or shadowing without having to use a user shared account. See the screen documentation for the following commands: <code>multiuser</code> and <code>acladd</code>.</p>
+<p>
+Tmux's main feature is the client/server model it uses.  Earlier it was mentioned that not being able to specify a specific instance of tmux was less of a nuisance, this is due to the fact that tmux runs in a client server model. As long as there is a session of tmux running (even in the background), the tmux server will exist to manage it. Since there is a central server dealing with each tmux client and session, it is far simpler for the client that the user has launched to be aware of these. If you have multiple tmux sessions running (via <code>tmux new</code>), you can ask any tmux session to list them by typing '<code>C-b s</code>', the result looks something like this:</p>
+<p>
+<img alt="tmux session list" src="http://lh5.ggpht.com/_u-5lMShiO40/TRRiquC2UiI/AAAAAAAAAHQ/TwF-EUKdNKY/tmux-session-list.jpg" title="tmux session list, by typing &apos;C-b s&apos;" /></p>
+<p>
+From the above session list, you can switch to any other open session.</p>
+<p>
+Until recently, tmux (vs screen) was the only one supporting both vertical and horizontal splits. You can create horizontal splits with <code>C-b "</code> and <code>C-b %</code> for vertical splits. In screen, horizontals are made with <code>C-a S</code> and verticals made with <code>C-a |</code> (pipe).</p>
+<p>
+<img alt="tmux splits example" src="http://lh3.ggpht.com/_u-5lMShiO40/TRRiIBoKSlI/AAAAAAAAAHE/aYWCE7sUATk/tmux-split.jpg" /></p>
+<h2>
+Tricks</h2>
+<p>
+You can nest screens within screens, or tmux within tmux. This is most common when running tmux or screen, sshing to another server, and running screen/tmux from there.</p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>     <th> goal </th>     <th> screen </th>     <th> tmux </th>   </tr>
+<tr> <td> start up </td> <td> <code> screen -S main </code> </td> <td> <code> tmux new -s main </code> </td>   </tr>
+<tr>     <td> ssh somewhere </td>     <td> <code> ssh ...<code> </td>     <td> <code> ssh ...</code> </td>   </tr>
+<tr>     <td> create a new session on remote host</td>     <td> <code>screen -S foo</code> </td>     <td> <code>tmux new -s foo</code> </td>   </tr>
+</table>
+<p>
+The main problem with nesting is knowing how to talk to the nested session. To detach from the 2nd screen session (nested) you'll have to send 'C-a a' which will send a litteral C-a from the first screen to the running program, which is another screen session. Detaching from the nested screen, then, would be 'C-a a d'</p>
+<p>
+This is similar with tmux, though your tmux may not be configured similarly. You may have to add this to your <code>~/.tmux.conf</code>: </p>
+<pre><code>bind-key C-b send prefix
+</code></pre>
+<p>
+Now pressing 'C-b C-b d' will detach from the nested tmux</p>
+<p>
+The above only applies if you nest screen-in-screen and tmux-in-tmux. If you have screen-in-tmux, you would just press the normal C-a to talk to screen. Same with tmux.</p>
+<h2>
+Making them similar again</h2>
+<p>
+Screen's defaults don't usually include a status bar, but you can make one similar to tmux by adding this to your <code>~/.screenrc</code>:</p>
+<pre><code>hardstatus alwayslastline "%w"
+</code></pre>
+<p>
+You can also tune tmux to behave more like screen by changing the command key. In your <code>~/.tmux.conf</code>:</p>
+<pre><code>set-option -g prefix C-a  # make the command key C-a
+unbind-key C-b            # unbind the old command key
+bind-key a send-prefix    # 'C-a a' sends literal 'C-a'
+</code></pre>
+<p>
+Why would you do this? If you've used screen for years, and want some of your muscle memory to function in tmux, doing the above is a good start.</p>
+<h1>
+Cheat sheet</h1>
+<p>
+In closing, here is a recap of commands in convenient cheat sheet form:</p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>     <th> action </th>      <th> screen </th>     <th> tmux </th>   </tr>
+<tr>     <td>new named session</td>      <td>screen -S foobar</td>     <td>tmux new -s foobar</td>   </tr>
+<tr>     <td>detach session</td>      <td>`C-a d`</td>     <td>`C-b d`</td>   </tr>
+<tr>     <td>reattach session</td>      <td>screen -dr foobar</td>     <td>tmux a -t foobar</td>   </tr>
+<tr>     <td>new terminal</td>      <td>`C-a c`</td>     <td>`C-b c`</td>   </tr>
+<tr>     <td>next terminal</td>      <td>`C-a a` or `C-a n`</td>     <td>`C-b  n`</td>   </tr>
+<tr>     <td>lock terminal</td>      <td>`C-a x`</td>     <td>lock (from command prompt)</td>   </tr>
+<tr>     <td>large clock</td>      <td>not supported </td>     <td>`C-b t`</td>   </tr>
+<tr>     <td>not as good smaller clock</td>      <td>`C-a t`</td>     <td>not supported </td>   </tr>
+<tr>     <td>split screen horizontal</td>      <td>`C-a S`</td>     <td>`C-b “`</td>   </tr>
+<tr>     <td>split screen vertical</td>      <td>`C-a |` </td>     <td>`C-b %`</td>   </tr>
+<tr>     <td>change to other portion of a split</td>      <td>`C-a tab`</td>     <td>`C-b arrowkey` (up or down)</td>   </tr>
+<tr>     <td>send prefix</td>      <td>`C-a a`</td>     <td>`C-b C-b` (if </td>   </tr>
+</table>
+<p>
+Happy tmux'ing and screen'ing! </p>
+<p>
+Further reading:</p>
+<ul>
+<li><a href="http://tmux.sourceforge.net/">tmux homepage</a></li>
+<li><a href="http://www.gnu.org/software/screen/">GNU Screen homepage</a></li>
+<li><a href="http://www.openbsd.org/faq/faq7.html#tmux">OpenBSD FAQ on tmux</a></li>
+</ul>
