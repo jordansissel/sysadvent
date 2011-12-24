@@ -1,0 +1,163 @@
+<i> This post was contributed by <a href="http://standalone-sysadmin.blogspot.com/">Matt Simmons</a>. Thanks, Matt! :) </i>
+
+<p>
+
+It's been said that change is the only thing that ever stays the same, and
+whoever said that probably worked in IT. Transitions are a part of life, but we
+administrators are burdened by what I would judge to be more than our fair
+share.  
+
+<p>
+
+Too frequently, we find ourselves picking up the pieces from the last major
+system change we made, while at the same time designing the next iteration of
+the infrastructure that we'll be putting in place. How many times have you
+chosen an implementation that wasn't ideal now, because a bigger change was
+just around the corner, and you wanted to "future proof" your design? Bonus
+points for having to make that decision due to a previous change that was still
+being implemented. It doesn't seem to matter how precisely you've planned a
+major upgrade, snags and snafus are expected to rear their ugly heads.  
+
+<p>
+
+Is this something that we just have to deal with? Are we at the mercy of
+Murphy, or are there ways we can induce these issues to work to our benefit?
+Sure, it would be easy if we had a crystal ball, but too often we don't even
+have a rough guess as to where our plans will encounter problems.  
+
+<p>
+
+Change itself isn't the enemy. Change promotes progress, and from the 10,000ft
+view, our long-term goals should work towards this progress. Dealing with
+change is a natural and positive endeavor.  
+
+<p>
+
+Instead of being thrown about by the winds of chance, lets put some sails on
+our boat, and see if we can make headway by trying to manage the change on our
+terms. If we know that problems are going to be encountered, and we face those
+facts before we edit the first configuration, then we've taken the first step
+towards real change management.  
+
+<p>
+
+The enemies of successful change (and the resulting progress) are imprecise
+requirements and lack of project leadership. Unless you plan around these
+pitfalls, your project may very well go into ventricular fibrillation,
+flip-flopping back and forth, unable to decide between two unforeseen evils
+midway through the work flow. While it's possible to recover from this with an
+injection of leadership, it's much easier to inoculate against the problem in
+the beginning.  
+
+<p>
+
+If you're going to be planning a big project, you will probably want to follow
+a methodology. There are just about as many methods of managing a change as
+there are people who want you to pay them to do it, but with IT projects, I've
+found what I consider to be the most efficient for me. Your mileage may vary,
+of course.  
+
+<p>
+
+<ol>
+  <li> Team and goal formation
+
+<p>
+
+      Assuming your change is moderate to large scale, you've (hopefully) got a
+team of people involved, and one of them has been appointed leader. This is the
+point where you want to decide on your goals. Determine what success will be
+defined as at the end of the project, and how best to get there.
+
+<p>
+
+      Many times we don't yet know what or how success will be defined, or even
+what the target should be. Because of this, it's natural to perform step 2
+before your goals have been decided upon. In fact, I'd recommend it.
+
+</li>
+<li> Analysis (Research) & Information Organization
+
+<p>
+
+      Too often (or not often enough, depending on your view point) we're asked
+to do too much with too little. Frequently, we don't even know how to do it.
+This Analysis step is here to allow you to make informed decisions, and to
+acquire the skills and resources necessary to succeed in your task. Sometimes
+the resources are people, in the form of new employees or contractors, or both.
+
+<p>
+
+</li>
+<li> Design
+
+<p>
+
+      By this time, you know what the task entails, but you don't have a road
+map of to how you're going to get there. This step makes you the
+cartographer, planning the route from where you are to the implementation of
+your project and beyond. Some details of the design may change during
+development, but it's important to have the major framework laid out in this
+step as you proceed.
+
+</li>
+<li> Development
+
+<p>
+
+      In a perfect world, you would take the design produced in step three and
+translate it straight into something usable. We all know that this rarely, if
+ever happens. Instead, you encounter the first set of really difficult problems
+in this stage. Issues spring up with the technology that you're using, or with
+kinks in the design that you thought were smoothed over, but weren't.
+Development appears to follow Hofstadter's Law: 'It always takes longer than
+you expect, even when you take into account Hofstadter's Law'. Thorough testing
+at the end of the development stage will prevent misery in the next step.
+
+</li>
+<li> Implementation
+
+<p>
+
+      Here we find the second repository of unforeseen bugs and strange
+glitches that counteract your carefully planned designs. The good thing about
+issues at this point is that, provided you've tested thoroughly enough in
+development, you won't find many show stoppers. On the other hand, sometimes
+these bugs can appear as niggling details and intermittent issues, hard to
+reproduce.
+
+</li>
+<li> Support
+
+<p>
+
+      If you're designing, developing, and implementing a product, support is
+just another part of the game. This is where you pay for how carefully you
+performed the preceding steps. Garbage In, Garbage Out, they say, but because
+you've designed and built a solid system, your support tasks will be light,
+possibly just educating the users and performing routine maintenance.
+
+</li>
+<li> Evaluation
+
+<p>
+
+      Remember that part in step 1, where you decided what success would be
+defined as? Dust it off and evaluate your project according to those
+requirements. Discuss with your team what you could have improved on, and don't
+forget to give credit where it is due. Hard work deserves appreciation.  
+
+</ol>
+
+This method is really a modified ADDIE design, so named because it consists of
+Analysis, Design, Development, Implementation, and Evaluation. We've added a
+couple of steps to help it flow better in the IT world we live in. There are
+certainly other methods to look at. The Instructional Systems Design (ISD) is
+another one which is well known. 
+
+<p>
+
+However you decide to manage change, it's important to stay with your plan and
+follow through. Remember to work and communicate with your teammates, and don't
+stress because the project is too big. Just take it one step at a time, follow
+your plan, and you'll get the job done.

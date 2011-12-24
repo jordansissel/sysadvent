@@ -1,0 +1,50 @@
+# Does fetching / over http worK?
+define command {
+  command_name check-http-getroot
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -u /
+}
+
+# Does fetching / over https work?
+define command {
+  command_name check-https-getroot
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -u / -S
+}
+
+# Alert when certificate has less than 30 days to live
+define command {
+  command_name check-https-certificate-age
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -C 30
+}
+
+# Does basic mysql stuff work?
+define command {
+  command_name check-mysql
+  command_line $USER1$/check_mysql -H $HOSTADDRESS$ -u test -p test -d test
+}
+
+%# Generate host definitions with ERB:
+% @host_labels.each do |host, labels|
+define host {
+  host_name <%= host %>
+  address <%= host %>
+}
+
+% end
+
+%# Generate hostgroup and service definitions
+% @label_checks.each do |label, checks|
+define hostgroup {
+  hostgroup_name <%= label %>
+  members <%= hosts_by_label(label).join(", ") %>
+}
+
+%   # For each check, make a service
+%   checks.each do |check|
+define service {
+  hostgroup_name <%= label %>
+  service_description <%= label %>.<%= check %>
+  check_command <%= check %>
+}
+
+%   end # 'checks.each do ...'
+% end

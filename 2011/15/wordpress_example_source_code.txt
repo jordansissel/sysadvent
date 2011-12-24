@@ -1,0 +1,222 @@
+Figure 1: Control Promise
+
+#!/var/cfengine/bin/cf-agent -Kif
+
+body common control 
+{
+
+	bundlesequence => {
+				"packages_installed",
+				"services_up",
+				"wordpress_tarball_is_present",
+				"wordpress_tarball_is_unrolled",
+				"configuration_of_mysql_db_for_wordpress",
+				"wpconfig_exists",
+				"wpconfig_is_properly_configured",
+				"allow_http_inbound",
+			  };
+
+	inputs =>	{ "/var/cfengine/inputs/cfengine_stdlib.cf" };
+
+}
+
+
+Figure 2: packages_installed bundle
+
+
+bundle agent packages_installed
+
+{
+
+vars: "desired_package" slist => {
+					"httpd",
+					"php",
+					"php-mysql",
+					"mysql-server",
+				 };
+
+packages: "$(desired_package)"
+		package_policy => "add",
+		package_method => yum,
+		classes => if_repaired("packages_added");
+
+commands:
+
+  packages_added::
+	
+	"/sbin/service httpd graceful"
+
+		comment => "Restarting httpd so it can pick up new modules.";
+
+}
+
+
+
+Figure 3: services_up bundle
+
+
+bundle agent services_up {
+
+processes:
+	"^mysqld" restart_class => "start_mysqld";
+	"^httpd"  restart_class => "start_httpd";
+
+commands:
+
+  start_mysqld::
+
+	"/sbin/service mysqld start";
+
+  start_httpd::
+
+	"/sbin/service httpd start";
+
+}
+
+
+Figure 4: wordpress_tarball_is_present bundle
+
+
+bundle agent wordpress_tarball_is_present
+{
+
+classes:
+  "wordpress_tarball_is_present" expression =>
+fileexists("/root/wordpress-latest.tar.gz");
+
+reports:
+  wordpress_tarball_is_present::
+    "WordPress tarball is on disk.";
+
+commands:
+  !wordpress_tarball_is_present::
+    "/usr/bin/wget -q -O /root/wordpress-latest.tar.gz
+http://wordpress.org/latest.tar.gz"
+    comment => "Downloading WordPress.";
+}
+
+
+Figure 5: wordpress_tarball_is_unrolled bundle
+
+
+bundle agent wordpress_tarball_is_unrolled
+{
+
+classes:
+  "wordpress_directory_is_present" expression =>
+fileexists("/var/www/html/wordpress/");
+
+reports:
+  wordpress_directory_is_present::
+    "WordPress directory is present.";
+
+
+commands:
+
+  !wordpress_directory_is_present::
+
+    "/bin/tar -C /var/www/html -xvzf /root/wordpress-latest.tar.gz"
+	    comment => "Unrolling wordpress tarball to /var/www/html/.";
+}
+
+
+Figure 6: configuration_of_mysql_db_for_wordpress bundle
+
+
+bundle agent configuration_of_mysql_db_for_wordpress
+{
+
+commands:
+  "/usr/bin/mysql -u root -e \"
+    CREATE DATABASE IF NOT EXISTS wordpress;
+    GRANT ALL PRIVILEGES ON wordpress.*
+    TO 'wordpress'@localhost
+    IDENTIFIED BY 'lopsa10linux';
+    FLUSH PRIVILEGES;\"
+  ";
+
+}
+
+
+Figure 7: wpconfig_exists bundle
+
+bundle agent wpconfig_exists
+{
+
+classes:
+  "wordpress_config_file_exists"
+	expression => fileexists("/var/www/html/wordpress/wp-config.php");
+
+reports:
+  wordpress_config_file_exists::
+    "WordPress config file /var/www/html/wordpress/wp-config.php is present";
+
+commands:
+  !wordpress_config_file_exists::
+	"/bin/cp -p /var/www/html/wordpress/wp-config-sample.php \
+	  /var/www/html/wordpress/wp-config.php"
+		comment => "Creating wp-config.php from
+wp-config-sample.php";
+
+}
+
+
+Figure 8: wp_config_is_properly_configured
+
+bundle agent wpconfig_is_properly_configured
+{
+files:
+	"/var/www/html/wordpress/wp-config.php"
+		edit_line => replace_default_wordpress_config_with_ours;
+}
+
+bundle edit_line replace_default_wordpress_config_with_ours
+{
+replace_patterns:
+	"database_name_here" replace_with => value("wordpress");
+
+replace_patterns:
+	"username_here" replace_with => value("wordpress");
+
+replace_patterns:
+	"password_here" replace_with => value("lopsa10linux");
+}
+
+
+
+Figure 9: allow_http_inbound
+
+bundle agent allow_http_inbound
+{
+files:
+  redhat::  # tested on RHEL only, file location may vary on other OSs
+	"/etc/sysconfig/iptables"
+		edit_line =>
+insert_HTTP_allow_rule_before_the_accept_established_tcp_conns_rule,
+		comment => "insert HTTP allow rule into
+/etc/sysconfig/iptables",
+		classes => if_repaired("iptables_edited");
+
+commands:
+  iptables_edited::
+	"/sbin/service iptables restart"
+		comment => "Restarting iptables to load new config";
+
+}
+
+bundle edit_line insert_HTTP_allow_rule_before_the_accept_established_tcp_conns_rule
+{
+
+vars:
+	"http_rule" string => "-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT";
+
+insert_lines: "$(http_rule)",
+	location => before_the_accept_established_tcp_conns_rule;
+}
+
+body location before_the_accept_established_tcp_conns_rule
+{
+before_after => "before";
+first_last => "first";
+select_line_matching => "^-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT.*";
+}

@@ -1,0 +1,113 @@
+Maybe you're a windows sysadmin. Maybe you're not. Either way, you might find
+the features in Powershell pretty cool.
+
+<p>
+
+Powershell is Windows-only and free to use. Some syntactic differences asside, it 
+looks and feels like a unix shell language. It has standard features you might expect
+such as functions, recursion, variables, variable scope, objects, and a handful
+of built-in functionality to help you get work done, but it does many things better.
+
+<p>
+
+In addition to these baseline expectations, functions in powershell trivially take
+flag arguments by simply declaring a function argument (<code>function
+foo($bar) { ... }</code> can be invoked as <code>foo -bar "somevalue"</code>.
+You can create arbitrary objects with properties and methods defined on the
+fly. Exception handling, logging, trace debugging, and other goodies are packed
+in by default.
+
+<p>
+
+It supports pipes like your favorite unix shell, except instead of piping text,
+you pipe objects. The key word is object. When you run 'dir' (or ls, which is
+an alias), it outputs file objects. When you run 'ps' (which is an alias of
+get-process), you get process objects. When you run 'get-content' a file, you
+get an array of strings.
+
+<p>
+
+Why is this significant? As a unix sysadmin, you quickly become intimate with
+piping one command to another, smoothly sandwiching filter invocations between
+others tools. Filter tools like awk, sed, grep, xargs, etc, all helping you
+convert one output text into another input text for another command. What if
+you didn't have to do that, or had to do it less? No more parsing the output of
+ls(1), stat(1), or du(1) to ask for file attributes when powershell's file
+object has them. What about getting process attributes?
+
+<pre>
+# Yes, this is a comment in Powershell
+# Show the top 3 consumers of virtual memory:
+PS > get-process | sort {$_.VirtualMemorySize} | select -last 3
+
+Handles  NPM(K)    PM(K)      WS(K) VM(M)   CPU(s)     Id ProcessName
+-------  ------    -----      ----- -----   ------     -- -----------
+    745      58    66648       4316   632    21.03   3564 CCC
+   1058     107   230788      28384   680   600.23   5048 Steam
+    446      78  1328988    1267960  1616 6,223.72   3692 firefox
+
+# Kill firefox
+PS > get-process firefox | stop-process
+# Alternately
+PS > get-process firefox | foreach { $_.kill() }
+</pre>
+
+'select' is an alias for 'select-object' which lets you (among other things)
+trim an object to only selected properties. Inspection is done with
+'get-member' (or 'gm' for short) and you can inspect objects output by 'ls' by
+doing: <code>ls | gm</code>, or processes with <code>get-process | gm</code>. You can ask an object what type it is with <code>obj.gettype()</code>; such as <code>(get-item .).gettype()</code>
+
+<p>
+
+But what if you want to manipulate the registry easily?  The registry,
+filesystem, aliases, variables, environment, functions, and more are all
+considered "providers" in Powershell. Each provider gives you access to a
+certain data store using standard built-in commands. A provider can be invoked
+by prefixing a path with the provider name. For example, to access a registry
+key, you could use <code>dir Registry::HKEY_CURRENT_USER</code> to list keys
+in that part of the registry.
+
+<p>
+
+In addition to other neat features, you've got nice access to both COM and
+.NET. Want to create a tempfile? 
+
+<pre>
+PS > $tmp = [System.IO.Path]::GetTempFileName()
+PS > ls $tmp
+    Directory: Microsoft.PowerShell.Core\FileSystem::C:\Users\Jordan\AppData\Local\Temp
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+-a---         12/2/2008   1:25 AM          0 tmp55FC.tmp
+
+PS > rm $tmp
+</pre>
+
+<p>
+
+Help is also conveniently available from the powershell prompt. Help, which can
+be accessed with a muscle-memory-friendly 'man,' comes in different details
+levels. Try <code>help select-object</code> and then <code>help select-object
+-detailed</code>. There's also other useful builtins like foreach-object (like
+'for' in bourne), select-object (like cut, tail, head, and uniq, but cooler) ,
+sort-object (like sort, but cooler), where-object (like grep, but cooler),
+measure-object (like wc, but cooler), and format-list and format-table for
+sanely printing object properties.
+
+<p>
+
+Are you still scripting in DOS batch or VBScript? Do you use Cygwin as a means
+of escaping to a scripting language on windows that is less frustrating or
+awkward? Are you suddenly facing windows administration when your background is
+unix? Check out Powershell.
+
+<p>
+
+Further reading:
+<dl>
+  <dt> <a href="http://www.microsoft.com/windowsserver2003/technologies/management/powershell/download.mspx">Download Powershell</a> </dt>
+  <dt> <a href="http://www.microsoft.com/windowsserver2003/technologies/management/powershell/default.mspx"> Powershell homepage </a> </dt>
+  <dt> <a href="http://www.microsoft.com/technet/scriptcenter/resources/qanda/default.mspx">Hey, Scripting Guy!</a> </dt>
+  <dd> A pretty good resources for practical powershell examples </dd>
+</dl>

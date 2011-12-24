@@ -1,0 +1,47 @@
+<html>  <head>    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />    <title>      Cfengine Site Policy Summary (version not specified)    </title>    <link rel="stylesheet" href="/cf_enterprise.css" type="text/css" media="screen" />  </head>  <body><h1>Cfengine Site Policy Summary (version not specified)</h1><p><div id="bundle"><table class=border><tr><td><h2> Bundle <span class="bodytype">agent</span> <span class="bodyname">packages</span>
+ <tr><td> ARGS:</td></tr>
+
+<tr><td><table class="border"><tr><td><tr><td></td></tr><tr><td>
+<tr><td><table class="border"><tr><td>
+Promise type is <span class="subtype">vars</span>, <a href="#class_context">context</a> is <span class="class">any</span> <br><hr>
+
+Resource object <b>'match_package'</b> make the promise to default promisee 'cf-agent' (about vars)...
+
+<br><span class="lval">........................slist</span> => <span class="rval"> {'figlet','cowsay'}</span> , if body <a href="#class_context">context</a> <span class="context">any</span>
+<hr><p><div id="compliance">Compliance level checking only in Cfengine Nova and above</div><p><small>Promise (version not specified) belongs to bundle <b>packages</b> (type agent) in '<i>./test.cf</i>' near line 23</small></p>
+</td></tr></table></td></tr>
+</td></tr>
+<tr><td></td></tr><tr><td>
+<tr><td><table class="border"><tr><td>
+Promise type is <span class="subtype">packages</span>, <a href="#class_context">context</a> is <span class="class">any</span> <br><hr>
+
+Resource object <b>'$(match_package)'</b> make the promise to default promisee 'cf-agent' (about packages)...
+
+<br><span class="lval">........................package_policy</span> => <span class="rval">add</span> , if body <a href="#class_context">context</a> <span class="context">any</span>
+<hr><p><div id="compliance">Compliance level checking only in Cfengine Nova and above</div><p><small>Promise (version not specified) belongs to bundle <b>packages</b> (type agent) in '<i>./test.cf</i>' near line 29</small></p>
+</td></tr></table></td></tr>
+</td></tr>
+</td></tr></table></td></tr>
+</td></tr>
+</td></tr></h2></table></div>
+<h1>All Bodies</h1><tr><td><div id="block"><table class=border cellpadding=5 width=800>
+<tr><td><table class="border"><tr><td>
+ <span class="bodytype">common</span> <span class="bodyname">control</span><span class="args">(no parameters)</span>
+<br><span class="lval">.............................bundlesequence</span> => '<span class="rval"> {'packages'}'</span> if sub-body context <span class="class">any</span>
+</td></tr></table></td></tr>
+</table></div></td></tr> 
+ </p><tr><td><div id="block"><table class=border cellpadding=5 width=800>
+<tr><td><table class="border"><tr><td>
+ <span class="bodytype">package_method</span> <span class="bodyname">apt</span><span class="args">(no parameters)</span>
+<br><span class="lval">.............................package_changes</span> => '<span class="rval">bulk'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_list_command</span> => '<span class="rval">/usr/bin/dpkg -l'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_list_name_regex</span> => '<span class="rval">ii\s+([^\s]+).*'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_list_version_regex</span> => '<span class="rval">ii\s+[^\s]+\s+([^\s]+).*'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_installed_regex</span> => '<span class="rval">.*'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_name_convention</span> => '<span class="rval">$(name)'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_add_command</span> => '<span class="rval">/usr/bin/apt-get --yes install'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_delete_command</span> => '<span class="rval">/usr/bin/apt-get --yes remove'</span> if sub-body context <span class="class">any</span>
+<br><span class="lval">.............................package_update_command</span> => '<span class="rval">/usr/bin/apt-get --yes dist-upgrade'</span> if sub-body context <span class="class">any</span>
+</td></tr></table></td></tr>
+</table></div></td></tr> 
+ </p></div></body></html>

@@ -1,0 +1,330 @@
+<h1>Linux Containers (LXC)</h1>
+
+<p><i>This article was written by Ken Barber (http://bob.sh/).</i></p>
+
+<h2>Introduction</h2>
+
+<p>Linux Containers (abbreviated as <em>LXC</em>) provide a kind of virtual machine that
+operates within an operating system. For clarity and to keep the semantical
+pedants happy, this kind of virtualisation is often dubbed "Operating
+system-level virtualisation." This provides an alternative (or arguably a
+subset) to what is known as "platform virtualisation" solutions such as KVM,
+Xen or Vmware.</p>
+
+<p>In the past, we have often used chroot jails to achieve this kind of effect,
+and products like LXC are simply a modern evolution of this old idea by
+including isolation and resource management through extensions to the kernel.</p>
+
+<p>This is by no means a new idea. Other examples of technologies like this
+already include:</p>
+
+<ul>
+<li>Solaris Zones</li>
+<li>BSD Jails</li>
+<li>OpenVZ</li>
+<li>Linux vserver</li>
+<li>FreeVPS</li>
+</ul>
+
+<p>What makes LXC the topic of discussion, here, is that its development has
+recently made it into the Linux kernel as an official mechanism for providing
+containers. While these features are always improving, LXC is reaching a
+stage where it can be considered for production (depending on your level of
+conservatism, of course), and I feel that it deserves some well earned
+attention.</p>
+
+<h2>Platform vs. OS-level virtualisation</h2>
+
+<p>LXC, as mentioned, provides operating system-level virtualisation. For better
+or worse this means programs still run in the main OS, so only one kernel is
+ever in operation. This may be an advantage or a disadvantage depending on what
+you are trying to achieve. Having said that, it provides a level of isolation
+that is similar to other virtualisation techniques.</p>
+
+<p>For example, if you wish to run a large number of Apache instances while
+ensuring they are isolated from each other, then LXC is a good fit. Doing
+this same job using platform virtualisation can add resource overhead thereby
+not providing the same level of scalability.</p>
+
+<p>I often found that using full virtualisation was wasteful in cases where the
+instance was created for isolation purposes (which can be handy) but the usage
+itself was very low. Small mysql databases often need isolation due to
+differing cache and tuning requirements (and my desire to not have an
+application kill a shared database platform) but having extra copies of
+net-snmp and ssh and other system and support tools was wasteful.</p>
+
+<p>On the other hand, if you want to provide complete environments to different
+groups or customers including SSH, specific OS distributions and kernel
+revisions then platform virtualisation might be a better fit.</p>
+
+<p>Its all about common sense and finding the right fit. Sometimes the best fit
+is often a hybrid one. The good news is that libvirt supports LXC now, which
+means provisioning LXC and KVM (for example) can be managed with the same tool.
+Also, you can run LXC containers inside a platform virtualised environment.
+This means you can have LXC containers inside KVM for example, allowing you to
+create quite interesting mixes of the technologies.</p>
+
+<h2>The Technology</h2>
+
+<p>LXC works to provide instance isolation and resource control by using several
+techniques:</p>
+
+<ul>
+<li>chroot</li>
+<li>namespace</li>
+<li>cgroups</li>
+</ul>
+
+<p>A <em>chroot</em> is an old technique for providing application security through file
+access isolation. It provides a way to "re-root" a program so that it is not
+able to access files above that directory. For example if you chroot'd an
+application to /srv/foo, the application would see / (which is really /srv/foo
+on the host) only and not be able to access /srv/bar.</p>
+
+<p>The <em>namespace</em> feature was developed as part of LXC. It allows you to isolate
+resources from each other. These resources can be process IDs, networking
+information (routes, iptables, interfaces etc.), ipc, and mounts.  Much like a
+chroot works for files, namespace control allows you to isolate process lists
+so container A cannot see container B's processes.</p>
+
+<p><em>cgroups</em> was also developed as part of LXC. It allows you to logically bundle
+together resources and apply resource management, accounting, isolation and
+other policies to them. This feature provides you with proper control of your
+container, not just by hiding information but by providing constraints around
+it.</p>
+
+<p>Together, the complete effect is that a virtual environment created with LXC
+can be created that in effect looks like a real machine (or perhaps a full
+virtual machine) but really the processes and functions within it run within
+the host os's kernel.</p>
+
+<h2>Installation</h2>
+
+<p>This installation guide here is based around Ubuntu or Debian. A lot of the
+concepts are the same however on other distributions, and the user space tools
+for LXC should be roughly identical.</p>
+
+<p>To begin with, we'll need some tools. You will need to install the following
+packages:</p>
+
+<pre><code>apt-get install lxc bridge-utils debootstrap
+</code></pre>
+
+<p>Now, for networking its best to place your primary interface inside a bridge.
+You can achieve this by modifying /etc/network/interfaces as such:</p>
+
+<pre><code># The primary network interface
+#allow-hotplug eth0
+#iface eth0 inet dhcp
+
+auto br0
+iface br0 inet dhcp
+       bridge_ports eth0
+       brdige_fd 0
+       bridge_maxwait 0
+</code></pre>
+
+<p>To configure cgroups, you need a special mount (its much like the proc or sys
+filesystem). Create a new entry in /etc/fstab like so:</p>
+
+<pre><code>cgroup          /cgroup         cgroup  defaults        0       0
+</code></pre>
+
+<p>Then create the /cgroup directory and mount it.</p>
+
+<pre><code>mkdir -p /cgroup
+mount /cgroup
+</code></pre>
+
+<p>The /cgroup mount can be poked by hand (like /proc) to adjust various resource
+settings. Later we'll talk about how resource management can be controlled
+using lxc user space tools.</p>
+
+<h2>Manipulating Containers</h2>
+
+<p>Once you have done the preliminary steps, you can now start creating and working
+with containers. Try creating a container named 'vm0' by typing the following
+commands:</p>
+
+<pre><code>mkdir -p /var/lib/lxc/vm0
+/usr/lib/lxc/templates/lxc-debian -p /var/lib/lxc/vm0/
+</code></pre>
+
+<p>The command lxc-debian is in fact one of a few a wrapper scripts that
+simplifies the container creation process. It performs a number of tasks for
+you:</p>
+
+<ul>
+<li>Downloads a minimal debian root using 'debootstrap' from
+http://ftp.debian.org/ to /var/lib/lxc/vm0/rootfs</li>
+<li>Configures inittab, hostname, locale and networking for the container</li>
+<li>Removes any unnecessary services such as hwclock and umountfs</li>
+<li>Sets the root password to 'root'</li>
+<li>Creates a configuration file in /var/lib/lxc/vm0/config</li>
+</ul>
+
+<p>Of course you are always free to create your own script or to modify this one. In
+most cases if you are looking to provision lots of containers that perform
+similar functions its recommended that you tailor your own template to your
+needs.</p>
+
+<p>There are a number of lxc command line tools for manipulating containers. Most
+of these are fairly self-explanatory by looking at their name. Lets start by
+getting a list of instances:</p>
+
+<pre><code># lxc-ls
+</code></pre>
+
+<p>Then getting state information on the instance you just created:</p>
+
+<pre><code># lxc-info --name vm0
+</code></pre>
+
+<p>Once prepared, you can start the container in the background with:</p>
+
+<pre><code># lxc-start -d --name vm0
+</code></pre>
+
+<p>Then connect to the console of your container using:</p>
+
+<pre><code># lxc-console --name vm0
+</code></pre>
+
+<p>At this point you will be prompted with a Linux console login prompt. Log into
+the console using root/root and take a look around. You will notice that a 'ps
+auxw' results in only a small number of processes. Try the same in your main
+OS, and you will see that you can see these processes as well, however the PIDs
+are different.</p>
+
+<p>Doing a pstree -pl however, allows you to see the relationship to a container
+easily enough:</p>
+
+<pre><code>|-lxc-start(22715)---init(22716)---dhclient3(22917)
+|                                |---getty(23006)
+|                                |---getty(23008)
+|                                |---getty(23009)
+|                                |---getty(23010)
+|                                \---login(23007)---bash(23013)
+</code></pre>
+
+<p>Notice how the container has its own copy of init? This provides a convenient
+(and familiar) parent supervisor for all processes running in your container.
+Modifying the containers /etc/inittab works just like the real thing, too.</p>
+
+<p>To view container processes clearly from your real OS use this command:</p>
+
+<pre><code># lxc-ps --name vm0
+</code></pre>
+
+<p>Or, to see the processes for all containers (including a column which tells you
+which container they are in) try:</p>
+
+<pre><code># lxc-ps --lxc
+</code></pre>
+
+<p>Now to exit out of your console, type Ctrl-A then q. You can then shutdown your
+instance with:</p>
+
+<pre><code># lxc-stop --name vm0
+</code></pre>
+
+<p>Finally - if you wish to destroy your vm, simply do this with:</p>
+
+<pre><code># lxc-destroy --name vm0
+</code></pre>
+
+<p>This will delete the rootfs and configuration permanently.</p>
+
+<h2>Resource Management</h2>
+
+<p>Resource management is taken care of by the cgroups kernel feature.</p>
+
+<p>CPU resource allocation can be done a number of ways, by either pinning CPU
+affinity or by providing shares. For example, to control CPU affinity for our
+process, you can use the <code>lxc-cgroup</code> command. First of all lets find out what
+the current setting is:</p>
+
+<pre><code># lxc-cgroup -n vm0 cpuset.cpus
+0-1
+</code></pre>
+
+<p>This means that vm0 can use CPU 0 or 1. You can adjust this by providing a new
+value:</p>
+
+<pre><code># lxc-cgroup -n vm0 cpuset.cpus '0'
+</code></pre>
+
+<p>Now our container processes will only schedule on CPU 0. The alternative is to
+adjust shares, thereby defining priority of instances:</p>
+
+<pre><code># lxc-cgroup -n vm0 cpu.shares '2048'
+
+# lxc-crgoup -n vm1 cpu.shares '1024'
+</code></pre>
+
+<p>The above command signifies that vm0 will get twice as much priority as vm1.</p>
+
+<p>If you are looking to permanent change these settings for a specific container,
+modify the containers configuration file: <code>/var/lib/lxc/vm0/config</code> (for container 'vm0')</p>
+
+<p>For example, to add a specific cpu affinity and share to the container add the
+line:</p>
+
+<pre><code>lxc.cgroup.cpuset.cpus = 0
+lxc.cgroup.cpuset.shares = 2048
+</code></pre>
+
+<p>There are lots of settings regarding resource management. Its recommended to
+read the cpuset.txt documentation (see references) for futher details.</p>
+
+<h2>Other Cool Stuff</h2>
+
+<p>For those cases where you want to pause a container, freezing and unfreezing
+instances can be done simply with:</p>
+
+<pre><code># lxc-freeze --name vm0
+# lxc-unfreeze --name vm0
+</code></pre>
+
+<p>If you want the power of LXC but don't want the hassle of creating an
+environment first a temporary container for running a job can be created simply
+with:</p>
+
+<pre><code># lxc-execute -n temp1 -- 'top'
+</code></pre>
+
+<p>This container can benefit from cgroups management and namespace isolation just
+like a real container so may come in handy for wrapping application executions.</p>
+
+<p>For fun, I recommend trying some of the other templates available in /var/lib/
+lxc/templates. If you install the package 'febootstrap' you can try out
+lxc-fedora which installs a mini Fedora root for you to use inside Debian
+and Ubuntu.</p>
+
+<h2>Conclusion</h2>
+
+<p>I have only touched upon a number of functions within this LXC introduction,
+so I recommend researching further if you wish to implement this in the wild.</p>
+
+<p>In the mass-hysteria that is the 'Cloud' it's easy to forget that the solution
+is all about the problem, not the other way around. There is no doubt that at
+times containers and LXC will provide a neat alternative to platform
+virtualisation but sometimes this will be the other way around. This of course
+as usual depends on the problem at hand.</p>
+
+<p>As you can see, LXC is pretty straight-forward. Be sure to try alternative
+container tools I listed as well, as LXC may not suite your needs (or taste)
+exactly. Lasty, anything new and adventurous should be thoroughly tested
+before production deployment to avoid late night adventures.</p>
+
+<p>Further reading:</p>
+
+<ul>
+<li><a href="http://wiki.debian.org/LXC">LXC at wiki.debian.org</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Lxc">LXC on Wikipedia</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Cgroups">cgroups on Wikipedia</a></li>
+<li><a href="http://www.mjmwired.net/kernel/Documentation/cgroups.txt">cgroups documentation</a></li>
+<li><a href="http://nigel.mcnie.name/blog/a-five-minute-guide-to-linux-containers-for-debian">A Five Minute Guide to LXC for Debian</a></li>
+<li><a href="http://www.ibm.com/developerworks/linux/library/l-lxc-containers/">IBM developerWorks on LXC</a></li>
+<li><a href="http://linux.die.net/man/1/fakeroot">fakeroot - a userland hack for faking root privileges for file manipulation</a></li>
+</ul>

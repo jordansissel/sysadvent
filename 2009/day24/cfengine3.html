@@ -1,0 +1,226 @@
+<i>This article was written by <a href="http://lopsa.org/blog/430">Aleksey Tsalolikhin</a>.</i>
+
+<p>
+
+Cfengine3 marks the third major version of the original configuration
+management started 16 years ago. Like Puppet, Chef, Bcfg2, and others, Cfengine
+helps you automate the configuration and maintenance of your systems.
+
+<p>
+
+I chose cfengine because of it's long track record, large user base, academic origins, <a href="http://en.wikipedia.org/wiki/Comparison_of_open_source_configuration_management_software#Platform_support">wide platform support</a>, and <a href="https://cfengine.org/mailman/listinfo/help-cfengine">supportive community</a>.
+
+<p>
+
+For the uninitiated, configuration management tools help you maintain a desired
+configuration state. If the system is not in the correct state, the config
+management tool will perform actions to move into the correct state. For
+example, if your state includes a cron job, and one of the systems doesn't have
+that cron job, the config management tool will install it. No action would be
+taken if the cron job already existed correctly.
+
+<p>
+
+Cfengine has its own mostly declarative language. This language describes how
+things should be; with a little bit of imperative to  describe how to do it or
+what to do. Using this langauge you create configuration "policy rules" or "promises" of how the system should be configured. Cfengine manages how to get to the promised state.
+
+<p>
+
+In this way, Cfengine becomes your automated systems administrator, a kind of
+robot that maintains your system by your definitions. As exampled above: if a
+cron job is missing, and you said you wanted it, Cfengine will add it.
+
+<p>
+
+Your job then is promoted to one of configuring this automated system and to
+monitor its function. You can configure it to add cron jobs, upgrade software
+packages, or remove users, on thousands of hosts as easily as on one host. Use
+this tool with care ;)
+
+<p>
+
+Cfengine can be used standalone or in a client-server model. In the latter, if
+the server is unreachable, the client is smart and uses the last-seen cached
+set of policies and uses those until it can reach the server again. In either
+model, the client-side performs the checks and maintenance actions, so this
+should scale to thousands of hosts.
+
+<p>
+
+Speaking of using Cfengine, the language syntax in the latest version (3) has
+been cleaned up from the previous version, which was varied and inconsistent.
+
+<p>
+
+When using Cfengine, it's important to know some terms:
+<dl>
+  <dt> Promise </dt>
+  <dd> A promise is a Cfengine policy statement - for example, that /etc/shadow
+    is only readable by root - and it implies Cfengine will endeavor to keep
+    that promise.
+  </dd>
+  <dt> Pattern </dt>
+  <dd> I asked Mark to clarify for us what he means by "patterns" in Cfengine
+    3. Here is his answer:
+
+    <blockquote>
+    A "configuration" is a design arrangement or a pattern you make with system
+    resources. The cfengine language makes it easy to describe and implement
+    patterns using tools like lists, bundles and regular expressions. While
+    promises are things that are kept, the efficiencies of configuration come
+    from how the promises form simple re-usable patterns.
+    </blockquote>
+  </dd>
+  <dt> Class </dt>
+  <dd> For you programmers, this has nothing to do with the Object-Oriented
+  term. Classes are "if/then" tests but the test itself is hidden "under the
+  hood" of Cfengine. There is no way to say "if/then" in Cfengine except with
+  classes.
+
+  Example - this shell script will only be executed on Linux systems:
+
+  <pre>shellcommands:
+    linux:: "/var/cfengine/inputs/sh/my_script.sh"</pre>
+
+  There are a number of built-in classes, like the <code>linux</code> class
+  above; they can also be explicitly defined.
+  </dd>
+
+  <dt> Bundle </dt>
+  <dd> A bundle is a collection of promises </dd>
+
+  <dt> Body </dt>
+  <dd> The body of a promise explains what it is about. Think of the body of a
+  contract, or the body of a document. Cfengine "body" declarations divide up
+  these details into standardized, paramaterizable, library units. Like
+  functions in programming, promise bodies are reusable and parameterized.
+
+  <pre>
+  <i>cfengine-word</i> =&gt; <i>user-data-pattern</i>
+
+  body <i>cfengine-word</i> <i>user-data-pattern</i>
+  {
+      details
+  }
+</dl>
+
+The basic grammar of Cfengine 3 looks like this:
+<pre>
+  promisetype:
+      classes::
+          "promiser" -&gt; { "promisee1", "promisee2", ... }
+              attribute_1 =&gt; value_1,
+              attribute_2 =&gt; value_2,
+              ...
+              attribute_n =&gt; value_n;
+</pre>
+
+Classes are optional.
+
+Here is the list of promise types:
+<ul>
+  <li> commands - Run external commands </li>
+  <li> files - Handle files (permissions, copying, etc.) </li>
+  <li> edit_line - Handle files (content) </li>
+  <li> interfaces - Network configuration </li>
+  <li> methods - Methods are compound promises that refer to whole bundles of promises. </li>
+  <li> packages - Package management </li>
+  <li> processes - Process management </li>
+  <li> storage - Disk and filesystem management </li>
+</ul>
+
+Here's another example:
+
+<pre>
+    files:
+       "/tmp/test_plain" -&gt; "John Smith",
+            comment =&gt; "Make sure John's /tmp/test_plain exists",
+            create  =&gt; "true";
+</pre>
+
+Above, we have the <i>promisee</i> on the right side of the arrow. The promisee
+is "the abstract object to whom the promise is made". This is for documenation.
+The commercial version of cfengine uses promisees to generate automated
+knowledge maps. The object can be the handle of another promise, recognizing an
+interest in the outcome, or an affected person who you might want to contact in
+case of emergency.
+
+<p>
+
+How about a more complete and practical example? Lets ensure some ntp and portmap services are running:
+
+<pre>
+body common control
+{
+  # We can give this a version
+  version =&gt; "1.0";
+  # specify what bundles to apply
+  bundlesequence  =&gt; { "check_service_running"  };
+}
+
+bundle agent check_service_running
+{
+    vars:
+        # name    type  =>    value
+        "service" slist =&gt; {"ntp", "portmap"};
+        "daemon_path" string =&gt; "/etc/init.d";
+
+    processes:
+        "$(service)"
+            comment =&gt; "Check processes running for '$(service)'",
+            restart_class =&gt; "restart_$(service)";
+
+    commands:
+        "${daemon_path}/${service} start"
+            comment =&gt; "Execute the start command for the service",
+            ifvarclass =&gt; "restart_${service}";
+}
+</pre>
+
+Saving this as 'servicecheck.cf' we can test it in standalone mode with cf-agent:
+
+<pre>
+% sudo /etc/init.d/portmap status
+ * portmap is not running
+% sudo /etc/init.d/ntp status    
+ * NTP server is not running.
+
+% sudo cf-agent -f ./servicecheck.cf
+Q: "...init.d/ntp star":  * Starting NTP server ntpd
+Q: "...init.d/ntp star":    ...done.
+I: Last 2 QUOTEed lines were generated by promiser "/etc/init.d/ntp start"
+I: Made in version '1.0' of './servicetest.cf' near line 20
+I: Comment: Execute the start command for the service
+
+Q: "....d/portmap star":  * Starting portmap daemon...
+Q: "....d/portmap star":    ...done.
+I: Last 2 QUOTEed lines were generated by promiser "/etc/init.d/portmap start"
+I: Made in version '1.0' of './servicetest.cf' near line 20
+I: Comment: Execute the start command for the service
+
+# Now check to make sure cfengine started our services:
+% sudo /etc/init.d/portmap status
+ * portmap is running
+% sudo /etc/init.d/ntp status    
+ * NTP server is running.
+</pre>
+
+Configuration management is an essential tool for sane and happy sysadmins.
+They help you ensure your systems are correctly configured without repeatedly
+consuming your time fighting to maintain the status quo.
+
+<p>
+
+Further reading:
+
+<ul>
+  <li> <a href="http://en.wikipedia.org/wiki/Comparison_of_open_source_configuration_management_software#Basic_properties">Config Management Software Comparison</a> on Wikipedia </a> </li>
+  <li> Cfengine 3 Tutorial (<a
+  href="http://www.cfengine.org/manuals/cf3-tutorial.html">HTML</a>, <a
+  href="http://www.cfengine.org/manuals/cf3-tutorial.pdf">PDF</a>). </li>
+  <li> Cfengine 3 Reference Manual (<a href="http://www.cfengine.org/manuals/cf4-reference.html">HTML</a>, <a href="http://www.cfengine.org/manuals/cf3-Reference.pdf">PDF</a>.</li>
+  <li> <a href="http://watson-wilson.ca/blog/cf3-tutorial.html">Neil Watson's Cfengine 3 tutorial</a> </li>
+</ul>
+
+

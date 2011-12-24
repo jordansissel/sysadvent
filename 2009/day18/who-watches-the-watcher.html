@@ -1,0 +1,102 @@
+Day 18 - Who Watches The Watcher?
+
+The health of your infrastructure relies on you. You rely on a monitoring
+system (Nagios, etc) to detect problems and repair them or notify you of them, 
+but what monitors the monitor?
+
+<p>
+
+Assuming for the moment that Nagios is your monitor. What happens when Nagios
+crashes or gets stuck? What happens if a syntax error creeps in and causes
+Nagios to fail at startup? Moreover, if you have automated processes for
+generating and deploying Nagios configs and even upgrading Nagios, how do you
+know if things are working?
+
+<p>
+
+You need notification when your monitoring system is malfunctioning just like
+you want notification. It's possible you've overlooked this when configuring
+your monitoring systems, and solving this takes some thought, because not every
+solution is a complete one.
+
+<p>
+
+One option to consider is having Nagios check it's config file for
+problems on startup, and alerts you (via mail, whatever) on errors. This can be
+done with <code>nagios -v &lt;configfile&gt;</code>, which exits nonzero if
+there are config errors. Conveniently, if 'nagios' the command fails, this also
+results in a nonzero exit code. This solution fails, howver, to alert you when
+Nagios crashes or hangs.
+
+<p>
+
+Another option is to test behavior. One behavior to observe is the modification
+dates on Nagios' stored results, like <code>status.dat</code> or the
+<code>checkresults</code> directory. If these items haven't been modified
+recently, it's possible Nagios is unhappy. 
+
+<p>
+
+Both of the above solutions are incomplete because they run local to the
+monitoring host, and if that host fails, you don't get any notification. A
+solution is to run your monitor on at least two hosts and have them monitor
+each other. Your second monitor can just be a metamonitor (a monitor monitoring
+a monitor!) that does nothing else. Just remember that you should also monitor
+your metamonitor (meta-metamonitor?), and this can be done from your first
+Nagios instance.
+
+<p>
+
+How do we remotely monitor Nagios? The <code>status.dat</code> file is used as
+a data source when you access the Nagios web interface. The default web
+interface has a link "Process Info" which points to
+<code>http://.../nagios/cgi-bin/extinfo.cgi?type=0</code>. Included in the
+process info report is the last time an external command was run. Here's a <a
+  href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day18/nagios-last-update.rb">test
+  written in ruby</a> that will remotely verify Nagios's last-check time is
+within some threshold. Example using this script :
+
+<pre>
+# with nagios down (stopped safely)
+% ruby nagios-last-update.rb localhost 900
+extinfo.cgi returned bad data. Nagios is probably down?
+
+# Recently started, no checks run yet:
+% ruby nagios-last-update.rb localhost 900
+last external command time is 'N/A'. Nagios may have just restarted.
+
+# Working
+% ruby nagios-last-update.rb localhost 900
+OK. Nagios last-update 2.814607 seconds ago.
+
+# Web server is up, but nagios isn't running:
+% ruby nagios-last-update.rb localhost 900
+Time of last Nagios check is older than 900.0 seconds: 1434.941687
+
+# Web server is down
+% ruby nagios-last-update.rb localhost 900
+Connection refused when fetching http://localhost/nagios/cgi-bin/extinfo.cgi?type=0
+
+# Host is unresponsive:
+% ruby nagios-last-update.rb localhost 900     
+Timeout (30) while fetching http://localhost/nagios/cgi-bin/extinfo.cgi?type=0
+</pre>
+
+The script uses the proper exit statuses (0 == OK, 1 == warn, 2 == critical)
+nagios checks expect. There may be exceptions I'm not catching that I should,
+but uncaught ruby exceptions cause an exit code 1, which Nagios (or whatever)
+should interpret as a check failure.
+
+<p>
+
+Now we have a way to remotely verify the health of a Nagios instance that tells
+us if Nagios is running properly. Plug this into a monitoring instance on a
+different host and you should get alerts whenever your Nagios instance is down.
+
+<p>
+
+Further reading:
+
+<ul>
+  <li> <a href="http://en.wikipedia.org/wiki/Who_Watches_the_Watchers">Who watches the watchers?</a> Star Trek episode.</li>
+</ul>

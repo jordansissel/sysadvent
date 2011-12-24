@@ -1,0 +1,190 @@
+<i> This article was written by <a href="http://www.standalone-sysadmin.com/blog/">Matt Simmons</a>.</i>
+
+<p>
+Don't you just hate it when you're in the middle of a cross country flight, and
+all of a sudden the pilot gets on the intercom and announces that, due to the
+unfortunate loss of engine #2, you're going to crash and that maybe you should,
+you know, find peace with your maker or something?
+</p>
+
+<p>
+But wait, that doesn't usually happen. Which is sort of funny, because airplane
+engines die all the time. Seriously. It's so common that the FAA doesn't even
+keep track of it. <a
+href="http://www.aviationbanter.com/showthread.php?p=355593">These pilots</a>
+estimate that it happens somewhere between once every thousand hours and once
+every ten thousand hours. That seems pretty infrequent until you consider that
+there are, in any given day, around <a
+href="http://www.answerbag.com/q_view/34532">30,000 commercial flights</a> in
+the air over the United States. So every day that you wake up, go to work, and
+read the news, you don't hear about planes falling out of the sky, even though
+there's an excellent chance that somewhere that same day, a plane lost an
+engine. If you fly a lot, it might have happened on a flight you were on. You
+wouldn't know, they <a
+href="http://www.budgettravel.com/bt-dyn/content/article/2009/08/27/AR2009082703294.html">don't
+have to tell you</a> or anything. 
+</p>
+
+<p>
+It's not a big deal because all but the smallest planes have multiple engines.
+If one of the two engines goes out, the plane still flies just fine. 
+</p>
+
+<p>
+A while back, airlines discovered something. Due to a quirk in how statistics
+work, if you double the number of engines, you also double the number of engine
+problems. It's only logical. You're not improving the engines by adding more,
+you're just making it more likely that one of your engines will fail. The
+useful part of this is that you're also <i>decreasing</i> the likelihood that
+<i>all</i> of the engines will fail. 
+</p>
+
+<p>
+If engines die once every hundred flights (completely fake, imaginary number,
+way too high), and you've only got one engine, you're only going to have an
+engine fail once every hundred flights. Unfortunately, that's going to be a
+very interesting flight for those passengers. If, however, you have two
+engines, you're going to have engine problems every 50 flights, but it's only
+going to be really tragic once every 10,000 flights or so, on average. This is
+why lots of big heavy planes that need two engines to fly actually have four
+engines, which makes it even MORE unlikely that there will be problems. Of
+course, as I said, there are lots of flights. Eventually, statistics <a
+href="http://everything2.com/user/archiewood/writeups/The+most+engine+failures+in+one+flight">bites
+you in the butt</a>. If you click that link, you will see that there was
+actually a flight over the Indian Ocean that suffered <b>five</b> engine
+failures. And yet it still landed <i>because of other safety features built
+into the plane</i>. 
+</p>
+
+<p>
+In IT, we can learn a lot from the airline industry. They're one of the few
+fields with higher uptime requirements than ourselves, and they've been around
+for longer than we have. Over the course of their existence, they've learned a
+thing or two, and one of those things is that if you want your service to be
+available, you need to be redundant.
+</p>
+
+<hr>
+
+<p>
+IT Infrastructure is really a collection of systems that work together to
+provide services. Each of these systems fall into Physical, Network, or Host
+category, and in order to build a truly fault tolerant infrastructure, each one
+of these layers must have independent redundancies. 
+</p>
+
+<p>
+The physical infrastructure deals with things such as the site, the server room
+itself, the rack, and the electricity. If you read that list again, you see a
+graduation from general (the site) to specific (electricity). This should also
+be mirrored in our redundancy plans.
+</p>
+
+<p>
+One source of power is not enough. Every piece of equipment we use relies on
+electricity, and if the power fails, we're dead in the water. To combat this,
+if we're in a data center, we receive two power lines, each fed by completely
+separate power infrastructure. Each of the servers has two power supplies,
+which allows the power to be redundant. 
+</p>
+
+<p>
+As for the data center themselves, they feed you power from two independent
+systems which are fed by independent battery banks, which are powered by
+independent generators. High quality data centers use an N+1 or N+2 strategy.
+This means whenever it takes N pieces of equipment to do what they need,
+they've got 1 (or 2) more. Planes with 2 engine are N+1. Quad-engined planes
+are N+2. 
+</p>
+
+<p>
+If we're not in a high end data center, then we've got to approximate the
+equivalent of dual power sources. For that, we use Uninterruptible Power
+Supplies (UPS), which are fed through the standard power infrastructure, but
+also have a battery backup that takes over when line power fails. It's not as
+good as having two actual sources of power, but it's better than nothing.
+<center><img
+src="http://farm3.static.flickr.com/2752/4176603808_139d34dd15.jpg"></center>
+</p>
+
+<p>
+The network infrastructure provides remote access to our resources. The
+services that we provide as an organization are made available through these
+systems, and if the network is down, the services are unavailable, regardless
+of the actual status of the machines. 
+</p>
+
+<p>
+To ensure that the network resources are always available, we use defense in
+depth. 
+</p>
+
+<p>
+Two uplink connections should be used when at all possible. In a data center,
+this means two network drops. In a smaller environment, this means take
+whatever your required connection is, then double it. If possible, use
+different providers, so that an outage by one won't affect the other. 
+</p>
+
+<p>
+For the local machine networks, having a single network connection to the
+switch is precarious. It's easy to get snagged and pulled loose. Network cards
+fail. Switch ports fail. If any of those things happen, the machine becomes
+unavailable. To prevent this from being a problem, modern servers come with two
+built in network cards. I used to wonder why, then I learned about <a
+href="http://linux-ip.net/html/ether-bonding.html">interface bonding</a>. 
+</p>
+
+<p>
+Of course, it's not enough to just run both cables to the same switch. That
+piece of equipment is pretty fragile, too. Switches fail sometimes, and every
+low and midrange switch I've seen only has one power supply, which means that
+if your power dies (see above), your network access dies. So get two switches,
+and run each NIC to its own switch.  <center><img
+src="http://farm3.static.flickr.com/2361/2432246645_b1184e6086.jpg"></center>
+Of course, this isn't just limited to ethernet networks. Storage networks are
+susceptible to the same damage, with possibly more dire ramifications to your
+data. Every storage networking technology that I'm aware of has the ability to
+do <a
+href="http://technet.microsoft.com/en-us/library/cc725907.aspx">multipath</a>,
+which functions analogously to interface bonding. 
+</p>
+
+<p>
+So now we have fault tolerant infrastructures underlying and connecting our
+hosts, but what about the hosts themselves? As I've indicated, modern servers
+are built with redundant parts to be fault tolerant. Many BIOSes have the
+ability to do <a
+href="http://www.rackaid.com/resources/memory-mirroring-to-the-rescue/">RAM
+mirroring</a>, and almost every server comes with RAID mirrors for the system
+drive. As important as these improvements are, things still happen.
+Motherboards blow up, people make mistakes, and even mirrored drives get erased
+with the wrong command. 
+</p>
+
+<p>
+To provide for this eventuality, we replicate entire machines. Using the right
+software, we can <a
+href="http://en.wikipedia.org/wiki/High-availability_cluster">cluster our
+servers</a> so that they act logically as one. This provides an additional
+level of redundancy that one server just can't give us. 
+</p>
+
+<p>
+Even redundant servers can't help a truly catastrophic event.  <center><img
+src="http://farm4.static.flickr.com/3149/2282244200_43897805a9.jpg"></center>
+</p>
+
+<p>
+The above picture is the natural enemy of the network administrator. It is the
+fiber seeking backhoe, and it alone can wreck all of your carefully laid plans.
+With one small pull of a lever, it's gaping maw can chew through the heaviest
+armor.
+</p>
+
+<p>Further reading:</p>
+
+<ul>
+  <li> Search for <a href="http://www.google.com/search?q=backhoe+fiber">backhoe fiber</a> on Google </li>
+  <li> <a href="http://www.wired.com/science/discoveries/news/2006/01/70040">Backhoe vs Fiber problems</a> on Wired.com</li>
+</ul>

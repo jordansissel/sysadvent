@@ -1,0 +1,84 @@
+Logging in to a machine that isn't your own workstation can be scary. You are
+subject to the decisions made in someone else's configuration files that don't
+always align with your own configurations: different shell, different default
+shell configuration, different default editor, different editor configuration,
+etc.
+
+<p>
+
+This is a scary and unproductive place. Suddenly 'ls' output is colored, or vim
+uses a different indenting configuration, or worse, the default editor is not
+your favorite editor (which doesn't have to be vim). Dedication to mastering
+your basic tools over time has helped you create the One True Configuration for
+each tool; deviation from this configuration means a loss of productivity. You
+need to bring your home (directory) with you.
+
+<p>
+
+When your home directory doesn't magically appear through the miracles of
+network filesystems, you may need to fix the problem another way. One potential
+solution is to make sure that you copy all your configuration files (.vimrc,
+.zshrc, whatever) to every host you're going to login to. This doesn't scale.
+Further, it means everyone else has to repeat the same process for their own files.
+
+<p>
+
+The fix is to create a system which automatically keeps your home directory, on
+every machine, populated with your configurations. You can do this minimally
+with revision control and a cron job, but I prefer to add rsync to this
+process.
+
+<p>
+
+Step one is make a place in your revision control system for people to create
+home directories. For example, declaring that the path /trunk/home in your repository is
+where you should dump your homedirectory contents. This means if my username
+were 'jordan' then I'd check my '.vimrc' in as '/trunk/home/jordan/.vimrc' and
+should expect it to show up on any system I have access to.
+
+<p>
+
+Step two is to pick a server that has access to both revision control and other
+servers. Set up a cron job here that will check out and keep-updated your
+entire /trunk/home path. Run an rsync daemon here that exports this /trunk/home
+for other servers to update with. Set the rsync module name to 'homedirs' for
+readability.
+
+<p>
+
+Step three is to deploy a cron job on every necessary server that copies down
+all the obvious files from someserver::homedirs with rsync. You do have
+automation that lets you install a cron job on all of your servers, right? ;)
+
+<p>
+
+Before you go and write the one line of rsync invocation that it would take to
+copy someserver::homedirs to /home, you should take care to note the potential
+security implications of doing this as root. If I have a file checked in called
+/home/jls/test/shadow, and on one of the servers I sneakily symlink
+/home/jls/test/ to /etc, and you run the rsync blindly as root, you just let me
+overwrite your /etc/shadow file (or something else evil). Malicious or
+accidental, doing a single rsync may not be the best solution.
+
+<p>
+
+The fix is to run the rsync as each user. You can get the list of users to copy
+down by running 'rsync someserver::homedirs' to get the list of directories,
+which should include your usernames. Check out the completed version of the
+<a
+href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day11/synchome.sh">sync
+home directories script</a>.
+
+<p>
+
+You should now be able to modify your home directory files in revision control
+and have them automatically propogate without your assistance.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://samba.anu.edu.au/rsync/">rsync homepage</a> </li>
+</ul>
+
+<i> The 'run rsync as the user' security idea from Pete Fritchman. </i>

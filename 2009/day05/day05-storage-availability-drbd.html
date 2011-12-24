@@ -1,0 +1,117 @@
+
+<i> This article was written by <a href="http://jeffhengesbach.blogspot.com">Jeff Hengesbach</a>.</i>
+
+<p>
+Storage and storage technologies have really moved into the limelight in
+recent years.  Previously, advanced storage and storage concepts were hidden
+away in large corporate datacenters; they were complicated, proprietary, and
+costly. Most small and mid-sized organizations used or still use systems with
+local or direct attached hard drives.  In the event of drive failure, RAID was
+relied upon as the sole savior to keep things running uninterrupted.  In the
+event of array or system loss, restore from backups was the primary or only
+option. The drives were expensive and storage needs modest (arguably due to
+storage costs).
+</p>
+
+<p>
+Move forward a few years to the now. Storage needs are, relatively speaking,
+monumental, and space is much less costly. Virtualization has come to the
+forefront, and you are now behind the proverbial technology curve if not taking
+advantage of its benefits. System densities have increased (blades,
+virtualization, etc) and now, more than ever, storage is a critical component
+of the infrastructure.  Most of these density-increasing technologies that
+improve space, power consumption, cooling, management, disaster recovery, and
+availability, require carefully designed, reliable, and centralized storage.
+Reliable storage starts with good drives and controllers with appropriate RAID
+levels for the application as well as connectivity to that storage. What
+happens when a controller fails, or a multiple drive failure brings down a RAID
+set, or connectivity is lost?  The proprietary solutions of course have their
+options and some very nice options indeed, but for some organizations that
+need storage availability, many of the proprietary solutions do not scale to
+the available budgets.  </p>
+
+<p>
+This is where <a href="http://drbd.org/">DRBD</a> comes to the table.  DRBD is
+graciously maintained, supported, and provided as
+<a href="http://www.drbd.org/home/drbd-is-gpled/">open source</a>  by
+the people over at <a href="http://www.linbit.com/en/">Linbit</a>.  As the
+website states: "DRBD can be understood as network based raid-1".  Technically
+speaking, DRBD is a block device driver you layer into the device chain just
+like <a
+href="http://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)">LVM</a> or
+<a
+href="http://www.linuxfoundation.org/collaborate/workgroups/linux-raid">MD</a>.
+It can be put anywhere in the stack: on top of the disk device, on top of LVM
+or MD, at the top just under the file-system, wherever it makes sense.  Its
+specialty is taking block level changes, keeping track of them, and sending
+them over a network to another system where they are duplicated.  DRBD has a
+few specific traits to highlight. First off, it is smart (and dumb?). It works
+at the block level and knows which bits may be out of sync and will only send
+those bits across the wire. It knows nothing of file-systems, files, etc, so the
+application using it can be anything: samba, iSCSI, NFS, EXT3, XFS, or
+others. Secondly it can be non-destructively added to existing data volumes. It
+is not necessary to go through backup/install/restore process - only install,
+configure and replicate.  </p>
+
+<p>
+Linbit also offers a closed source product, <a
+href="http://www.linbit.com/en/products-services/drbd-proxy/">DRBD Proxy</a>,
+that is designed for long haul, high latency(200ms) connections as well as
+greater than 2-node replication situations. If you want to replicate outside
+of a LAN using DRBD, then you'll need it.
+<a href="http://blogs.linbit.com/florian/2009/11/16/linbit-announces-stewardship-for-heartbeat-code-base/">Recently</a>,
+Linbit
+became the steward of the <a href="http://linux-ha.org/">Heartbeat</a> cluster
+messaging codebase.  Heartbeat is the application that handles the
+monitoring and fail-over activities between the systems.  DRBD and Heartbeat
+are a tried and true tag team for storage high availability / fail-over
+situations.
+</p>
+
+<p>
+So what does a simple, highly available, solution look like?  Two nodes with
+appropriate storage use DRBD in their block device stacks to replicated the
+data over a gigabit or better connection; one is primary (the source), the
+other secondary (the destination).  Heartbeat runs on both systems
+monitoring for system and service availability.  If Heartbeat detects a
+failure it coordinates the startup of services on the backup node including
+all DRBD and service (could be nfs, samba, iscsi, etc) related commands.  It
+is a beautiful thing to see in action.
+</p>
+
+<p>
+I'm not one to rehash out the commands needed to install, configure
+and run these solutions.  The DRBD website has an excellent
+<a href="http://www.drbd.org/docs/about/">user manual</a> that would be absolutely
+futile to reproduce here, and Heartbeat is relatively simplistic to get
+established and working.  Both products have a multitude of options not
+necessary for basic operations but are very handy for more fine grained control
+and tuning.  </p>
+
+<p>
+What are the keys parts to a good solution?  DRBD relies on TCP/IP
+networking to move data around.  Make sure gigabit or better is being used
+along with quality cables and switching.  If at all possible keep DRBD
+traffic on its own network - or even direct cross-over connections.  Don't
+skimp on your backup node.  A backup node that can not keep up with
+replication will cause IO blocking on the primary.  Design connectivity to
+handle loss of a switch.  If in doubt - ask Linbit or the community for
+assistance.  DRBD, DRBD+Heartbeat have been in use for a while and they are
+sound technologies.
+</p>
+
+<p> -- </p>
+
+<p>
+About the author: Jeff Hengesbach is a System Administrator with a history of
+working in smaller organizations.  He is an avid proponent of virtulization and
+linux (and Microsoft, where appropriate) technologies.  Between work and family
+he occasionally has the opportunity to post articles on his blog at: <a
+href="http://jeffhengesbach.blogspot.com">http://jeffhengesbach.blogspot.com</a>.
+</p>
+
+Further reading:
+<ul>
+  <li> <a href="http://fghaas.wordpress.com/">Florian's blog</a> a LINBIT employee's personal blog that often discusses DRBD</li>
+  <li> <a href="http://www.mattscomputertrends.com/harddrives.html">Hard drive cost trends </a></li>
+</ul>

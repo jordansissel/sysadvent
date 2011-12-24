@@ -1,0 +1,94 @@
+Modern systems administration often involves saving yourself (and your company) time
+and money. If I had to list skills (of people) and features (of software) by priority, automation would be near the top.
+
+<p>
+
+This is usually why I get so mad at software that doesn't lend itself easily to
+automation. 
+<a href="http://sysadvent.blogspot.com/2008/12/day-6-automating-tripwire.html">
+Day 6
+</a>
+pointed out some potential difficulty in automating Tripwire. I'm willing to
+forgive Tripwire since it's security software. I don't expect security guys to
+think about systems administration problems.
+
+<p>
+
+But what about something like Cacti? Cacti is a monitoring tool aimed at helping you 
+track data and data trends on your systems. You can configure it to graph many 
+things on many hosts; sounds like a systems
+administration tool, right?  Monitoring sounds sysadmin-ey. Transitivity from
+sysadmin goes to automation. Therefore, I expect that Cacti will fall happily into my family of other automated configurations. If I have a few hundred machines in various, known 
+configurations, can I easily put this data into Cacti and keep it up to date?
+
+<p>
+
+Cacti's main interface is a web interface, and such things do not easily 
+lend themselves to automation.
+
+<p>
+
+Searching for 'cacti automation' will point you at Cacti's <a
+href="http://docs.cacti.net/?q=node/529">command-line scripts</a>
+(add_device.php, for example). These scripts only support adding things, not
+modifying or deleting them. If you want to do that, you're almost on your own.
+Automation features started showing up in Cacti 0.8.6 from a feature request
+that there was no way to mass add devices. This request lead a few new
+functions and the scripts mentioned previously.
+
+<p>
+
+With that version and beyond, you can add devices, graphs, and other things, in
+an easily automated way. For all other interactions, you'll need to click your
+way through the web interface. Removing devices, etc... click click click. If
+you want to import or export graph, data, or host templates, you can do that
+using the web interface, but only one template at a time.
+
+<p>
+
+There is a file called "api_automation_tools.php" (or the other api_xxxx.php scripts) 
+in Cacti that sounds promising, but has no documentation. Many of the functions are self documenting by name or simplicity, but others are in great need of documenting and simplicity. Reading over the code, it's not obvious to me how I can do automated maintenance of cacti's devices, graphs, etc. Looking at Cacti's roadmap, I don't see 'improvements in automation' on it. Plugins are on the roadmap, but it's unclear if plugins will help with automation. There is an existing <a href="http://cactiusers.org/">plugin effort for Cacti</a>, but none of the plugins appear to aid with automation.
+
+<p>
+
+My guess is that the reason that the available automation is poorly documented
+or doesn't exist is because of two reasons: first, that the developers didn't
+develop cacti with systems administrator priorities in mind, and second, that
+no one has made the feature request. The second point makes me wonder, is cacti
+only used by people with a handful of systems to monitor? As I research Cacti,
+it's starting to feel more and more like it isn't for people who want
+automation or is mainly for those who have plenty of time to click few zillion
+times keeping Cacti's information aligned with reality.
+
+<p>
+
+Automation should be accessible. It should be documented. If I can't find
+Cacti's automation documentation, if it exists, then it's not accessible
+automation. Yes, you could read the code and figure out exactly functions you
+needed to call to modify or remove a device, graph, or whatever. Or skip the
+code and look at the storage system to modify the configuration. Hacks produced
+with this method are troublesome and will not scale. You will be lucky if the hacks
+survive the upgrade to the  next version. Further, reading the code so you can
+implement your own hacks is not accessible automation.
+
+<p>
+
+If an open source tool fits your needs but lacks automation, get involved in the community, if there is one. File bug reports and feature requests, or send patches if possible. If a commercial tool fits your needs but lacks automation, contact the vendor. Find out if they can implement what you need, and how long it might take. Don't get stuck with a tool that sucks away resources because the best maintenance interface is with the mouse and keyboard.
+
+<p>
+
+I'm not trying to pick on Cacti, specifically. Many software tools are simply
+not written with accessible automation or other important sysadmin features in
+mind. This is a very important feature to consider when looking for tools to
+solve a problem, because, as I've repeated previously, automation saves you
+time, effort, and errors.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://www.cacti.net/"> Cacti homepage </a> </li>
+  <li> <a href="http://svn.cacti.net/viewvc/cacti/branches/main/lib/api_automation_tools.php?revision=4834&view=markup"> Cacti's api_automation_tools.php </a> (as of 2008/12/06) </li>
+  <li> <a href="http://docs.cacti.net/?q=node/529"> Cacti CLI documentation </a> </li>
+  <li> <a href="http://cactiusers.org/"> CactiUsers.org </a> - external effort to add plugins to cacti </li>
+</ul>

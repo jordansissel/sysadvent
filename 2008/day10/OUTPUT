@@ -1,0 +1,69 @@
+# Does fetching / over http worK?
+define command {
+  command_name check-http-getroot
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -u /
+}
+
+# Does fetching / over https work?
+define command {
+  command_name check-https-getroot
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -u / -S
+}
+
+# Alert when certificate has less than 30 days to live
+define command {
+  command_name check-https-certificate-age
+  command_line $USER1$/check_http -H $HOSTADDRESS$ -C 30
+}
+
+# Does basic mysql stuff work?
+define command {
+  command_name check-mysql
+  command_line $USER1$/check_mysql -H $HOSTADDRESS$ -u test -p test -d test
+}
+
+define host {
+  host_name host2.prod.yourdomain
+  address host2.prod.yourdomain
+}
+
+define host {
+  host_name host1.prod.yourdomain
+  address host1.prod.yourdomain
+}
+
+
+define hostgroup {
+  hostgroup_name frontend
+  members host2.prod.yourdomain
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-http-getroot
+  check_command check-http-getroot
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-https-certificate-age
+  check_command check-https-certificate-age
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-https-getroot
+  check_command check-https-getroot
+}
+
+define hostgroup {
+  hostgroup_name mysql-debug
+  members host1.prod.yourdomain
+}
+
+define service {
+  hostgroup_name mysql-debug
+  service_description mysql-debug.check-mysql
+  check_command check-mysql
+}
+

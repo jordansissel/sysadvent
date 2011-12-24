@@ -1,0 +1,125 @@
+A <a href="/2008/12/day-7-host-vs-service.html">few days ago</a> we covered
+using a yaml file to label machines based on desired configuration. Sometimes
+part of this desired configuration includes using a config file that needs
+modification based on attributes of the machine it is running on: labels,
+hostname, ip, etc.
+
+<p>
+
+Using the same idea presented in Day 7, what can we do about generating
+configuration files? Your 'mysql-slave' label could cause your my.cnf (mysql's
+config file) to include settings that enable slaving off of a master mysql
+server. You could also use this machine:labels mapping to automatically
+generate monitoring configurations for whatever tool you use; nagios, cacti,
+etc.
+
+<p>
+
+The older ways of doing config generation included using tools like sed, m4,
+and others, to modify a base configuration file inline or writing a script that
+had lots of print statements to generate your config. These are both bad with
+respect to present-day technology: templating systems. Most (all?) major
+language have templating systems: ruby, python, perl, C, etc. I'll limit
+today's coverage, for the sake of providing an example, to ruby and ERB.
+
+<p>
+
+ERB is a ruby templating tool that supports conditionals, in-line code, in-line
+variable expansion, and 
+other things you'll find in other systems. It gets bonus points because it comes standard with ruby installations. That one bonus means that most people (using ruby) will use ERB as their templating tool (Ruby on Rails does, for example), and this manifests itself in the form of good documentation and examples.
+
+<p>
+
+Let's generate a sample nagios config using ruby, ERB and yaml. Before that, we'll need another yaml file to describe what checks are run for each label. After
+all, the 'frontend' label might include checks for process status, page fetch
+tests, etc, and we don't want a single 'check-frontend' check since mashing all
+checks into a single script can mask problems.
+
+<p>
+
+You can view the 
+<a href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day10/hostlabels.yaml">hostlabels.yaml</a>
+and 
+<a href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day10/labelchecks.yaml">lablechecks.yaml</a>
+to get an idea of the simple formatting. Using this data we can see that
+'host2.prod.yourdomain' has the 'frontend' label and should be monitored using
+the 'check-apache' and 'check-frontend-page-test' checks.
+
+<p>
+
+The ruby code and ERB are about 70 lines total, perhaps too much to write here,
+so here are the files:
+
+<ul>
+  <li> <a href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day10/configgen.rb">configgen.rb</a> </li>
+  <li> <a href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day10/nagios.cfg.erb">nagios.cfg.erb</a> </li>
+</ul>
+
+Running 'configgen.rb' with all the files above in the same directory produces
+<a
+href="http://semicomplete.googlecode.com/svn/sysadvent/2008/day10/OUTPUT">this
+output</a>. Here's a small piece of it:
+
+<pre>
+define hostgroup {
+  hostgroup_name frontend
+  members host2.prod.yourdomain
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-http-getroot
+  check_command check-http-getroot
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-https-certificate-age
+  check_command check-https-certificate-age
+}
+
+define service {
+  hostgroup_name frontend
+  service_description frontend.check-https-getroot
+  check_command check-https-getroot
+}
+</pre>
+
+I'm not totally certain this generates valid nagios configurations, but I did
+my best to make it close. 
+
+<p>
+
+If you add a new 'frontend' server to hostlabels.yaml, you can regenerate the nagios config trivially and see that the 'frontend' hostgroup now contains a new host:
+
+<pre>
+define hostgroup {
+  hostgroup_name frontend
+  members host3.prod.yourdomain, host2.prod.yourdomain
+}
+</pre>
+
+(There's also a new host {} block declaring the new host3.prod.yourdomain not shown in this post)
+
+<p>
+
+Automatically generating config files moves you into a whole new world of
+sysadmin zen. You can regenerate any configuration file if it is corrupt or lost.
+No domain knowledge is required to add a new host or label. Knowing the nagios (or other
+tools) config language is only required when modifying the config template, not
+the label or host definitions (a time/mistake saver). You could swap nagios out
+for another monitoring tool and still make sure the underlying concepts
+(frontend has http monitoring, etc) are consistent. Being able to automatically
+generate configs means that you probably have both the templates and the source
+data (our yaml files here) stored in revision control, which is a whole other
+best practice to focus on.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://www.ruby-doc.org/stdlib/libdoc/erb/rdoc/">Ruby ERB documentation</a> </li>
+  <li> <a href="http://template-toolkit.org/">Perl Template Toolkit</a> </li>
+  <li> <a href="http://wiki.python.org/moin/Templating"> Python templating project
+s </a> </li>
+</ul>

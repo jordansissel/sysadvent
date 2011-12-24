@@ -1,0 +1,157 @@
+What Time Is It?
+
+<p>
+Time is relative. No, I'm not talking about Einstein's <a href="http://en.wikipedia.org/wiki/Theory_of_relativity">relativity theory</a>. 
+</p>
+
+Time is a complex thing. Did you know there are a few bazillion <a
+  href="http://en.wikipedia.org/wiki/Time_standard">time standards</a>?  Not
+time representations, but actually standards on how to record and observe the
+passage of time! That's awesome! Further, learning about time standards helps explain why we have leap years and leap seconds.
+
+<p>
+
+Why do we care about time? Before we talk about why, let's first introduce some
+time representation formats.
+
+<p>
+
+Time formats for exchange and storage are also complex. <a
+  href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> is a widely used
+and abused time format standard. This standard also supports durations (aka 30
+seconds) and intervals (start and end timestamps), though I've never seen
+anything use ISO 8601 durations or intervals. Timestamps (ie; a point in time)
+are the focus of today, so we'll ignore durations and intervals. The problem
+with ISO 8601 is that it is huge and complex and supports a pile of different
+timestamp representations with all kinds of optional fields. This complexity
+has lead groups like the <a href="http://www.w3.org/TR/NOTE-datetime">W3C</a>
+and <a href="http://www.ietf.org/rfc/rfc3339.txt">IETF</a> to publish time
+format specifications that are similar to ISO 8601, but much simpler and
+reduced.
+
+<p>
+
+An example RFC 3339 timestamp looks like:
+<code>2009-12-09T00:45:58-08:00</code> (see RFC 3339 section 5.6). Like ISO
+8601, RFC 3339 supports fractional seconds, so the following is also valid:
+<code>2009-12-09T00:45:58<b>.335134</b>-08:00</code>.
+
+<p>
+
+The RFC does not specify a limit to the precision of the fractional seconds.
+This fractional seconds field is also the only optional field in RFC 3339; all
+other values must be present.
+
+<p>
+
+Another common time format is <a
+  href="http://www.ietf.org/rfc/rfc2822.txt">RFC-2822</a> (supercedes <a
+  href="http://tools.ietf.org/html/rfc822">RFC-822</a>). RFC-2822 section 3.3
+covers time formats. This format has redundant fields and generally appears to
+be a format for the benefit of humans, not computers. It appears to be
+backwards compatible with RFC 822 time format. Mentionables about this format
+are that it uses abbreviated english names for months, does not support
+fractional seconds, and has some oddities in whitespace suggestions.
+
+<p>
+
+Text time formats aren't the only ones you need to be aware of. MySQL supports
+three time types, none of them superb. None of MySQL's time types support
+fractional seconds.  DATETIME and TIMESTAMP lack timezone storage. DATE doesn't
+hold times. TIME doesn't hold dates. 
+is funky at best. TIMESTAMP will convert to UTC on write and
+back to local time on read, but the mysql client needs to explain it's view of
+<a
+  href="http://dev.mysql.com/doc/refman/5.1/en/time-zone-support.html">timezones
+  external to any read or write</a>. <a
+  href="http://dev.mysql.com/doc/refman/5.1/en/time-zone-leap-seconds.html">MySQL's
+  leap second support</a> is odd - you won't be able to detect if a stored
+timestamp is during a leapsecond due to a bug they had to work around in their
+mysql dump/restore with leap seconds.
+
+<p>
+
+Like the MySQL example there are thousands of cases of software not using
+standard time formats. Almost every piece of software uses it's own logging
+time format, which brings me to my next point -
+
+<p>
+
+Time formats are a perfect example of what the programming world would say is
+mixing your data model and your view on that data. In this case, our data model
+is time, and the view is whatever format present it in. For example, in syslog,
+you'll see times like "Dec 6 11:51:04" and in Apache you'll see
+"02/Oct/2009:12:01:16 -0700".  Nagios uses "[1253586479]" which is unix epoch.
+
+<p>
+
+Any random time format, depending on what it is needed for, can have
+one of a few problems. Time formats often omit values: syslog doesn't often
+have year or timezone. Most time formats don't sort when compared: apache logs
+do not sort because the month is specified as english abbreviation, 'Dec' for
+example). Finally, few things support or bother to use fractional seconds.
+Fractional seconds (micro/milli/nanoseconds) is not required for most
+applications, but it's something to be mindful of.
+
+<p>
+
+A lack of common time format means that you can pick any two pieces of software
+in your system and have a high probability that they don't speak the same time
+format. This makes it very difficult to compare times across applications
+without writing custom conversions (with awk, perl, whatever) to normalize all
+the times to a single format for comparison. This sucks.
+
+<p>
+
+All of the above make real the following - having two tools speak different
+time languages makes for a hard time.  I am quite annoyed that most software
+chooses to use their own randomly-created time format. You should be annoyed,
+too. 
+
+<p>
+
+Stepping back from the time format problems discussion, software time formats
+aren't the only problem. Having the same tool on two servers speak the same
+time format but out of sync can cause other problems for you. Some protocols
+require time to be synchronized. 
+<a href="http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/time-sync.html">Kerberos</a>
+is an example system that requires time synchronization. 
+
+<p>
+
+Use NTP to synchronize clocks across your servers.
+
+<p>
+
+As discussed above, lots of time formats do not include time zones. For your
+own sanity, you should standardize on a single time zone. UTC is a good choice,
+as it does not use daylight savings time. If you are bad at converting UTC to
+localtime in your head, buy two wall clocks for your office and set one to UTC
+and one to local. Where applications allow, have them always show time in
+localtime but store time in UTC.
+
+<p>
+
+Lastly, be careful when you change the system time zone (on any operating
+system). Some processes don't check the timezone changes. For example, apache
+will continue to log in PST (-0800) even after you change /etc/localtime to use
+UTC - fixing this requires a restart of apache. The same problem may plague
+your cron, syslog, and other systems, depending on how they are implemented.
+
+<p>
+
+Time is hard. Keep your server and device time in sync, try to keep your software
+using the same time format, use a common time zone across your systems, and if
+you have the option, use time formats that don't drop things like year. These
+practices should help you and others navigate through time.
+
+<p>
+
+Further reading:
+<ul>
+  <li> 
+  <li> <a href="http://en.wikipedia.org/wiki/Special_relativity">Special Relativity</a> </li>
+  <li> <a href="http://www.ntp.org/">NTP.org</a> </li>
+  <li> <a href="http://www.exit109.com/~ghealton/y2k/yrexamples.html">The Best Of Dates, The Worst Of Dates</a> </li>
+  <li> <a href="http://www.amazon.com/s/ref=nb_ss?url=search-alias%3Daps&field-keywords=atomic+wall+clock&x=9&y=20">Atomic Wall Clocks</a> on Amazon </li>
+</ul>

@@ -1,0 +1,99 @@
+<h1>Aggregating Nagios Checks for Better Alerting</h1>
+
+<p><em>This article was written by <a href="http://www.semicomplete.com/">Jordan Sissel</a> (<a href="http://twitter.com/jordansissel">@jordansissel</a>)</em></p>
+
+<p>Chances are that your infrastructure has more than one machine performing the
+same role - frontend (webapps, etc), backend (databases, log collectors, etc),
+middleware (message brokers, proxies, etc), support services (config
+management, etc). Horizontal scaling means that you scale by adding more server
+resources, right?</p>
+
+<p>Monitoring a horizontally scaled system can often lead to unintended noise. You
+might have 10 web servers, but 3 are broken, so you get 3 alerts. Maybe you
+monitor ssh health on all 50 of your servers, and someone pushed a bad config
+or there is a bad network connection, and now all 50 servers are alerting you
+about failures. Further, I believe that monitoring alerts (things that page
+you) should generally be business-oriented, not
+single-metric-and-single-server-oriented.</p>
+
+<p>Even if you aren't running systems with duplicate roles, it often makes sense
+to collect multiple individual health checks into a single alert.</p>
+
+<p>This calls for aggregating your data. Benefits of aggregation are increased 
+alert value while decreasing alert noise. Noisy monitoring systems often result in
+yourself (and others) unconsciously training to ignore that system - don't let
+your monitoring servers <a
+href="http://en.wikipedia.org/wiki/The_Boy_Who_Cried_Wolf">cry, "Wolf!"</a>.
+Further, alerting on aggregates means you can do cool things like only alerting
+if, for example, more than 5% of things are failing - assuming that's safe for
+your business.</p>
+
+<p>If you could keep the existing checks you have, not alert on them, but add
+aggregate checks that cause alerting, you could maintain your current
+fine-grain monitoring while improving alerting in both noise level and business
+relevance! Sounds like win-win.</p>
+
+<p>There are some solutions for this already, like
+<a href="http://my-plugin.de/wiki/projects/check_multi/configuration/file">check_multi</a>.
+but I didn't want to run additional or duplicate checks. Why? Some checks may
+take a long time (like a complex Selenium test), or may be resource-intensive
+to run (like verifying a large backup), or may not scale if I have to run 200 of
+them to answer one aggregated health check.</p>
+
+<p>So, I took a different approach. Nagios already records <a href="http://nagios.sourceforge.net/docs/3_0/configmain.html#status_file">state in a file on
+disk</a>, so
+we can parse that file and produce an aggregate check. Lucky for me, there are
+already tools that parse this format, so most of
+the work is done already (<a href="http://code.google.com/p/nagiosity/">nagiosity</a>,
+<a href="http://mathias-kettner.de/checkmk_livestatus.html">checkmk_livestatus</a>, and
+<a href="http://code.google.com/p/ruby-nagios/">ruby-nagios</a>). I picked ruby-nagios, for no particular reason. It didn't require much
+hacking to add what I needed. The result is
+<a href="https://rubygems.org/gems/nagios-manage">nagios-manage</a> and a tool:
+<code>check_check.rb</code> (comes with the nagios-manage rubygem).</p>
+
+<p>Notes: Currently, this tool assumes a few things about what I want:</p>
+
+<ul>
+<li>Skips checks that have notifications disabled</li>
+<li>Skips checks that are marked in downtime</li>
+<li>Only uses the <code>hard</code> state. If it is in <code>soft critical</code>, for example, it will
+assume the previous <code>hard</code> state.</li>
+</ul>
+
+<p>The above constraints let me aggregate other nagios-state data into health that
+is deemed important - if one server is down for maintenance or has a known
+failure, I don't want to alert about it.</p>
+
+<p>Examples:</p>
+
+<pre><code># Summarize all checks for all hosts:
+% check_check.rb
+OK=110 WARNING=0 CRITICAL=0 UNKNOWN=0 services=// hosts=// 
+
+# Summarize solr checks, when one check is failing:
+% check_check.rb -s solrserver
+OK=27 WARNING=0 CRITICAL=1 UNKNOWN=0 services=/solrserver/ hosts=// 
+Services in CRITICAL:
+  frontend1.example.com =&gt; solrserver client tests
+</code></pre>
+
+<p>The result in nagios looks something like this:</p>
+
+<p><img src="http://lh4.ggpht.com/_u-5lMShiO40/TPyrT6Io2GI/AAAAAAAAAGA/hfsdcMj44b4/nagios-check_check.png" alt="nagios check_check" title="" /></p>
+
+<p>By the way, the no-argument invocation is super useful for, from the command
+line, checking the overall health of everything nagios monitors.</p>
+
+<p>For the solrserver check above, I would create one single check that would run
+the above <code>check_check.rb</code> command and alert appropriately. This saves me from
+having 28 potentially-failing-and-alerting checks. Further, if I get an alert
+about 1 critical check, I still have the further fine-grained alerting per
+server, so I can easily drill into what is failing.</p>
+
+<p>Summarizing: I still have monitoring doing fine-grained, individual checks,
+like cpu usage, network activity, server behaviors, etc, but individual checks
+do not cause alerts themselves. This means setting the <code>contacts</code> for your
+individual checks to something that won't alert you. Instead, I use
+<code>check_check.rb</code> to aggregate results to reduce noise and to collect relevant
+data - alerting only on important failures in a way that doesn't flood the
+pager and helps me better indicate business-service problems to those on call.</p>

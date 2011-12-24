@@ -1,0 +1,156 @@
+<i>This article was written by Kent Brodie</i>
+
+<p>
+When you're a sysadmin of several systems, you soon find yourself needing a
+centralized `dashboard' (ugh, I hate that term!) of sorts for your systems.
+That is, a central monitoring point where, with one or two screens, you can
+easily check on the overall health of ALL of your systems.   And yeah, it helps
+when the same monitoring tool/suite notifies you 24x7 when something goes awry.
+</p>
+
+<p>
+In this context, many product names are familiar: Nagios, Zenoss, Hyperic,
+OpenNMS, but one that I personally feel that gets overlooked too often is
+Xymon.  </p>
+
+<p>
+Anyhow, all of the above-mentioned products work well. Some are free, and some
+are mostly free unless you wish to purchase support or perhaps value add-ons.
+After trying most of them out, I settled on Xymon. Why? Because it's simple,
+lightweight, flexible, scalable, and yes, free. The others?  They're all quite
+good, but I found them time-consuming to set up, and many of the screens
+display "too much" for my liking.   There can indeed be "too much" of a good
+thing.  </p>
+
+<p>
+Historical note: Xymon is the current name of the project formerly known as
+Hobbit. Due to a nastygram the project lead got from the Tolkien estate some
+time ago, the project had to be renamed.  You will notice however that portions
+of the original project name are still there (configuration file names, for
+example).   So long as you know that Hobbit=Xymon, you'll be fine.  </p>
+
+<p>
+If you've never seen Xymon, you need to check out the online demo.  I guarantee
+it will take you about 60 seconds (or less) to see how it works.  Go to <a
+href="http://www.xymon.com">http://www.xymon.com</a>.    You'll see a simple
+screen with a few catagories and colored icons: green = good, yellow =
+warning, red = bad.  The Xymon "home screen" is quite simple, and is one
+of the reasons I like this setup so much.   Simplicity = elegance.  
+
+<p>
+Navigating the display is simple. Start with the icon next to "systems."  You'll
+see a few servers listed and lots of status icons.  Click on ANY of the status
+icons for info.   Click on a CPU icon.  Once you've done that, scroll to the
+bottom.  Check out the RRD historical graph at the bottom.  And click on it.
+Whoa - lots of history and trend info.   By the way, the online demo is actual
+live Xymon monitoring of a few servers belonging to the project's primary
+author.  </p>
+
+<p>
+After playing with the demo, you will either say "feh", or you'll say "whoa--
+this is pretty powerful, yet - simple". For the latter folks: read on.
+</p>
+
+<p>
+Setting up Xymon is simple.    It's available as RPMs and <a
+href="http://sourceforge.net/projects/hobbitmon/">source</a>.   I prefer
+source.  Compiling it (follow the instructions) is straightforward. By the way,
+your distro may still use 'hobbit' as the package name.  I'm not going to go
+into how to build and install Xymon, my goal is to describe a few of the key
+configuration files that make Xymon work.  Note, as you read on, the simplicity
+of the setup. Xymon includes easy hooks into your local apache server.  </p>
+
+<p>
+The primary file that drives Xymon is <a
+href="http://xymon.com/hobbit/help/manpages/man5/bb-hosts.5.html"><code>
+bb-hosts</code></a> (Why bb?  Hobbit..  er..  Xymon is an active branch of the
+older, less capable "Big Brother" monitoring package). The
+<code>bb-hosts</code> contains the systems you want to monitor.   The first
+entry is the Xymon host itself (and is required).     The other two shown in
+the example below are two additional servers I want to monitor. (see <a
+href="http://xymon.com/hobbit/help/manpages/man5/bb-hosts.5.html">bb-hosts(5)</a>).  </p>
+
+<p>
+The basic format of this file is pretty straightforward:   IP and host name.
+Other options are available as extra tests per host, such as checking web
+pages, verifying oracle is running, and so on.  You can add the options later
+as you become familiar with how it all works.  </p>
+
+<pre>
+# format is
+# ip-address       hostname                # tag1 tag2 ...
+192.168.1.10       xyhost                  # bbd apache=http://127.0.0.1/
+192.168.1.1        system1
+192.168.1.2        system2
+</pre>
+
+<p>
+Once you get rolling, you can eventually categorize and group the Xymon
+display page to your liking. For example, you can have all of your web
+servers in one sub-page and all database servers in another sub-page. You
+can mix and match, and hosts can occupy multiple sub-pages if you wish. It's
+all a simple matter of editing <code>bb-hosts</code> and following examples in
+there.  </p>
+
+<p>
+The next file that will become of great importance to you is <a
+href="http://xymon.com/hobbit/help/manpages/man5/hobbit-alerts.cfg.5.htm
+l"><code>hobbit-alerts.cfg</code></a>.   This file describes the notification
+actions to take when an event occurs.  </p>
+
+<pre>
+SERVICE=conn
+ MAIL my.email@my.domain RECOVERED FORMAT=TEXT
+</pre>
+
+<p>
+The entry above says, "Whenever ANY server is unreachable via a simple
+ping, send a detailed message to the email address listed".
+There's lots of flexibility here.  You can have alerts sent when only
+certain servers fail, and ignore alerts for others.  You can limit the
+times of day that alerts are actually sent, and so on. It's important to
+not have your Xymon environment "cry wolf" with too many false or chatty
+alerts, or everyone will start ignoring them. SMS texting is also available
+using out-of-band methods.
+</p>
+
+<p>
+That's it!   After setting up a hobbit server and configuring only a handful of
+simple text files, you now have basic monitoring.  Without anything installed
+on clients, hobbit can remotely monitor things like uptime (ping test), http,
+ftp, ssh, smtp, and a few others. The power comes in when you install a
+little hobbit client on each server. Then, you'll have it all: CPU, memory,
+disk, processes (and more). You also have the ability to download/customize
+or even write your own tests. There's a ton of available modules you can add.
+</p>
+
+<p>
+I highly recommend getting started slowly.  After you have basic Xymon
+monitoring as outlined above, go ahead and build the client and install it on ONE
+of your additional servers above.   Make sure to allow the xymon port (the
+default is tcp <a
+  href="http://en.wikipedia.org/wiki/Nineteen_Eighty-Four">1984</a>) into the
+xymon server.   When you check out the Xymon display, you will notice the
+server that has the client running will report a lot more information available
+for you to investigate.  </p>
+
+<p>
+When I set up a new server (we add stuff weekly), one of my configuration steps
+is adding it to the hobbit/xymon monitoring.    On the Xymon server side, I add
+one text entry in the bb-hosts file.   On the client side (the new server), I
+create a hobbit user account, grab the client tarball that I built earlier, and
+untar it in the hobbit user's home directory.   With the final step of adding
+an init script, I'm done.   Takes about a minute.  The client is VERY
+lightweight, and gathers data using simple available tools like "top", "df",
+etc.  </p>
+
+<p>
+I like Xymon because it meets the <a href="http://michaelreid.typepad.com/michaelreid/2009/11/kiss-principle.html">"Gene Simmons" principle</a>.   It's simple, and
+it's effective.   All of your sysadmin tools should be that way.  </p>
+
+<p> Further reading:
+
+<ul>
+  <li> <a href="http://en.wikibooks.org/wiki/System_Monitoring_with_Xymon">System Monitoring with Xymon</a> on wikibooks </li>
+  <li> 
+</ul>

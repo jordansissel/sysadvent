@@ -1,0 +1,102 @@
+<i>This article was written by <a href="http://saintaardvarkthecarpeted.com/">Saint Aardvark the Carpeted</a></i>
+
+<p>If you work in smaller environments, like I do, the need for inventory
+software can seem...well, distant.  Maybe you can keep track of
+everything already, or maybe that spreadsheet or wiki page is just
+fine.</p>
+
+<p>But what happens when you upgrade it?  What about when you want to get
+more information, like service tags or the number of DIMM slots in
+use?  What about keeping a history of each machine, so you can see
+what problems you've had with it before?  Or what about simply
+hitting the jackpot and getting ten or twenty or fifty machines in a
+week?</p>
+
+<p>Relax.  OCS Inventory NG and GLPI are here to help.</p>
+
+<h4>OCS Inventory NG</h4>
+
+<p>OCS Inventory NG is a French project released under the GPL. It
+helps you:</p>
+
+<ul>
+<li>keep track of your systems, including a full inventory of software
+and hardware</li>
+<li>manage the inventory using a web interface</li>
+<li>deploy packages to your systems as needed</li>
+</ul>
+
+<p>Now, I'll be honest: I don't use the package management part of
+OCSNG.  (I use cfengine for that.) Instead, I use the agent software
+to get machines to inventory themselves.</p>
+
+<p>The OCSNG agent a clever tool that runs well on both Unix (I've tested it
+on OpenBSD, CentOS and Ubuntu Linux, and Solaris) and Windows (I've
+only tried it on Windows XP so far).  It takes an inventory of the
+hardware (including things like Dell service tags), number and type of
+hard drives, and MAC addresses, and reports it via the web
+interface.</p>
+
+<p>(One gotcha:  I tried for a while to get the web interface to work
+behind Apache's mod_reverse_proxy, but this failed.  In the end I gave
+up and put the website on a server available directly from my
+networks.)</p>
+
+<p>Because the agent is meant to be self-sufficient, it will
+automagically install the various Perl modules it needs if it can't
+find them and put them under its installation directory (/opt/OCSNG by
+default).  I'd rather grab those modules using the distro's package
+management tool, so I wish there was a way to turn that behaviour off.
+However, that's a minor nit.</p>
+
+<p>You'll notice that the management website is kind of spare.  This
+is where GLPI shines.</p>
+
+<h4>GLPI</h4>
+
+<p>GLPI is <i>another</i> French, GPL'd tool, and it complements OCS
+Inventory quite well.  It has a much broader aim: rather than simply
+keeping track of your machines, it allows you to keep a whole swath of
+information abou them.  Problems and their resolution, support
+contracts, contact people, random notes -- GLPI wil track it all.</p>
+
+<p>Again, though, I already have tools for much of this (Request
+Tracker for tickets, FosWiki for documentation).  What I really like
+about GLPI are the inventory tools.</p>
+
+<p>GLPI will certainly let you add new machines manually to its
+inventory. There is a plugin for GLPI called OCS Import that will
+let you suck data in from your OCSNG installation, and that's what
+I've done.</p>
+
+<p>Installing the plugin is simple; adding new machines takes a bit
+more work.  Rather than automagically grabbing info from OCSNG
+whenever it shows up, the plugin allows you to specify machines to
+insert into GLPI, or to update afterward.</p>
+
+<p>(Originally, I was going to write that it was a shame that you had
+to do this by hand; not just the first time, but every time the
+information in OCSNG got updated.  However, it turns out there
+<i>is</i> a script in the plugin to do a mass synchronization of
+GLPI with OCSNG and is suitable for running from cron.  Memo to
+myself:  RTFM.)</p>
+
+<p>GLPI's interface is easy to use.  You can update location
+information, add PDFs of support contracts, or change the responsible
+person.  You can export inventory lists to PDF. Additionally, you can
+extend its functionality with a multitude of plugins, covering
+everything from order management to exporting notes to Outlook to
+showing Snort alerts.</p>
+
+<p>You've tried chocolate and peanut butter; now try OCS Inventory NG
+and GLPI.  You'll like it.</p>
+
+<p>Further reading:</p>
+
+<ul>
+<li><a href="http://www.ocsinventory-ng.org/">OCS Inventory NG</a></li>
+<li><a href="http://glpi-project.org/?lang=en">GLPI</a></li>
+<li><a href="http://plugins.glpi-project.org/spip.php?article92">OCS
+Import plugin for GLPI</a></li>
+<li><a href="http://plugins.glpi-project.org/?lang=en">GLPI Plugins</a></li>
+</ul>

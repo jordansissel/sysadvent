@@ -1,0 +1,423 @@
+<h1>Down The Rabbit Hole</h1>
+<p><em>This article was written by <a href="http://www.thesimplelogic.com/">Adam Fletcher</a> (<a href="http://twitter.com/adamfblahblah">@adamfblahblah</a>)</em></p>
+<h2>From <code>ls(1)</code> to the kernel and back again.</h2>
+<p>Too often sysadmins are afraid to dive into the source code of our core
+utilities to see how they really work. We're happy to edit our scripts but we
+don't do the same with our command line utilities, libraries, and
+kernel.  Today we're going to do some source diving in
+those core components. We'll answer the age-old interview question, "What
+happens when you type <code>ls</code> at the command line and press enter?" The answer to this question
+has infinite depth, so I'll leave out some detail, but I'll capture the essence
+of what is going, and I'll show the source in each component as we go. The
+pedants in the crowd may find much to gripe about but hopefully they'll do so
+by posting further detail in the comments. </p>
+<h2>Requirements</h2>
+<p>It'll be helpful if you install the source on your machine for the software
+we'll be looking at. Below are the commands I used to get the source for the
+needed packages on Ubuntu 9.10, and similar packages are available for your
+Linux distribution. </p>
+<pre><code>apt-get install linux-source 
+apt-get source coreutils 
+apt-get source bash
+apt-get source libc6
+apt-get install manpages-dev
+</code></pre>
+<p>I'm using <code>linux-source</code> version <code>2.6.31.22.35</code>, <code>coreutils</code> (for the code to
+<code>ls</code>) version <code>7.4-2ubuntu1</code>, <code>bash</code> version <code>3.5.21</code>, and <code>libc6</code> version
+<code>2.10.1-0ubuntu18</code>, and finally <code>manpages-dev</code> to get the programmer's <code>man</code> pages.</p>
+<h2>Starting Out - <code>strace</code> &amp; <code>bash</code></h2>
+<p>One of the most useful tools in the sysadmin's arsenal is <code>strace</code>, a command
+that will show you most of the standard library and system calls a program
+makes while it executes. We'll use this tool extensively to figure out what
+code we are looking for in each component. </p>
+<p>Let's start by <code>strace</code>'ing <code>bash</code> when it runs <code>ls</code>. To do so, we'll start a
+new instance of <code>bash</code> under <code>strace</code>. Note that I'll be cutting the output of
+<code>strace</code> down a lot in the post for readability.</p>
+<pre><code>adamf@kid-charlemagne:~/foo$ strace bash
+execve("/bin/bash", ["bash"], [/* 30 vars */]) = 0
+
+[... wow that's a lot of output ...]
+
+write(2, "adamf@kid-charlemagne:~/foo$ ", 29adamf@kid-charlemagne:~/foo$ ) = 29
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+rt_sigprocmask(SIG_BLOCK, NULL, [], 8)  = 0
+read(0,
+</code></pre>
+<p>... and that's where the output stops. If you're new to <code>strace</code> the key to
+reading it is to make liberal use of <code>man</code> pages to figure out what each
+library call does. Be aware that the relevant pages you want are in section
+2 of the <code>man</code> pages, so you'll need to do <code>man 2 read</code> to find the page on <code>read</code>; this is
+because many of the system functions have the same name as regular commands that are found
+in chapter 1 of the <code>man</code> pages.</p>
+<p>The <code>read</code> call is waiting for input on file descriptor 0, which is standard
+input. So we type <code>ls</code> and hit enter (you'll see more <code>read</code> &amp; <code>write</code> calls as
+you type). </p>
+<p>There's a lot of output, but we know we want to see <code>ls</code> related output, so
+let's do the simple thing and look at the lines that have <code>ls</code> in them:</p>
+<pre><code>stat("/usr/local/sbin/ls", 0x7fff03f1fd60) = -1 ENOENT (No such file or directory)
+stat("/usr/local/bin/ls", 0x7fff03f1fd60) = -1 ENOENT (No such file or directory)
+stat("/usr/sbin/ls", 0x7fff03f1fd60)    = -1 ENOENT (No such file or directory)
+stat("/usr/bin/ls", 0x7fff03f1fd60)     = -1 ENOENT (No such file or directory)
+stat("/sbin/ls", 0x7fff03f1fd60)        = -1 ENOENT (No such file or directory)
+stat("/bin/ls", {st_mode=S_IFREG|0755, st_size=114032, ...}) = 0
+stat("/bin/ls", {st_mode=S_IFREG|0755, st_size=114032, ...}) = 0
+</code></pre>
+<p>If we <code>man 2 stat</code> we see that <code>stat</code> returns information about a file if it
+can find it, and an error if it can't (much more on <code>stat</code> later). In this case
+what <code>bash</code> is doing is searching my <code>$PATH</code> environment variable in hopes of
+finding an executable file with the name <code>ls</code>. Bash will <code>stat</code> every directory
+in my <code>$PATH</code>, and if it can't find the file it returns <code>command not found</code>. In
+this case, Bash found <code>ls</code> in <code>/bin</code>, and then that's the last we see of the
+string <code>ls</code> in our output. </p>
+<p>We don't see <code>ls</code> in our output anymore because once Bash knows it can execute
+the program it spawns a child process to execute that program, and we haven't 
+told <code>strace</code> to follow children of the command it is tracing.  It's the next
+few lines of <code>strace</code> that give this spawning away: </p>
+<pre><code>pipe([3, 4])                            = 0
+clone(child_stack=0, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7f2c853217c0) = 30125
+</code></pre>
+<p>If we <code>man 2 pipe</code> and <code>man 2 clone</code> we see that <code>bash</code> is creating a pipe (two
+file descriptors that can be read and written to; this way a shell can link commands input 
+and output together when you give the shell a <code>|</code> character) and <code>clone</code>'ing itself so
+that there are two copies of <code>bash</code> running. Remember, every UNIX process is a
+child of another process, and a brand new process starts out as a copy of its
+parent. So when does ls actually happen? Let's <code>strace ls</code> and find out!</p>
+<pre><code>adamf@kid-charlemagne:~/foo$ strace ls
+execve("/bin/ls", ["ls"], [/* 30 vars */]) = 0
+</code></pre>
+<p>That first line is the key. <code>execve</code> is the library call to load and run a new
+executable. Once <code>execve</code> runs we're actually <code>ls</code> (well, the loader runs
+first, but that's another article). Interestingly, the call to <code>execve</code> is in
+the <code>bash</code> source code, not the <code>ls</code> source code. Let's find it in the <code>bash</code>
+code:</p>
+<pre><code>adamf@kid-charlemagne:/usr/src/bash-4.0/bash-4.0$ find . | xargs grep -n "execve ("
+./builtins/exec.def:201:  shell_execve (command, args, env);
+./execute_cmd.c:4323:   5) execve ()
+./execute_cmd.c:4466:      exit (shell_execve (command, args, export_env));
+./execute_cmd.c:4577:  return (shell_execve (execname, args, env));
+./execute_cmd.c:4653:/* Call execve (), handling interpreting shell scripts, and handling
+./execute_cmd.c:4656:shell_execve (command, args, env)
+./execute_cmd.c:4665:  execve (command, args, env);
+</code></pre>
+<p>If we look at line 4323 in <code>execute_cmd.c</code> we see this helpful comment:</p>
+<pre><code>/* Execute a simple command that is hopefully defined in a disk file
+somewhere.
+
+1) fork ()
+2) connect pipes
+3) look up the command
+4) do redirections
+5) execve ()
+6) If the execve failed, see if the file has executable mode set.
+If so, and it isn't a directory, then execute its contents as
+a shell script.
+[...]
+*/
+</code></pre>
+<p>And looking at line 4665 we do see the call to <code>execve</code>. Take a look at the code
+around <code>execve</code> - it's a bunch of error handling but nothing too hard to
+understand. What's interesting is what is not there; the code exists only to
+handle errors and nothing to handle success. That is because <code>execve</code> will only
+return if there's a failure, which makes sense - a successful call to <code>execve</code>
+means we're running something completely different!</p>
+<p>Look around <code>execute_cmd.c</code> at the code around calls to <code>shell_execve</code> and
+you'll see that that code is fairly straightforward.</p>
+<h2>Inside <code>ls(1)</code></h2>
+<p>Let's look at what <code>ls</code> is doing by creating a single file in our directory and
+<code>ls</code>'ing that file under <code>strace</code>.</p>
+<pre><code>adamf@kid-charlemagne:~/foo$ touch bar
+adamf@kid-charlemagne:~/foo$ strace ls bar
+execve("/bin/ls", ["ls", "bar"], [/* 30 vars */]) = 0
+</code></pre>
+<p>Interesting! We can see that <code>bar</code> is now being passed to our <code>execve</code> call.
+Let's keep looking at the <code>strace</code> output to find <code>bar</code>:</p>
+<pre><code>stat("bar", {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+lstat("bar", {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f467abbe000
+write(1, "bar\n", 4bar
+)                    = 4
+</code></pre>
+<p>Right at the end of the <code>strace</code> output we see <code>bar</code> a few times. It looks like
+<code>bar</code> gets passed to <code>stat</code>, <code>lstat</code>, and <code>write</code>. Working backwards, we can <code>man 2 write</code> 
+to figure out that <code>write</code> sends data to a file descriptor, in this case
+standard out, which is our screen. So the call to <code>write</code> is just <code>ls</code> printing out
+<code>bar</code>. The next two library calls, <code>stat</code> and <code>lstat</code>, share a <code>man</code> page, with the
+difference between the commands being that <code>lstat</code> will get information on a
+symbolic link while <code>stat</code> will only get information on a file. Let's look in in
+the <code>ls</code> source code for these calls to see why <code>ls</code> does both <code>lstat</code> and <code>stat</code>:</p>
+<pre><code>adamf@kid-charlemagne:/usr/src/coreutils-7.4/src$ grep -n "stat (" ls.c
+967:      assert (0 &lt;= stat (Name, &amp;sb));       \
+2437:      ? fstat (fd, &amp;dir_stat)
+2438:      : stat (name, &amp;dir_stat)) &lt; 0)
+2721:     err = stat (absolute_name, &amp;f-&gt;stat);
+2730:         err = stat (absolute_name, &amp;f-&gt;stat);
+2749:     err = lstat (absolute_name, &amp;f-&gt;stat);
+2837:         &amp;&amp; stat (linkname, &amp;linkstats) == 0)
+</code></pre>
+<p>That call to <code>lstat</code> stands out amongst the other calls, and so it is a pretty
+good guess that <code>lstat</code> happens for some exceptional reason that programmer would
+notate with a comment. Looking at line 2749 in <code>ls.c</code> we see an interesting
+comment a few lines above:</p>
+<pre><code>         /* stat failed because of ENOENT, maybe indicating a dangling
+             symlink.  Or stat succeeded, ABSOLUTE_NAME does not refer to a
+             directory, and --dereference-command-line-symlink-to-dir is
+             in effect.  Fall through so that we call lstat instead.  */
+        }
+
+    default: /* DEREF_NEVER */
+      err = lstat (absolute_name, &amp;f-&gt;stat);
+      do_deref = false;
+      break;
+    }
+</code></pre>
+<p>That comment means that if we're not talking about a directory and <code>stat</code> has
+already succeeded, we need to see if we are looking at a symlink.  We can see
+that this is true by <code>ls</code>'ing a directory under <code>strace</code>:</p>
+<pre><code>adamf@kid-charlemagne:~/foo$ strace ls /home/adamf/foo/
+[...]
+stat("/home/adamf/foo/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/home/adamf/foo/", O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC) = 3
+fcntl(3, F_GETFD)                       = 0x1 (flags FD_CLOEXEC)
+getdents(3, /* 3 entries */, 32768)     = 72
+getdents(3, /* 0 entries */, 32768)     = 0
+close(3)                                = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f873dda4000
+write(1, "bar\n", 4bar
+</code></pre>
+<p>Note that there was no call to <code>lstat</code> this time. </p>
+<h2>Where We Are Going There Is No <code>strace</code></h2>
+<p>It is time to bid our friend <code>strace</code> a fond farewell as he doesn't have what
+it takes to show us what <code>stat</code> is doing. For that we need to look into the
+standard library, or as it is commonly known, <code>libc</code>. </p>
+<p>The <code>libc</code> code provides a common API for UNIX programs, and a portion of that
+API is the system calls. These are functions that provide a way for a
+programmer to ask the kernel for a resource that is managed by the kernel,
+including the resource we're interested in: the filesystem. The code we'd like
+to look at is for the system call <code>stat</code>. However, because kernels are very
+dependent on the hardware architecture they run on, and <code>libc</code> needs to talk to
+the kernel, much of the code you'll find in the <code>libc</code> source organized by
+architecture. This makes finding the code for <code>stat</code> tricky; if we look in
+<code>io/stat.c</code> we see basically a single line of code that calls a function called
+<code>__xstat</code>. If we <code>find . -name xstat.c</code> we'll see that we want
+<code>./sysdeps/unix/sysv/linux/i386/xstat.c</code>, which is the implementation of <code>stat</code> for
+Linux on i386. </p>
+<p>The code in <code>xstat.c</code> that isn't a reference to a C <code>#include</code> looks like:</p>
+<pre><code>return INLINE_SYSCALL (stat, 2, CHECK_STRING (name), CHECK_1 ((struct kernel_stat *) buf));
+</code></pre>
+<p>And:</p>
+<pre><code>result = INLINE_SYSCALL (stat64, 2, CHECK_STRING (name), __ptrvalue (&amp;buf64));
+</code></pre>
+<p>Reading the comments in the code we can see that <code>stat64</code>is for 64-bit
+platforms. We'll stick to 32-bits for now, but either way we need to figure out
+what <code>INLINE_SYSCALL</code> is. A convention in C programming is that FUNCTIONS IN ALL
+CAPS are pre-processor macros, which means you can typically find out what
+those macros are by <code>grep</code>'ing for <code>define &lt;macroname&gt;</code>:</p>
+<pre><code>adamf@kid-charlemagne:/usr/src/eglibc-2.10.1/sysdeps/unix/sysv/linux/i386$ grep -n "define INLINE_SYSCALL" *
+sysdep.h:348:#define INLINE_SYSCALL(name, nr, args...) \
+</code></pre>
+<p>At first, the code we find at line 348 in <code>sysdep.h</code> looks confusing:</p>
+<pre><code>#define INLINE_SYSCALL(name, nr, args...) \
+({                                                                          \
+    unsigned int resultvar = INTERNAL_SYSCALL (name, , nr, args);             \
+    if (__builtin_expect (INTERNAL_SYSCALL_ERROR_P (resultvar, ), 0))         \
+    {                                                                       \
+        __set_errno (INTERNAL_SYSCALL_ERRNO (resultvar, ));                   \
+        resultvar = 0xffffffff;                                               \
+    }                                                                       \
+    (int) resultvar; })
+</code></pre>
+<p>Looking at the code the call to <code>INTERNAL_SYSCALL</code> stands out - it appears that
+all <code>INLINE_SYSCALL</code> is doing is calling <code>INTERNAL_SYSCALL</code>. Conveniently we can
+scroll down in <code>sysdep.h</code> to find the definition of <code>INTERNAL_SYSCALL</code>:</p>
+<pre><code>/* Define a macro which expands inline into the wrapper code for a system
+call.  This use is for internal calls that do not need to handle errors
+normally.  It will never touch errno.  This returns just what the kernel
+gave back.
+
+The _NCS variant allows non-constant syscall numbers but it is not
+possible to use more than four parameters.  */
+#undef INTERNAL_SYSCALL
+#ifdef I386_USE_SYSENTER
+# ifdef SHARED
+#  define INTERNAL_SYSCALL(name, err, nr, args...) \
+</code></pre>
+<p>... but it appears to define <code>INTERNAL_SYSCALL</code> a few times, and I'm not sure
+which one is actually used. </p>
+<p>A good practice in a situation like this is to stop looking at the code and
+instead take some time to understand the concept the code is trying to
+implement. Googling for something like <code>i386 system calls linux</code> gets us a to
+(Implementing A System Call On i386 Linux)[http://tldp.org/HOWTO/html_single/Implement-Sys-Call-Linux-2.6-i386/] which
+says:</p>
+<pre><code>A system call executes in the kernel mode. Every system call has a number
+associated with it. This number is passed to the kernel and that's how the
+kernel knows which system call was made. When a user program issues a system
+call, it is actually calling a library routine. The library routine issues a
+trap to the Linux operating system by executing INT 0x80 assembly instruction.
+It also passes the system call number to the kernel using the EAX register. The
+arguments of the system call are also passed to the kernel using other
+registers (EBX, ECX, etc.). The kernel executes the system call and returns the
+result to the user program using a register. If the system call needs to supply
+the user program with large amounts of data, it will use another mechanism
+(e.g., copy_to_user call).
+</code></pre>
+<p>Okay, so I think the implementation of <code>INTERNAL_SYSCALL</code> we'll want will have <code>0x80</code> in it 
+and some assembly code that puts stuff in the <code>eax</code> register (newer x86 machines can 
+use <code>sysenter</code> instead of <code>int 0x80</code> to make syscalls). 
+Line 419 in <code>sysdep.h</code> does the trick:</p>
+<pre><code># define INTERNAL_SYSCALL(name, err, nr, args...) \
+({                                                                          \
+    register unsigned int resultvar;                                          \
+    EXTRAVAR_##nr                                                             \
+    asm volatile (                                                            \
+    LOADARGS_##nr                                                             \
+    "movl %1, %%eax\n\t"                                                      \
+    "int $0x80\n\t"                                                           \
+    RESTOREARGS_##nr                                                          \
+    : "=a" (resultvar)                                                        \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");                  \
+    (int) resultvar; })
+</code></pre>
+<p>If we go back to <code>xstat.c</code> we see that the <code>name</code> we pass to <code>INTERNAL_SYSCALL</code> is
+<code>stat</code>, and in the code above the <code>name</code> argument will expand from  <code>__NR_##name</code>
+to <code>__NR_stat</code>. The web page we found describing syscalls says that syscalls are
+represented by a number, so there has to be some piece of code that turns <code>__NR_stat</code> into a
+number. However, when I <code>grep</code> through all of the <code>libc6</code> source I can't find any
+definition of <code>__NR_stat</code> for i386. </p>
+<p>It turns out that the code that translates <code>__NR_stat</code> into a number is inside
+the Linux kernel:</p>
+<pre><code>adamf@kid-charlemagne:/usr/src/linux-source-2.6.31$ find . | grep x86 | xargs grep -n "define __NR_stat"
+./arch/x86/include/asm/unistd_64.h:23:#define __NR_stat             4
+./arch/x86/include/asm/unistd_64.h:309:#define __NR_statfs              137
+./arch/x86/include/asm/unistd_32.h:107:#define __NR_statfs       99
+./arch/x86/include/asm/unistd_32.h:114:#define __NR_stat        106
+./arch/x86/include/asm/unistd_32.h:203:#define __NR_stat64      195
+./arch/x86/include/asm/unistd_32.h:276:#define __NR_statfs64        268
+</code></pre>
+<h2>The Amulet Of Yendor: Inside The Kernel</h2>
+<p>The syscall number definitions being inside the kernel makes sense, as the kernel is 
+the owner of the syscall API and as such
+will have the final say on what numbers get assigned to each syscall. As we're
+running on 32-bit Linux, it appears the syscall number that <code>libc</code> is going to
+put in <code>eax</code> is <code>106</code>. </p>
+<p>The table in <code>unistd_32.h</code> is great (look at all those syscalls!) but it
+doesn't tell us where the code for handling a call to stat actually lives in
+the kernel.  <code>find</code> is our friend again:</p>
+<pre><code>adamf@kid-charlemagne:/usr/src/linux-source-2.6.31$ find . -name stat.c
+./fs/stat.c
+./fs/proc/stat.c
+</code></pre>
+<p>Well that was easy. Opening up <code>fs/stat.c</code> we find what we're looking for:</p>
+<pre><code>SYSCALL_DEFINE2(stat, char __user *, filename, struct __old_kernel_stat __user *, statbuf)
+{
+        struct kstat stat;
+        int error;
+
+        error = vfs_stat(filename, &amp;stat);
+        if (error)
+                return error;
+
+        return cp_old_stat(&amp;stat, statbuf);
+}
+</code></pre>
+<p>Looks like this just a wrapper around <code>vfs_stat</code>, which is also in <code>stat.c</code> and
+is a wrapper around <code>vfs_statat</code>, which again is in <code>stat.c</code> and is wrapper
+around two functions, <code>user_path_at()</code> and <code>vfs_getattr()</code>. We'll ignore <code>user_path_at()</code> 
+for now (it figures out if the file exists) and instead follow
+<code>vfs_getattr()</code>:</p>
+<pre><code>int vfs_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
+{
+        struct inode *inode = dentry-&gt;d_inode;
+        int retval;
+
+        retval = security_inode_getattr(mnt, dentry);
+        if (retval)
+                return retval;
+
+        if (inode-&gt;i_op-&gt;getattr)
+                return inode-&gt;i_op-&gt;getattr(mnt, dentry, stat);
+
+        generic_fillattr(inode, stat);
+        return 0;
+}
+</code></pre>
+<p>One thing that is helpful to do in a case like is to look back at any
+documentation I have on the function whose implementation I'm tracking down,
+which in this case is the library call to <code>stat</code>. Back to <code>man 2 stat</code> we see:</p>
+<pre><code>   All of these system calls return a stat structure, which contains the following fields:
+
+       struct stat {
+           dev_t     st_dev;     /* ID of device containing file */
+           ino_t     st_ino;     /* inode number */
+           mode_t    st_mode;    /* protection */
+           nlink_t   st_nlink;   /* number of hard links */
+           uid_t     st_uid;     /* user ID of owner */
+           gid_t     st_gid;     /* group ID of owner */
+           dev_t     st_rdev;    /* device ID (if special file) */
+           off_t     st_size;    /* total size, in bytes */
+           blksize_t st_blksize; /* blocksize for file system I/O */
+           blkcnt_t  st_blocks;  /* number of 512B blocks allocated */
+           time_t    st_atime;   /* time of last access */
+           time_t    st_mtime;   /* time of last modification */
+           time_t    st_ctime;   /* time of last status change */
+       };
+</code></pre>
+<p>So our <code>vfs_getattr</code> function is trying to fill out these fields, which must be in the <code>struct kstat *stat</code> argument to <code>vfs_getattr</code>.
+<code>vfs_getattr</code> tries to fill out the <code>stat</code> struct in two ways: </p>
+<pre><code>    if (inode-&gt;i_op-&gt;getattr)
+            return inode-&gt;i_op-&gt;getattr(mnt, dentry, stat);
+
+    generic_fillattr(inode, stat);
+</code></pre>
+<p>In the first attempt to fill <code>stat</code>, <code>vfs_getattr</code> checks to see if this
+<code>inode</code> struct has a special function defined to fill the <code>stat</code> structure.
+Each <code>inode</code> has an <code>i_op</code> struct which can have a <code>getattr</code> function, if
+needed. This <code>getattr</code> function is not defined in <code>fs.h</code> but rather is defined
+by the specific file system the <code>inode</code> is on. This makes good sense as it
+allows the application programmer to call <code>libc</code>'s <code>stat</code> without caring if the
+underlying file system is ext2, ext3, NTFS, NFS, etc. This abstraction layer
+is called the 'Virtual File System' and is why the syscall above is prefixed with 'vfs'.</p>
+<p>Some filesystems, like NFS, implement a specific <code>getattr</code> handler, but the
+filesystem I'm running (ext3) does not. In the case where there is no special
+<code>getattr</code> function defined <code>vfs_getattr</code> will call <code>generic_fillattr</code>
+(helpfully defined in <code>stat.c</code>) which simply copies the relevant data from the
+<code>inode</code> struct to the <code>stat</code> struct:</p>
+<pre><code>void generic_fillattr(struct inode *inode, struct kstat *stat)
+{
+        stat-&gt;dev = inode-&gt;i_sb-&gt;s_dev;
+        stat-&gt;ino = inode-&gt;i_ino;
+        stat-&gt;mode = inode-&gt;i_mode;
+        stat-&gt;nlink = inode-&gt;i_nlink;
+        stat-&gt;uid = inode-&gt;i_uid;
+        stat-&gt;gid = inode-&gt;i_gid;
+        stat-&gt;rdev = inode-&gt;i_rdev;
+        stat-&gt;atime = inode-&gt;i_atime;
+        stat-&gt;mtime = inode-&gt;i_mtime;
+        stat-&gt;ctime = inode-&gt;i_ctime;
+        stat-&gt;size = i_size_read(inode);
+        stat-&gt;blocks = inode-&gt;i_blocks;
+        stat-&gt;blksize = (1 &lt;&lt; inode-&gt;i_blkbits);
+}
+</code></pre>
+<p>If you squint a little bit at this struct you'll see all the fields you can get
+out of a single <code>ls</code> command! Our adventure into the kernel has yielded fruit. </p>
+<h2>Just One More Turn...</h2>
+<p>If you'd like to keep going, the next thing to figure out is how the <code>inode</code>
+struct gets populated (hint: <code>ext3_iget</code>) and updated, and from there figure
+out how the kernel reads that data from the block device (and then how the
+block device talks to the disk controller, and how the disk controller finds
+the data on the disk, and so on).</p>
+<p>I hope this has been instructive. Digging through the actual source code to a
+program isn't as easy as reading a summary of how something works, but it is
+more rewarding and you'll know how the program <em>actually</em> works. Don't be
+intimidated by an unknown language or concept! We found our way through the
+internals of the kernel with <code>strace</code>, <code>find</code> and <code>grep</code>, tools a sysadmin uses
+every day.<br />
+</p>
+<h2>Other Resources</h2>
+<ul>
+<li>/Documentation in the Linux kernel source</li>
+<li>The 2nd section of the Linux man pages</li>
+<li><a href="http://tldp.org/HOWTO/html_single/Implement-Sys-Call-Linux-2.6-i386/">Implementing a System Call on Linux 2.6 for i386</a></li>
+</ul>

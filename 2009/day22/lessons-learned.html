@@ -1,0 +1,199 @@
+<p>I've been through two big moves in my career.  The first was about
+four years ago when the company I was working for moved offices.  It
+was only across the street, but it meant shifting the whole company
+over.  We had about forty employees at the time, and maybe a hundred
+workstations, test servers, and production servers.</p>
+
+<p>The second move was when, earlier this year at my current job, we
+finally got to move into our new server room.  This time the scope of
+the move was smaller (no workstations, and about twenty servers), but
+the new digs were nicer. :-)</p>
+
+<p>I learned a lot from these two moves.  I want to pass those lessons
+on to you.</p>
+
+<h2>Have a second set of skilled hands around</h2>
+
+<p>At both places, I was the only sysadmin on staff.  For the first
+move, my company hired a consultant for a few days to help me out with
+the move and its aftershocks.  It was great to have someone else
+around that could help diagnose email problems, run traceroute and
+generally run interference while I swore at the servers.</p>
+
+<p>The second time, I thought that four volunteers, plus me, would be
+enough... it was only twenty servers, after all.  Mainly, it would be a
+question of cabling, then things would just fall into place after
+that... right?<p>
+
+<p>Well, the volunteers were excellent -- I can't say enough about
+them, but a second set of skilled hands would have simplified things
+a <i>lot</i>.  I found myself often switching between them as
+questions came up: How do these rack rails work?  Which interface is
+eth0?  Did you really mean to put 8U of servers into 4U of space?</p>
+
+<p>Obviously, someone familiar with your network, OS/distro and
+thought patterns can help you with network testing, re-jigging Apache
+proxy directives, and finding your pizza coupons.  Even something
+as simple as being familiar with rack rails helps a lot.</p>
+
+<p>And if you're moving offices, <i>don't</i> do this without the
+support of your company.  For the first move there were three of us --
+including the CEO -- and I wouldn't want to do it with less bodies or
+less influence.</p>
+
+<h2>Don't underestimate how tired you'll be</h2>
+
+<p>In some ways, the first move was easier despite it being much more
+involved.  We moved on a Saturday, I got machines up and running on
+Sunday, and on Monday, things were mostly working again.  Knowing that
+I had the time meant that I could go home with a clear conscience.</p>
+
+<p>The second move, though, was meant to be done in one day.  It was
+gonna be simple: I had a checklist for services and boot order, the
+network settings were ready to go, and the new server room was quite
+close our old server room.  How long could it take to move stuff two
+blocks?</p>
+
+<p>Well, the <i>moving</i> took the morning.  De-racking machines,
+getting stuff on the elevator and to the truck (thank goodness for
+strong movers), then dropping stuff off in the server room left us in
+a good position for lunch.</p>
+
+<p>But after lunch, little things cropped up: I'd borked some netmask
+settings on a couple key servers.  The rack I'd planned to put the
+firewall in was too shallow to accept it.  My placement of the in-rack
+switches blocked some PDU outlets.  Some of the rack rails were
+fragile, stupidly constructed, and difficult to figure out.</p>
+
+<p>Each of these things were overcome, but it took time.  Before I
+knew it, it was 7:15pm, I'd been at it for 11 hours and I was
+exhausted.  I had to head home and finish it the next day.
+Fortunately, I had the support of my boss in this.</p>
+
+<h2>Don't make the day any worse than it has to be</h2>
+
+<p>At the first move, I'd decided it would be a good idea to switch to
+a new phone vendor as we moved into the new building.</p>
+
+<p>I avoided firing by, I later calculated, the skin of my teeth.</p>
+
+<p>Your move will be long.  It will be stressful.  You will trip over
+things you didn't plan for, thought you'd planned for, and were sure
+someone else was planning for.  Don't add to the misery by making
+<i>another</i> big change at the same time.  This goes double for
+anything involving a complicated technology with multiple vendors
+(including a local monopoly that Does Not Like competition) that will
+leave everyone <i>very upset</i> if it fails to work right when they
+come in.</p>
+
+<p>Instead, mark it carefully on your calendar for five years in the
+future.</p>
+
+<h2>Set up monitoring early</h2>
+
+<p>For the second move, my Nagios box was second on my list of
+machines to boot up.  I'd set it up with new addresses ahead of time,
+and made sure when it did start that alerts were turned off.</p>
+
+<p>As machines came up, I watched the host and service checks turn
+green.  It was a good way to ensure that I hadn't forgotten
+anything...if it failed, I'd either forgotten to update the address or
+I had a genuine problem.  Either way, I knew about it quickly, and
+could decide whether to tackle it right away or leave it for later.</p>
+
+<h2>Don't forget about cabling</h2>
+
+<p>I planned out a lot of things for my second move, and it served me
+well.  Service checklists, boot sequences...it had taken a long time,
+but it was worth it.  I even had a colour-coded spreadsheet showing
+how many rack units, watts and network cables I'd need for each
+server.</p>
+
+<p>Unfortunately, what I missed was thinking about the cabling itself.
+I'd picked out where the switch in each rack would go, I'd made sure I
+had lots of cables of varying lengths around, and so on.  But there
+were some things I'd missed that experience -- or a dry run -- would
+have caught:</p>
+
+<ul>
+
+<li>Horizontal cable management bars blocked a couple of PDU outlets
+each; this was mostly, but not entirely, unavoidable.</li>
+
+<li>PDU outlets were on the wrong side for most -- but not all --
+servers, which put power cables right next to network cables.</li>
+
+<li>The switches were right next to some PDU outlets -- and since the
+switch outlets went all the way to the side, that meant some network
+cables were right next to power cables.</li>
+
+</ul>
+
+<p>A dry run of the cabling would not have been easy. I didn't have a
+spare server to rack and check for problems, and some of these things
+only emerged when you had a full rack.  But it would have been a lot
+<i>less</i> work than doing it all on the day of the move (let alone
+swearing at it and leaving it for Christmas maintenance).</p>
+
+<h2>Getting new equipment?  Make sure it works</h2>
+
+<p>As part of the new server room, we got a few bells and whistles.
+Among them were a humidifier (necessary since we didn't have a vapour
+barrier) and leak detectors that sat on the floor, waiting to yell at
+me about floods.  "Woohoo!" I thought.  "We're movin' on up!"</p>
+
+<p>What I <i>didn't</i> think about was how these things worked...or
+rather, how I could <i>tell</i> that they worked.  We moved in during
+summer, so the humidifier wasn't really necessary.  But when winter
+came around and the humidity dropped to 15%, I realized that I had no
+idea how to tell if the thing was working.  And when I dug up the
+manual, I had no idea what it was talking about.</p>
+
+<p>Same with the leak detection.  I knew it was there, since the
+sub-contractor had pointed it out.  I had assumed it was managed by
+the monitoring box that had been installed along with it...and since
+I was busy right then moving in boxes and getting NFS working, I put
+it on the list of stuff to do later.</p>
+
+<p>When I finally did tackle it later, it turned out I was wrong:  it
+wasn't part of the other monitoring box.  The box I needed to query
+didn't show anything about a leak detector.  And I had no idea how to
+test the leak detection once I did figure it out.</p>
+
+<p>In both cases, I erred by assuming that I could figure things out
+later.  Most of the time, I can -- and being handy at figuring things
+out goes with the job.  But there are limits to our expertise, our
+area of familiarity, and our ability to learn whole technologies at
+one sitting.  One of the hardest things I've had to realize is
+that, while I like to think I'm <i>capable</i> of learning just about
+anything I'm likely to try my hand at, it's not <i>practical</i> --
+that there are times when you have to give up and say, "That's just
+something I'll have to learn in my next life."</p>
+
+<p>I also erred by not asking the installer to walk me through things.
+I should have asked for simple steps to test whether they were
+working, how to check for problems, and how to reset them.</p>
+
+<h2>Conclusion</h2>
+
+<p>Moving tests things and people. You (re-)learn what you forgot
+about; you find out how to do without missing parts; you come to terms
+with the limits of being human.  It's no less true for being
+melodramatic, but a few tricks, some obsessive planning, foolhardy
+volunteers, and hard work will give you the best war story of all: a
+boring one, where everything worked out just fine in the end.</p>
+
+<p>Further reading:</p>
+
+<ul>
+<li><a href="http://www.lopsa.org">LOPSA</a> mailing list thread on <a
+href="http://lopsa.org/pipermail/discuss/2006-May/001230.html">Sudden
+server room move</a> -- lots of good tips</li>
+<li><a
+href="http://blogs.techrepublic.com.com/datacenter/?p=297">Lessons
+learned from a server room migration</a></li>
+<li>A forum discussion on<a
+href="http://itknowledgeexchange.techtarget.com/itanswers/checklist-for-moving-datacenter/">server
+room moving checklists</a></li>
+</ul>
+

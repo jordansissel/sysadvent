@@ -1,0 +1,95 @@
+Documentation is like automation. Good documentation will save you and your
+cowokers time, effort, and mistakes. Bad documetation will frustrate, anger,
+and annoy. No documentation means you get more interruptions, and you spend
+time not making progress on other tasks.
+
+<p>
+
+There are many things to document: designs, changes, APIs, policies and
+procedures. Each document should focus on a specific audience. Sending a change
+notification to your own group could be terse: "I rebooted system3 because
+&lt;reason&gt;." Documenting an important procedure that your customers will be
+invoking should be well written and probably not terse.
+
+<p>
+
+Good documentation takes effort and thought. Documentation should be written for
+a known audience. Choose your audience before writing a document. Express your intended audience before you begin your document. If you're revising a document, make sure the
+intended audience will still benefit after your revisions. 
+
+<p>
+
+Documentation is about content, audience and findability. If the content is wrong
+or out of date, then your documentation is hurting the situation. If you don't know
+your audience, you can't best help the people who most need your information. If
+your document can't be found, no one will know it exists.
+
+
+<p>
+
+The content of your document is very important. The assumptions of prior
+knowledge in your content must be molded around your chosen audience. For
+instance, don't use an acronym without defining it unless you are certain your
+audience will know what it is or how to find out what it is. Content isn't
+necessarily always text. Good documents include diagrams or links to other
+resources, where possible.
+
+<p>
+
+The medium (wiki, email, paper, etc) of your documentation should reflect the
+needs of that documentation. Don't document long-term information over email. A
+printed new-hire todo list is good to have on said new-hire's desk on the first
+day. A network design should be published (perhaps on your wiki) with details
+including the problem, the solution, and benefits.
+
+<p>
+
+If the medium is electronic, you need to consider findability. Findability
+means that any person needing a piece of information can find it. Findability
+is difficult to provide without good search facilities and/or a easily
+browsable structure. Books have indeces to enhance findability, and your
+documentation should, too. These days, a wiki is a reasonable choice for containing
+your documents as they help you provide search and structure which improves
+findability. If you make roll out a major change, update your documentation and
+send an email to your audience (interested parties) indicating the change and
+where to learn about it.
+
+<p>
+
+You probably have a whole bucket of things that merit documentation. Prioritize
+these by what will gain you the most first. If you get multiple interrupts a
+week from customers making a frequently asked question, documenting it and
+respond with "Look on the wiki for &lt;foo&gt;" is a good way keep an interrupt
+short. Helping customers help themselves helps you. Of course, by "customer" I
+mean the people you are, as a sysadmin, supporting.  Even if they're other
+employees, they're still customers.
+
+<p>
+
+Documentation, like code, needs to be tested. Testing documentation means
+having someone from your intended audience read it and report their level of
+understanding. If they didn't understand the information you were expressing,
+then you need to revise and re-test. If a document is intended for your
+customers, don't have a fellow team member review it.
+
+<p>
+
+Further, documentation being like code, suffers bit rot if neglected. Unmaintained documentation means people reading it will be misinformed. Don't ignore your existing
+documentation. It's worth more to you updated than neglected.
+
+<p>
+
+Knowing that documentation is important means that you should prioritize the
+act of improving and creating documentation among your other duties and tasks.
+Such things take time and effort, so be sure to consider documentation when
+budgeting your own time on work.
+
+<p>
+
+Lastly, it's worth pointing out that some documentation can lead to automation.
+For example, a well-documented alerts (or failure scenario) playbook often looks like a
+flowchart detailing operations to perform to debug and fix a problem. This kind
+of detail often lends itself to being transformed into a script. Once you have
+the script, you could have your alert system run the new script instead of
+paging you, or even just use the script to automate collection of some
+diagnostic information to help you more quickly debug a problem.

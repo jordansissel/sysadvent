@@ -1,0 +1,285 @@
+<h1>Going Parallel</h1>
+
+<p><em>This article was written by <a href="http://www.inatree.org/">Brandon Burton</a>, aka <a href="http://www.twitter.com/solarce">@solarce</a></em>.</p>
+
+<p>As system administrators, we are often faced with tasks that need to run
+against a number of things, perhaps files, users, servers, etc.  In most cases,
+we resort of a loop of some sort, often, just a for loop in the shell.  The
+drawback to this seemingly obvious approach, is that we are constrained by the
+fact that this approach is serial and so the time it will take increases linearly
+with the number of things we are running the task against.</p>
+
+<p>I am here to tell you there is a better way, it is the path of going parallel!</p>
+
+<h2>Tools for your shell scripts</h2>
+
+<p>The first place to start is with tools that can replace that <code>for</code> loop you
+usually use and add some parallelism to the task you are running.</p>
+
+<p>The two most well known tools that are available are:</p>
+
+<ol>
+<li><a href="http://ss64.com/bash/xargs.html">xargs</a></li>
+<li><a href="http://www.gnu.org/software/parallel/">gnu parallel</a></li>
+</ol>
+
+<p><code>xargs</code> is a tool used to build and execute command lines from standard
+input, but one of its great features is that it can execute those command lines
+in parallel via its <code>-P</code> argument.  A quick example of this is:</p>
+
+<pre><code>seq 10 20 | xargs -n 1 -P 5 sleep
+</code></pre>
+
+<p>This will send a sequence of numbers to xargs and divide it into chunks of one
+argument (<code>-n 1</code>) at a time and fork off 5 parallel processes (<code>-P 5</code>) to
+execute each. You can see it in action:</p>
+
+<pre><code>$ ps -eaf | grep sleep
+baron     5830  5482  0 11:12 pts/2    00:00:00 xargs -n 1 -P 5 sleep
+baron     5831  5830  0 11:12 pts/2    00:00:00 sleep 10
+baron     5832  5830  0 11:12 pts/2    00:00:00 sleep 11
+baron     5833  5830  0 11:12 pts/2    00:00:00 sleep 12
+baron     5834  5830  0 11:12 pts/2    00:00:00 sleep 13
+baron     5835  5830  0 11:12 pts/2    00:00:00 sleep 14
+</code></pre>
+
+<p>Some further reading on <code>xargs</code> is available at:</p>
+
+<ul>
+<li><a href="http://www.semicomplete.com/blog/articles/week-of-unix-tools/day-5-xargs.html">http://www.semicomplete.com/blog/articles/week-of-unix-tools/day-5-xargs.html</a></li>
+<li><a href="http://www.xaprb.com/blog/2009/05/01/an-easy-way-to-run-many-tasks-in-parallel/">http://www.xaprb.com/blog/2009/05/01/an-easy-way-to-run-many-tasks-in-parallel/</a></li>
+<li><a href="http://www.linuxask.com/questions/run-tasks-in-parallel-with-xargs">http://www.linuxask.com/questions/run-tasks-in-parallel-with-xargs</a></li>
+<li><a href="http://stackoverflow.com/questions/3321738/shell-scripting-using-xargs-to-execute-parallel-instances-of-a-shell-function">http://stackoverflow.com/questions/3321738/shell-scripting-using-xargs-to-execute-parallel-instances-of-a-shell-function</a></li>
+</ul>
+
+<p><code>gnu parallel</code> is a lesser known tool, but has been gaining popularity
+recently. It is written with the specific focus on executing processes in
+parallel.  From the home page description: <em>"GNU parallel is a shell tool for
+executing jobs in parallel locally or using remote machines. A job is typically
+a single command or a small script that has to be run for each of the lines in
+the input. The typical input is a list of files, a list of hosts, a list of
+users, a list of URLs, or a list of tables."</em></p>
+
+<p>A quick example of using <code>parallel</code> is:</p>
+
+<pre><code>% cat offlineimap-cron5min.plist | parallel --max-procs=8 --group 'echo "Thing: {}"'
+Thing:       &lt;string&gt;offlineimap-cron5min&lt;/string&gt; 
+Thing:     &lt;key&gt;Label&lt;/key&gt; 
+Thing:       &lt;string&gt;solarce&lt;/string&gt; 
+Thing:     &lt;key&gt;UserName&lt;/key&gt; 
+Thing:   &lt;dict&gt; 
+Thing:     &lt;key&gt;ProgramArguments&lt;/key&gt; 
+Thing:       &lt;string&gt;admin&lt;/string&gt; 
+...
+</code></pre>
+
+<p>This <code>plist</code> file is xml, but the output of parallel is unordered above because
+each line of input is processed by one of the 8 workers and output occurs
+(<code>--group</code>) as each worker finishes an input (line) and not necessarily in the
+order of input.</p>
+
+<p>Some further reading on <code>parallel</code> is available at:</p>
+
+<ul>
+<li><a href="http://www.gnu.org/software/parallel/man.html">http://www.gnu.org/software/parallel/man.html</a></li>
+<li><a href="http://psung.blogspot.com/2010/08/gnu-parallel.html">http://psung.blogspot.com/2010/08/gnu-parallel.html</a></li>
+<li><a href="http://unethicalblogger.com/posts/2010/11/gnuparallel_changed_my_life">http://unethicalblogger.com/posts/2010/11/gnuparallel<em>changed</em>my_life</a></li>
+</ul>
+
+<p>Additionally, there is a great
+<a href="http://www.youtube.com/watch?v=OpaiGYxkSuQ">screencast</a> on it.</p>
+
+<h2>Tools for multiple machines</h2>
+
+<p>The next step in our journey is to progress from just running parallel
+processes to running our tasks in parallel on multiple machines.</p>
+
+<p>A common approach to this is to use something like the following:</p>
+
+<pre><code>for server in $(cat list_of_servers.txt); do
+    ssh $server command argument
+done
+</code></pre>
+
+<p>While this approach is fine for small tasks on a small number of machines, the
+drawback to it is that it is executed linearly, so the total time the job will
+take is <em>as long as the task takes to finish multiplied by the number of machines you are
+executing it on</em>, which means it could take a while, so you'd better get a
+Snickers.</p>
+
+<p>Fortunately, people have recognized this problem and have developed a number of
+tools have been developed to solve this, by running your SSH commends in
+parallel.</p>
+
+<p>These include:</p>
+
+<ul>
+<li><a href="http://www.theether.org/pssh/">pssh</a></li>
+<li><a href="http://code.google.com/p/sshpt/">sshpt</a></li>
+<li><a href="http://sourceforge.net/projects/mussh/">mussh</a></li>
+<li><a href="http://sourceforge.net/projects/clusterssh/">clusterssh</a></li>
+</ul>
+
+<p>I'll illustrate how these work with a few examples.</p>
+
+<p>First, here is a basic example of <a href="http://www.theether.org/pssh/">pssh</a> (<em>on
+Ubuntu the package is 'pssh,' but the command is 'parallel-ssh'</em>):</p>
+
+<pre><code># cat hosts-file
+p1
+p2
+
+# pssh -h hosts-file -l ben date
+[1] 21:12:55 [SUCCESS] p2 22
+[2] 21:12:55 [SUCCESS] p1 22
+
+# pssh -h hosts-file -l ben -P date
+p2: Thu Oct 16 21:14:02 EST 2008
+p2: [1] 21:13:00 [SUCCESS] p2 22
+p1: Thu Sep 25 15:44:36 EST 2008
+p1: [2] 21:13:00 [SUCCESS] p1 22
+</code></pre>
+
+<p>Second, here is an example of using <a href="http://code.google.com/p/sshpt/">sshpt</a>:</p>
+
+<pre><code>./sshpt -f ../testhosts.txt "echo foo" "echo bar"
+Username: myuser
+Password:
+"devhost","SUCCESS","2009-02-20 16:20:10.997818","0: echo foo
+1: echo bar","0: foo
+1: bar"
+"prodhost","SUCCESS","2009-02-20 16:20:11.990142","0: echo foo
+1: echo bar","0: foo
+1: bar"
+</code></pre>
+
+<p>As you can see, these tools simplify and parallelize your SSH commands,
+decreasing the execution time that your tasks take and improving your
+efficiency.</p>
+
+<p>Some further reading on this includes:</p>
+
+<ul>
+<li><a href="http://serverfault.com/questions/17931/what-is-a-good-modern-parallel-ssh-tool">What is a good modern parallel SSH tool?</a></li>
+<li><a href="http://serverfault.com/questions/2533/linux-running-the-same-command-on-many-machines-at-once">Linux - Running The Same Command on Many Machines at Once</a></li>
+<li><a href="http://www.devco.net/archives/2010/08/28/effective_adhoc_commands_in_clusters.php">Effective adhoc commands in clusters</a></li>
+</ul>
+
+<h2>Smarter tools for multiple machines</h2>
+
+<p>Once you've adopted the mindset your tasks can be done in parallel and you've
+started using one of the parallel ssh tools for executing ad-hoc commands in a
+parallel fashion, you may find yourself thinking that you'd like to be able to
+execute tasks in parallel, but in a more repeatable, extensible, and organized
+fashion.</p>
+
+<p>If you were thinking this, you are in a luck.  There is a class of tools
+commonly classified as <em>Command and Control</em> or <em>Orchestration</em> tools. These
+tools include:</p>
+
+<ul>
+<li><a href="http://docs.puppetlabs.com/mcollective/">marionette collective aka mcollective</a></li>
+<li><a href="https://fedorahosted.org/func/">func</a></li>
+<li><a href="http://docs.fabfile.org/0.9.3/">fabric, aka fab</a></li>
+<li><a href="https://github.com/capistrano/capistrano/wiki/Documentation-v2.x">capistrano, aka cap</a></li>
+</ul>
+
+<p>These tools are built to be frameworks within which you can build repeatable
+systems automation.  Mcollective and capistrano are written in Ruby, and Func
+and Fabric are written in Python. This gives you options for whichever language
+you prefer.  Each has strengths and weaknesses.  I'm a big fan of Mcollective in particular, because it has
+the strength of being built on <a href="http://www.puppetlans.com/">Puppet</a> and its
+primary author, <a href="http://www.devco.net/">R.I. Pienaar</a> has a vision for it to
+become an extremely versatile tool for the kinds of needs that fall within the
+realm of <em>Command and Control</em> or <em>Orchestration</em>.</p>
+
+<p>As it's always easiest to grasp a tool by seeing it in action, here are basic
+examples of using each tool:</p>
+
+<p><strong>mcollective</strong></p>
+
+<pre><code>% mc-package install zsh
+
+ * [ ============================================================&gt; ] 3 / 3
+
+web2.my.net                      version = zsh-4.2.6-3.el5
+web3.my.net                      version = zsh-4.2.6-3.el5
+web1.my.net                      version = zsh-4.2.6-3.el5
+
+---- package agent summary ----
+           Nodes: 3 / 3
+        Versions: 3 * 4.2.6-3.el5
+    Elapsed Time: 16.33 s
+</code></pre>
+
+<p><strong>func</strong></p>
+
+<pre><code>% func client15.example.com call hardware info
+{'client15.example.com': {'bogomips': '7187.63',
+                          'cpuModel': 'Intel(R) Pentium(R) 4 CPU 3.60GHz',
+                          'cpuSpeed': '3590',
+                          'cpuVendor': 'GenuineIntel',
+                          'defaultRunlevel': '3',
+...
+                          'systemSwap': '8191',
+                          'systemVendor': 'Dell Inc.'}}
+</code></pre>
+
+<p><strong>fabric</strong></p>
+
+<pre><code>% fab -H localhost,linuxbox host_type
+[localhost] run: uname -s
+[localhost] out: Darwin
+[linuxbox] run: uname -s
+[linuxbox] out: Linux
+
+Done.
+Disconnecting from localhost... done.
+Disconnecting from linuxbox... done.
+</code></pre>
+
+<p><strong>capistrano</strong></p>
+
+<pre><code># cap invoke COMMAND="yum -y install zsh"
+  * executing `invoke'
+  * executing "yum -y install zsh"
+    servers: ["web1", "web2", "web3"]
+    [web2] executing command
+    [web1] executing command
+    [web3] executing command
+    [out :: web3] Nothing to do
+    [out :: web2] Nothing to do
+    [out :: web1] Complete!
+    command finished
+</code></pre>
+
+<p>As you can see from these brief examples, each of these tools accomplishes
+similar things, each one has a unique ecosystem, plugins available, and
+strengths and weaknesses, a description of which, is beyond the scope of this
+post.</p>
+
+<h2>Taking your own script(s) multithreaded</h2>
+
+<p>The kernel of this article was an article I recently wrote for my employer's
+blog, <a href="http://www.reliam.com/company/featured_geek">Taking your script
+multithreaded</a>, in which I
+detailed how I wrote a Python script to make an rsync job multithreaded and cut
+the execution time of a task from approximately 6 hours, down to 45 minutes.</p>
+
+<p>I've created a <a href="https://github.com/solarce/multithreaded-example">git repo</a> out
+of the script, so you can take my code and poke at it.  If you end up using the
+script and make improvements, feel free to send me patches!</p>
+
+<p>With the help of <a href="http://twitter.com/#!/davidgrieser">David Grieser</a>, there is
+also a <a href="">Ruby</a> port of the script up on Github.</p>
+
+<p>These are two good examples of how you can easily implement a multithreaded
+version of your own scripts to help parallelize your tasks.</p>
+
+<h2>Conclusion</h2>
+
+<p>There are clearly many steps you can take along the path to going parallel.
+I've tried to highlight how you can begin with using tools to execute commands
+in a more parallel fashion, progress to tools which help you execute ad-hoc and
+then repeatable tasks across many hosts, and finally, given some examples on
+how to make your own scripts more parallel.</p>

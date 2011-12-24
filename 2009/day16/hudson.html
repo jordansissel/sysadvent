@@ -1,0 +1,142 @@
+Hudson is a job monitor. It is primarily used as a build server for doing <a
+  href="http://en.wikipedia.org/wiki/Continuous_integration">continuous
+builds</a>, testing, and other build engineering activities. Continuous build
+and integration is a useful tool in improving the day-to-day quality of your
+company's code.
+
+<p>
+
+My first week's impression of <a
+  href="http://wiki.hudson-ci.org/display/HUDSON/Meet+Hudson">Hudson</a> was
+that it is really great software. Things work the way I expect! It has good
+documentation and a good web interface. The APIs are easy to use. Compared to
+other learning curves, Hudson's was extremely short thanks to one part
+documentation and one part ease of use. I had some internal software building
+in hudson in only a few minutes of playing with the tool.
+
+<p>
+
+Setting up a new job in Hudson is really easy, and every field in the job
+configuration interface has a little question mark icon that reveals useful
+documentation when clicked. It does the build-related things I expect: build on
+demand, build if there's been new commits, emailing folks who break things,
+give me trending on build statuses, etc.
+
+<p>
+
+Getting a bit more advanced into Hudson beyond simply building stuff or running
+jobs, let's talk administrative tasks. Speaking of administrative tasks, Hudson
+has <a
+  href="http://wiki.hudson-ci.org/display/HUDSON/Administering+Hudson">administrative
+  documentation</a> detailing how to backup and restore Hudson configurations,
+renaming jobs, etc. Hudson's configuration is stored in XML files in a sane
+directory heirarchy that makes it easy to backup specific jobs or specific
+configurations.
+
+<p>
+
+Hudson also has an <a
+  href="http://wiki.hudson-ci.org/display/HUDSON/Remote+access+API">API</a>.
+The things you need to know about the API is that any url you visit on the web
+interface can be accessed with the API. Adding '/api/' to any url will give you
+the API documentation for that url - only one thing to remember when asking
+"what's the API for this page?" - totally awesome.
+
+<p>
+
+<center>
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_u-5lMShiO40/SyiwMC_JzeI/AAAAAAAAACg/XrZzmdORB00/s1600-h/hudson-root-api.jpg"><img style="display:inline; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 200px; height: 136px;" src="http://4.bp.blogspot.com/_u-5lMShiO40/SyiwMC_JzeI/AAAAAAAAACg/XrZzmdORB00/s200/hudson-root-api.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5415772272919694818" /></a>
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_u-5lMShiO40/SyiwLuVJwsI/AAAAAAAAACY/PEFXaUfDACk/s1600-h/hudson-job-api.jpg"><img style="display:inline; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 200px; height: 136px;" src="http://2.bp.blogspot.com/_u-5lMShiO40/SyiwLuVJwsI/AAAAAAAAACY/PEFXaUfDACk/s200/hudson-job-api.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5415772267374822082" /></a>
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_u-5lMShiO40/SyiwLQf6OvI/AAAAAAAAACQ/hXneXpNVLVs/s1600-h/hudson-lastsuccessful-api.jpg"><img style="display:inline; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 200px; height: 136px;" src="http://2.bp.blogspot.com/_u-5lMShiO40/SyiwLQf6OvI/AAAAAAAAACQ/hXneXpNVLVs/s200/hudson-lastsuccessful-api.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5415772259366877938" /></a>
+</center>
+
+<p>
+
+I wanted to take the latest successful build of a specific job and put the
+resulting files (artifacts) into my local yum repo. Artifacts are what Hudson
+calls the files you archive after a build is complete.  Fetching the artifacts
+from the latest successful build of any given job is fairly
+straightforward. The XML api makes this easy, allowing you to find the
+artifacts for your builds:
+
+<pre>
+% GET http://build/hudson/job/helloworld/lastSuccessfulBuild/api/xml
+&lt;?xml version="1.0"?&gt;
+&lt;freeStyleBuild&gt;
+  ...
+  &lt;artifact&gt;
+    &lt;displayPath&gt;rpmbuild/RPMS/x86_64/helloworld-1.0-1.x86_64.rpm&lt;/displayPath>
+    &lt;fileName&gt;helloworld-1.0-1.x86_64.rpm&lt;/fileName>
+    <b>&lt;relativePath&gt;deploy/rpmbuild/RPMS/x86_64/helloworld-1.0-1.x86_64.rpm&lt;/relativePath></b>
+  &lt;/artifact&gt;
+  ...
+&lt;/freeStyleBuild&gt;
+</pre>
+
+Parsing XML in shell without the proper tools should make anyone a sad panda.
+Luckily, Hudson's XML api allows you to give an <a
+href="http://www.w3schools.com/XPath/default.asp">XPath</a> query to restrict
+the output:
+
+<pre>
+# Show me the text contents of the first artifact/relativePath
+% GET 'http://build/hudson/job/helloworld/lastSuccessfulBuild/api/xml?xpath=//artifact[1]/relativePath/text()'
+deploy/rpmbuild/RPMS/x86_64/helloworld-1.0-1.x86_64.rpm
+</pre>
+
+That path is relative to the non-api portion, so fetching the RPM becomes:
+http://build/hudson/job/helloworld/lastSuccessfulBuild/deploy/rpmbuild/RPMS...
+
+<p>
+
+Fetching the RPM was only the first step of a deployment process I was building
+with Hudson. At work, sometimes engineers do deployments. It is not totally
+productive to require them to have working knowledge of rpm, yum, <a
+href="http://dag.wieers.com/home-made/mrepo/">mrepo</a>, puppet, linux, ssh,
+and other tools that may be necessary. I wanted a one-click deployment that
+would do all the right things, in the right order, and would save us from
+having to poorly maintain a wiki describing the steps required to perform an
+on-demand upgrade.
+
+<p>
+
+As shown above with the API, we can fetch the latest packages. Once that
+happens, the exact method of deployment is really up to you and what your
+infrastructure needs. My version pushed the rpm to my yum master, then
+replicated to the per-site mirrors, then ssh'd to each related server, upgraded
+the package, and restarted any service required. The benefits of this are
+two-fold: we retire a poorly maintained upgrade howto document, and we relieve
+some engineers of the burdens of being intimate with the infrastructure, so
+they can just worry about writing and testing code.
+
+<p>
+
+One small trick, however. Since Hudson has a 'build now' button, I didn't want
+stray clicks or accidents to incur a new deployment. The workaround was to add
+<a
+href="http://wiki.hudson-ci.org/display/HUDSON/Parameterized+Build">checkbox</a>
+to the build that simply asked for confirmation. Without the checkbox checked,
+the build would fail.
+
+<p>
+
+Now armed with an automated, but still human-initiated, deployment process, it
+is fairly easy to extend your deployment script to include email notifications,
+nagios silences, and other actions that help make your deployment more safe and
+reliable.
+
+<p>
+
+While I am not certain that Hudson is the end-game of helping coworkers do deployments to production and staging, I am comfortable with this solution given that it works well, was very easy to implement, and relieves the knoweldge transfer problems mentioned above.
+
+<p>
+
+Even if you don't like Hudson for deployment, it's a great build server.
+
+<p>
+
+Further reading:
+<ul>
+  <li><a href="http://hudson-ci.org/">Hudson's home</a></li>
+  <li><a href="http://martinfowler.com/articles/continuousIntegration.html">Continuous Integration</a></li>
+</ul>

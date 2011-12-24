@@ -1,0 +1,76 @@
+<i>I'm compelled to write about this subject today because of having received this
+question multiple times since sysadvent began. </i>
+
+<p>
+
+Capistrano or Puppet? Both.
+
+<p>
+
+Puppet provides you with a way to specify a state your system should be in.
+Puppet's features will help you keep a machine in the same state. If someone
+hand-edits an apache config, you can have puppet automatically replace it with
+the correct one and reload apache, for example. Puppet runs on each of your
+servers.
+
+<p>
+
+Capistrano lets you describe what to do to a system or set of systems: Upload a
+file, run a program, restart a service, etc. Capistrano runs from your
+workstation and does work for you on remote systems.
+
+<p>
+
+So, why both?
+
+<p>
+
+Puppet needs a source of state information, and that
+source  has to come from somewhere. If you always run on the bleeding edge of
+your configurations, you can feed the puppet master with your revision control
+system and use the state described in the head revision. Bleeding edges tend to
+be bloody for a reason. You could feed puppet with data from a branch of your
+revision control, too, and both not need capistrano for the feeding and not run
+on the head revision. You could deploy new state to puppet with Capistrano on a
+planned release schedule.
+
+<p>
+
+Puppet lets you specify that the 'httpd' package should be installed, and even what version. If you maintain your own package repository, you can
+control what version is installed (which you should). To upgrade the 'httpd'
+package, you could use Capistrano to upload new packages to your package
+repository and to deploy puppet manifests to keep 'httpd' automatically updated to whatever
+version you decide.
+
+<p>
+
+As an example, here's how the state management with puppet and capistrano might look for your apache configuration:
+<ol>
+  <li> Modify httpd.conf in revision control, check it in. </li>
+  <li> Use capistrano to push the new state to your puppet masters. </li>
+  <li> Puppet will see the new state and apply necessary changes. [*] </li>
+</ol>
+
+[*] This will only occur automatically if you run puppet periodically (like
+through cron) rather than manually.
+
+<p>
+
+If the change was bad, you can revert the change in revision control and again
+use capistrano to push the new files.
+
+<p>
+
+You can use puppet and capistrano to do similar tasks, if you wish, but I find
+they are best suited to compliment each other. Let puppet focus on automated
+state maintenance and let capistrano help you do deployments of new packages
+and new configurations.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://www.agileweboperations.com/puppet-vs-capistrano-short-comparison/">Short comparsion of puppet and capistrano</a> </li>
+  <li> <a href="http://reductivelabs.com/projects/puppet/"> Puppet </a> </li>
+  <li> <a href="http://www.capify.org/"> Capistrano </a> </li>
+</ul>

@@ -1,0 +1,178 @@
+<h1>Upstart</h1>
+<p><em>This article was written by <a href="http://www.semicomplete.com">Jordan Sissel</a> (<a href="http://twitter.com/jordansissel">@jordansissel</a>)</em></p>
+<p>In past sysadvents, I've talked about <a href="http://sysadvent.blogspot.com/2008/12/day-3-babysitting.html">babysitting services</a>
+and showed how to use <a href="http://sysadvent.blogspot.com/2009/12/day-15-replacing-init-scripts-with.html" title="Replacing Init Scripts with supervisord">supervisord</a> to achieve it. This
+year, Ubuntu started shipping its release with a new init system called Upstart
+that has babysitting built in, so let's talk about that. I'll be doing all of
+these examples on Ubuntu 10.04, but any upstart-using system should work.</p>
+<p>For me, the most important two features of Upstart are babysitting and events.
+Upstart supports the simple runner scripts that daemontools, supervisord, and
+other similar-class tools support. It also lets you configure jobs to respond
+to arbitrary events.</p>
+<p>Diving in, let's take a look the <code>ssh</code> server configuration Ubuntu ships for
+Upstart (I edited for clarity). This file lives as /etc/init/ssh.conf:</p>
+<pre><code>description     "OpenSSH server"
+
+# Start when we get the 'filesystem' event, presumably once the file
+# systems are mounted. Stop when shutting down.
+start on filesystem
+stop on runlevel S
+
+expect fork
+respawn
+respawn limit 10 5
+umask 022
+oom never
+
+exec /usr/sbin/sshd
+</code></pre>
+<p>Some points:</p>
+<ul>
+<li><code>respawn</code> - tells Upstart to restart it if sshd ever stops abnormally
+  (which means every exit except for those caused by you telling it to stop).</li>
+<li><code>oom never</code> - Gives hints to the Out-Of-Memory killer. In this case, we say
+  never kill this process. This is super useful as a built-in feature.</li>
+<li><code>exec /usr/bin/sshd</code> - no massive SysV init script, just one line saying
+  what binary to run. Awesome!</li>
+</ul>
+<p>Notice:</p>
+<ul>
+<li>No poorly-written 'status' commands.</li>
+<li>No poorly-written /bin/sh scripts</li>
+<li>No confusing/misunderstood restart vs reload vs stop/start semantics.</li>
+</ul>
+<p>The <code>initctl</code>(8) command is the main interface to upstart, but there are
+shorthand commands <code>status</code>, <code>stop</code>, <code>start</code>, and <code>restart</code>. Let's query status:</p>
+<pre><code>% sudo initctl status ssh
+ssh start/running, process 1141
+
+# Or this works, too (/sbin/status is a symlink to /sbin/initctl):
+% sudo status ssh 
+ssh start/running, process 1141
+
+# Stop the ssh server
+% sudo initctl stop ssh
+ssh stop/waiting
+
+# And start it again
+% sudo initctl start ssh 
+ssh start/running, process 28919
+</code></pre>
+<p>Honestly, I'm less interested in how to be a user of upstart and more
+interested in running processes in upstart.</p>
+<p>How about running nagios with upstart? Make /etc/init/nagios.conf:</p>
+<pre><code>description "Nagios"
+start on filesystem
+stop on runlevel S
+respawn
+
+# Run nagios
+exec /usr/bin/nagios3 /etc/nagios3/nagios.cfg
+</code></pre>
+<p>Let's start it:</p>
+<pre><code>% sudo initctl start nagios
+nagios start/running, process 1207
+% sudo initctl start nagios
+initctl: Job is already running: nagios
+</code></pre>
+<p>Most importantly, if something goes wrong and nagios crashes or otherwise dies,
+it should restart, right? Let's see:</p>
+<pre><code>% sudo initctl status nagios
+nagios start/running, process 4825
+% sudo kill 4825            
+% sudo initctl status nagios
+nagios start/running, process 4904
+</code></pre>
+<p>Excellent.</p>
+<h2>Events</h2>
+<p>Upstart supports simple messages. That is, you can create messages with
+'initctl emit <event> [KEY=VALUE] ...' You can subscribe to an event in your
+config by specifying 'start on <event> ...' and same for 'stop.' A very simple
+example:</p>
+<pre><code># /etc/init/helloworld.conf
+start on helloworld
+exec env | logger -t helloworld
+</code></pre>
+<p>Now send the 'helloworld' message, but also set some parameters in that message.</p>
+<pre><code>% sudo initctl emit helloworld foo=bar baz=fizz
+</code></pre>
+<p>And look at the logger results (writes to syslog)</p>
+<pre><code>2010-12-19T11:03:29.000+00:00 ops helloworld: UPSTART_INSTANCE=
+2010-12-19T11:03:29.000+00:00 ops helloworld: foo=bar
+2010-12-19T11:03:29.000+00:00 ops helloworld: baz=fizz
+2010-12-19T11:03:29.000+00:00 ops helloworld: UPSTART_JOB=helloworld
+2010-12-19T11:03:29.000+00:00 ops helloworld: TERM=linux
+2010-12-19T11:03:29.000+00:00 ops helloworld: PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+2010-12-19T11:03:29.000+00:00 ops helloworld: UPSTART_EVENTS=helloworld
+2010-12-19T11:03:29.000+00:00 ops helloworld: PWD=/
+</code></pre>
+<p>You can also conditionally accept events with key/value settings, too. See the
+init(5) manpage for more details.</p>
+<p>Additionally, you can start jobs and pass parameters to the job with <code>start
+helloworld key1=value1 ...</code></p>
+<h2>Problems</h2>
+<p>Upstart has issues. </p>
+<p>First: Debugging it sucks. Why is your pre-start script failing? There's no
+built-in way to capture the output and log it. You're best doing '<code>exec 2&gt;
+/var/log/upstart.${UPSTART_JOB}.log</code>' or something similar. Your only option
+for capturing output otherwise is the '<code>console</code>' setting which lets you send
+output to /dev/console, but that's not useful.</p>
+<p>Second: The common 'graceful restart' idiom (test then restart) is hard to
+implement directly in Upstart. I tried one way, which is to in the 'pre-start'
+perform a config test, and on success, copy the file to a 'good' file and
+running on that, but that doesn't work well for things like Nagios that can
+have many config files:</p>
+<pre><code># Set two variables for easier maintainability:
+env CONFIG_FILE=/etc/nagios3/nagios.cfg
+env NAGIOS=/usr/sbin/nagios3
+
+pre-start script
+  if $NAGIOS -v $CONFIG_FILE ; then
+    # Copy to '&lt;config file&gt;.test_ok'
+    cp $CONFIG_FILE ${CONFIG_FILE}.test_ok
+  else
+    echo "Config check failed, using old config."
+  fi
+end script
+
+# Use the verified 'test_ok' config
+exec $NAGIOS $CONFIG_FILE.test_ok
+</code></pre>
+<p>The above solution kind of sucks. The right way to implement graceful restart
+, with upstart, is to implement the 'test' yourself and only call <code>initctl
+restart nagios</code> on success - that is, keep it external to upstart.</p>
+<p>Third: D-Bus (the message backend for Upstart) has very bad user documentation.
+The system seems to support access control, but I couldn't find any docs on the
+subject. Upstart doesn't seem to mention how, but you can see access control in action
+when you try to 'start' ssh as non-root:</p>
+<pre><code>initctl: Rejected send message, 1 matched rules; type="method_call",
+sender=":1.328" (uid=1000 pid=29686 comm="initctl)
+interface="com.ubuntu.Upstart0_6.Job" member="Start" error name="(unset)"
+requested_reply=0 destination="com.ubuntu.Upstart" (uid=0 pid=1 comm="/sbin/init"))
+</code></pre>
+<p>So, there's access control, but I'm not sure anyone knows how to use it.</p>
+<p>Fourth: There's no "died" or "exited" event to otherwise indicate that a
+process has exited unexpectedly, so you can't have event-driven tasks that
+alert you if a process is flapping or to notify you otherwise that it died.</p>
+<p>Fifth: Again on the debugging problem, there's no way to watch events passing
+along to upstart. strace doesn't help very much:</p>
+<pre><code>% sudo strace -s1500 -p 1 |&amp; grep com.ubuntu.Upstart
+# output edited for sanity, I ran 'sudo initctl start ssh'
+read(10, "BEGIN ... binary mess ... /com/ubuntu/Upstart ... GetJobByName ...ssh\0", 2048) = 127
+...
+</code></pre>
+<p>Lastly, the system feels like it was built for desktops: lack of 'exited'
+event, confusing or missing access control, stopped state likely being lost
+across reboots, no slow-starts or backoff, little/no output on failures, etc.</p>
+<h2>Conclusion</h2>
+<p>Anyway, despite some problems, Upstart seems like a promising solution to the
+problem of babysitting your daemons. If it has no other benefit, the best
+benefit is that it comes with Ubuntu 10.04 and beyond, by default, so if you're
+an Ubuntu infrastructure, it's worth learning.</p>
+<p>Further reading:</p>
+<ul>
+<li><a href="http://upstart.ubuntu.com/">Upstart's site</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Upstart">Upstart</a> on Wikipedia</li>
+<li><a href="http://manpages.ubuntu.com/manpages/lucid/en/man5/init.5.html">init(5)</a> - upstart job configuration</li>
+<li><a href="http://manpages.ubuntu.com/manpages/maverick/en/man8/initctl.8.html">initctl(8)</a> - upstart control tool</li>
+</ul>

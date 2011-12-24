@@ -1,0 +1,23 @@
+body common control
+{
+  version => "1.0";
+  bundlesequence  => { "check_service_running"  };
+}
+
+bundle agent check_service_running
+{
+    vars:
+        "service" slist => {"ntp", "portmap"};
+        "daemon_path" string => "/etc/init.d";
+
+    processes:
+        "$(service)"
+            comment => "Check processes running for '$(service)'",
+            restart_class => "restart_$(service)";
+
+    commands:
+        "${daemon_path}/${service} start"
+            comment => "Execute the start command for the service",
+            ifvarclass => "restart_${service}";
+}
+

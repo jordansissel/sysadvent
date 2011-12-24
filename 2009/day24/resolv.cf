@@ -1,0 +1,27 @@
+body common control
+{
+    version => "1.0";
+    bundlesequence  => { "checkresolver" };
+}
+
+bundle agent checkresolver
+{
+    vars:
+          "resolvers" slist => { "nameserver 128.39.89.10",
+                                 "nameserver 158.36.85.10",
+                                 "nameserver 129.241.1.99" };
+    files:
+          #"$(sys.resolv)"
+          "/tmp/resolv.conf"
+               edit_line => resolvconf("iu.hio.no cfengine.com",@(checkresolver.resolvers));
+}
+
+bundle edit_line resolvconf(search,list)
+{
+    delete_lines:
+        "search.*";
+    insert_lines:
+         "search $(search)";
+         "$(list)";
+}
+

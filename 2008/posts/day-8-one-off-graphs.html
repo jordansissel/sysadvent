@@ -1,0 +1,180 @@
+You've got your nagios and cacti configurations all diligently tracking
+information for you. The data it monitors is available for viewing in graphs at
+your will, but what about the data it doesn't monitor?
+
+<p>
+
+You get a report that your apache servers are randomly serving errors and that the
+problem started last week. You don't have cacti watching this data, so you 
+check the logs. The few-hundred-megs of logs are probably too much for you 
+to eyeball, and seeing this data, now, in a graph, would help you out. 
+
+<p>
+
+This report means two things: 1) Verify the report and fix the problem, and 2) add
+apache error servings to your monitoring system. What are your options for #1 and getting that data graphed now? Common sysadmin graph staples might include things like rrdtool, gnuplot, cacti, and others. Some of these tools are designed for recording and graphing data slowly
+over time and others require configuration changes or other complexities.  It's possible 
+you may be able to import historical data into your monitoring or trending system (cacti,
+etc), but if you don't know how, you have to graph it by yourself.
+
+<p>
+
+The path of least resistance is probably the best path when it comes to doing
+one-offs for visualizing or grabbing data. This means using the tool that
+requires the least amount of steps to go from data to graph with easy ability
+to iterate in case your graph output isn't helpful due to display decisions
+like scaling, etc.
+
+<p>
+
+Tools that help you do this include gnuplot, R, rrdtool, and Excel (or other
+spreadsheets that graph). These tools might help you manipulate the data before
+you graph it, but I'm going to assume that you've already got the data in some
+reasonable format (space, tab, comma delimited X and Y values).
+
+<p>
+
+We have apache access logs and want to see 500 error code trends. One approach
+might be to graph the ratio of 200s to 500s codes (200 is OK, 500 is internal
+error), or just graphing the 500s alone.
+
+<p>
+
+Making a useful graph depends much on how you aggregate your data. Do you
+aggregate on the hour, minute, 10 minute, second? You can go with your gut
+feeling, or you can take another approach. When gathering data, keep the data
+in the highest-precision format you have. In this case, we have data on the
+second precision.
+
+<pre>
+# The '500' here matches the response code from apache logs
+% egrep '" 500 [0-9]+ "' /b/access | sed -e 's/^.*\[//; s/\].*$//' | tee err500
+01/Dec/2008:21:23:54 -0500
+01/Dec/2008:21:24:08 -0500
+01/Dec/2008:21:27:09 -0500
+02/Dec/2008:05:23:34 -0500
+08/Dec/2008:00:44:59 -0500
+08/Dec/2008:00:45:55 -0500
+&lt; remainder of output cut &gt;
+
+# We count the instances per second by piping this output to 'uniq -c'
+% uniq -c err500 &gt; counts
+</pre>
+
+If your graphing tool helps you make aggregation decisions such as "total 500s
+in an hour", then that's a help. Otherwise, you'll need to aggregate yourself
+before feeding your graph tool. RRDtool lets you do this by using the 'average'
+RRA and multiplying the value by the time interval. From what I can tell,
+gnuplot doesn't let you modify input data before graphing in a way that would
+let you aggregate values. R lets you do this easily as it's a statistics scripting
+language.
+
+<p>
+
+Data input for time series might require additional steps to convert the date
+into a value your graphing tool understands. Gnuplot accepts string time values
+and lets you specify the strptime(3) format string. RRDtool updates require
+times be specified in terms of <a
+href="http://en.wikipedia.org/wiki/Unix_time">unix epoch</a>. R, from what I
+can tell, needs to be given numbers (like rrdtool). Excel hopefully has time
+parsing options, but I haven't tried.
+
+<p>
+
+Further, if your data doesn't have a point at every single unit of your graph,
+you will end up with odd-looking results when using lines to graph. This sways
+in favor of rrdtool since gnuplot and other tools that graph don't often accept
+this lack of data as OK. RRDtool has support for data points being 'unknown'
+and such and is much more drawn to time-series plotting.
+
+<p>
+
+Output is important too. Your graph is less helpful if the axes aren't
+readable; this means you need readable dates on your time axis. Both gnuplot
+and rrdtool allow you configure the X (time) axis labels and steps. It's
+difficult to do in R, from what I've tried and read.
+
+<p>
+
+For all the reasons above that help us see time-series data visualized most
+effortlessly, I would normally pick rrdtool. However, past experience has had
+me spend more time fighting rrdtool (read: pebcak) when I'm in a hurry, so I'll
+try gnuplot today. I fully confess in failing tonight trying to rush and
+re-learn rrdtool ;)
+
+<p>
+
+In gnuplot, you specify time as an input, from most any format, with:
+
+<pre>
+set xdata time
+set timefmt "%d/%b/%Y:%H:%M:%S"
+</pre>
+
+If you want output to a file, use:
+
+<pre>
+set terminal png size 580,300
+set output "/tmp/apache.png"
+</pre>
+
+The timefmt uses format strings specified by strptime(3). To graph the last year's
+worth of data in gnuplot (including the above xdata and timefmt lines):
+
+<pre>
+set xtics rotate right
+set xrange ["01/Jan/2008:00:00:00":"01/Dec/2008:00:00:00"]
+set yrange [0:]
+set format x "%Y/%b/%d"
+plot "counts" using 2:1
+</pre>
+
+Since 'uniq -c' (used above) outputs in the format 'count value' and our
+'value' here is a timestamp for use with the x axis, we have to tell gnuplot
+to use the 2nd column for X and the count for Y.
+
+<p>
+
+This generates an ugly and not totally useful <a href="http://docs.google.com/Doc?id=dckv5f97_3fh6j26cn">graph</a>, because visualizing errors on that rate .
+
+<p>
+
+Changing from a seconds to another unit just requires some simple summation.
+Rounding the timestamp to whatever value (10 minutes, for example) and then
+doing another summation (uniq -c) on the output should be easy; any tool that
+supports strptime will help you, such as this <a
+href="http://docs.google.com/Doc?id=dckv5f97_2hb323pzr">small ruby script</a>
+
+<p>
+
+If we sum errors by hour, the <a
+href="http://docs.google.com/Doc?id=dckv5f97_6cd48zsm5">new graph</a> gets a
+bit more useful, showing some days having very high error spikes compared to
+the average. As a note, since the output of <a
+href="http://docs.google.com/Doc?id=dckv5f97_2hb323pzr">strptime.rb</a> is in unix epoch, I had
+to change the timefmt to "%s" and the xrange to '["1199145600":"1228089600"]'
+
+<p>
+
+Note: If you use gnuplot with it's default output device (don't run 'set
+terminal png') you get a useful GUI that you can zoom in and out of, which is
+pretty useful.
+
+<p>
+
+This is another case of having the right tools to do the job. I've used statistics
+tools like SAS before, and while writing this article today it feels like using such
+a tool to do simple, fast visualizations and analyses would be easier. It's possible 
+R, Octave, or other math/stats tools provides this. On the other hand, I've never once heard
+of a sysadmin colleague using statistical tools, is this indicative of a problem?
+
+<p>
+
+Further reading:
+<dl>
+  <dt> <a href="http://www.visual-literacy.org/periodic_table/periodic_table.html"> Visualization periodic table </a> </dt>
+  <dd> Neat periodic table showing lots of different visualization methods with examples </dd>
+  <dt> <a href="http://www.gnuplot.info/">gnuplot</a> </dt>
+  <dt> <a href="http://oss.oetiker.ch/rrdtool/">rrdtool</a> <dt>
+  <dt> <a href="http://www.r-project.org/">R's homepage</a> </dt>
+</dl>

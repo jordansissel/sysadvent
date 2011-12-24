@@ -1,0 +1,91 @@
+From Wikipedia's <a
+href="http://en.wikipedia.org/wiki/Software_development_process#Software_development_activities">software
+development process</a> article, "the most important task in creating a
+software product is extracting the requirements or requirements analysis."
+Requirements analysis is an early part in the engineering process. This means
+learning what problem needs to be solved and the parameters and constraints
+with which you must solve them.
+
+<p>
+
+The wikipedia article goes on, "customers typically have an abstract idea of
+what they want as an end result, but not what software should do." My
+experience in systems administration is that customers may have an idea of what
+they want as an end result, but they may not know what problem they are solving
+and often present their idea in the form of a solution.
+
+<p>
+
+To describe this with an example, let's say you have a small team of sysadmins
+who are familiar with mysql and your group supports a few mysql deployments in
+your company.
+
+<p>
+
+A customer says, "I need postgresql installed." This is a request for action, not a description of the problem. You are only given the solution that the customer
+believes will bring about
+their desired end result. Do you simply install postgresql for them, or do you
+ask why they need it? If you already have a well-supported mysql deployment,
+you should be asking why you need to support another database.
+
+<p>
+
+Ask about the problem they need solved. Get details. Why does he or she need
+postgres? Can the existing mysql deployment and knowledge be used instead? Most of the time customers who simply ask
+for actions, "please implement this solution," often are unaware of existing,
+similar options already available. It's also possible that this customer is
+trying to solve a problem that doesn't exist, doesn't affect your company, or
+isn't feasible to solve completely.
+
+<p>
+
+If you get requirements, you might find they are simply "I need a database that
+speaks SQL." Alternately, you might find that the requirements include "I need
+to run this 3rd party tool which requires postgres." Dig deeper. What does this
+tool do? Can it's features be provided by another tool that doesn't require
+burdening your team with additional products to support? Is the problem the
+customer wants to solve even in the scope of your team?
+
+<p>
+
+In addition to getting the necessary information about the problem, you should
+also make sure you are given other constraints and parameters. Is there a
+deadline? What is the scope of the problem, who is affected, etc? What is the
+priority?
+
+<p>
+
+Let's examine another common situation. Another customer says, "I need
+apache on serverfoo restarted." Again, you should ask for a description of the problem. What are the symptoms the customer is observing? Restarting  apache is an action that could bring about a solution, but what are you
+solving? What is broken? What if a customer reports "mail is down?" What does
+"mail is down" mean? What are the symptoms being observed?
+
+<p>
+
+When digging for a description of the problem from your customer(s), be careful
+to not offend the customer. It's easy to dismiss the customer as an idiot if
+you the information you are given doesn't make sense or doesn't help you fix a
+problem. This issue can easily occur when a non-domain-expert interacts with a
+domain expert. Remember that perspective is reality, and that "mail is down"
+makes total sense to your customer but is confusing to you. Make sure your
+fellow sysadmins follow the advice in this paragraph, too.
+
+<p>
+
+Asking for requirements can be a tool to help push back on bad ideas.
+Sometimes a management hammer comes down from above and says you must implement
+something that you disagree with or don't understand. Being a domain expert,
+you might be disagreeing or lacking understanding because the request doesn't
+make sense. Ask for requirements! Sometimes ideas manifest themselves into
+requests (or mandates) without the idea being actually thought out. 
+
+<p>
+
+Lastly, always remember you can say, "no." Not every idea is a good one. Bad
+ideas can come with urgency. Be understanding of any urgency from your
+customers, but remember that you have the most information about what makes a
+change bad. Otherwise, why would they be asking you or your team to do it?
+Be aware of things people will say to convince you to do something even though
+you can show it is incorrect, such as "the CEO said we have to do this." Facts are
+your ally, so use facts to show why a proposal is wrong or why the
+requirements are impossible to fulfill.

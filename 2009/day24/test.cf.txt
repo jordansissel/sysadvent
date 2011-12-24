@@ -1,0 +1,49 @@
+***********************************************************
+ Promises 
+***********************************************************
+Bundle packages in the context of agent
+
+   ARGS:
+
+   {
+   TYPE: vars
+
+      vars promise by 'match_package' (implicit) if context is any
+
+              slist =>  {'figlet','cowsay'}       if body context any
+            Promise (version not specified) belongs to bundle 'packages' (type agent) in file './test.cf' near line 23
+
+
+   TYPE: packages
+
+      packages promise by '$(match_package)' (implicit) if context is any
+
+         package_policy => add       if body context any
+            Promise (version not specified) belongs to bundle 'packages' (type agent) in file './test.cf' near line 29
+
+
+   }
+
+
+
+
+All Bodies
+
+control body for type common(no parameters)
+   {
+   bundlesequence =>  {'packages'} if sub-body context any
+   }
+
+apt body for type package_method(no parameters)
+   {
+   package_changes => bulk if sub-body context any
+   package_list_command => /usr/bin/dpkg -l if sub-body context any
+   package_list_name_regex => ii\s+([^\s]+).* if sub-body context any
+   package_list_version_regex => ii\s+[^\s]+\s+([^\s]+).* if sub-body context any
+   package_installed_regex => .* if sub-body context any
+   package_name_convention => $(name) if sub-body context any
+   package_add_command => /usr/bin/apt-get --yes install if sub-body context any
+   package_delete_command => /usr/bin/apt-get --yes remove if sub-body context any
+   package_update_command => /usr/bin/apt-get --yes dist-upgrade if sub-body context any
+   }
+

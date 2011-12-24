@@ -1,0 +1,289 @@
+<p>In a previous life, I was the sysadmin at a small non-profit that
+helped organize conferences.  We solicited proposals, approved
+budgets, and helped the organizers whenever we could.  Since the
+organizers were scattered around the country, we used web-based tools
+to do all this.  My newly-created position combined that of a
+part-time SA and part-time web developer: provide registration and
+payment forms, and let organizers keep track of registrations.</p>
+
+<p>There were a number of problems^Wchallenges I faced:</p>
+
+<ul>
+
+<li>The database had evolved over time, and so had the web front end
+we used to manage it.  The database schema was completely
+undocumented.</li>
+
+<li>Registration forms had been created anew for each conference,
+because each conference's requirements were different.</li>
+
+<li>Another person who worked on the database front end didn't believe
+in revision control, or testing his changes; it was live data or
+nothing, baby!</li>
+
+<li>Everything was written in PHP.  PHP, used in anger, lets you get
+away with a *lot* of bad things.</li>
+
+<li>Conference season was coming up -- soon.</li>
+</ul>
+
+<p>What to do?</p>
+
+<p>I did the only thing I could do: I made mistakes.  I trampled over
+data.  I banged my head against my desk and cursed the day I'd ever
+taken this job.  And I learned some things that developers are
+<i>taught</i> -- and that we sysadmins are rarely told.</p>
+
+<p>Maybe it's assumed we'll never need to know these things....yet in my
+experience, we're often called on to be developers.  Maybe you're at a
+small shop like I was, and there simply isn't anyone else to take care
+of The Big Important App.  Maybe you're adapting a Free Software
+project for inside use.  Or maybe you're finding that the quick hack,
+lashed together in desperation and anger, has suddenly become useful
+for other people...and now they're coming back with ideas.</p>
+
+<p>Development is more than learning a language.  That part is *easy*,
+like learning how to use a hammer, or a drill, or a saw.  But learning
+how to build something that doesn't fall apart in the slightest wind
+is <i>hard</i>, whether you're doing programming or carpentry.</p>
+
+<p>When that app falls apart -- or better yet, before -- here's what to
+do.</p>
+
+<h2>Use revision control</h2>
+
+<p>Use it <i>always</i>; there is simply no excuse not to.  You need it to:</p>
+
+<ul>
+<li>Record changes -- not just what, but why</li>
+
+<li>Revert easily to older, working versions when you screw something up</li>
+
+<li>Tell your boss what bugs you've fixed</li>
+</ul>
+
+<p>If there's something already in place at work, or that you're
+already familiar with, or you're working on a project that has settled
+on a particular tool, use it. Otherwise, use <a
+href="http://subversion.tigris.org">Subversion</a>; it's simple, it
+works, it's available for your OS, and you can always convert later
+on.</p>
+
+<p>Learn how to commit and revert changes, then read up on branching,
+merging and tagging -- not just how, but why.  Are you going to be
+introducing a new feature?  Start a branch, then merge back to the
+main line.  Are you going to be making a release?  Start a branch, do
+what you need then leave it unchanged.</p>
+
+<p>What if you're the only developer?  Then it's at least fourteen times
+more important.  Trust me, you're not going to remember what the
+difference was between "foo.php.old-1" and "foo.backup.2" at 4:15 on a
+Friday afternoon, let alone at 3am on a Sunday morning.</p>
+
+<p>Read the books that are available for your tool, and the
+ones for the tools you passed up.  Not only do
+they usually contain good introductions to revision control, but
+you'll get an idea of what kind of development style they encourage.
+Don't get hung up on that yet; just stick it in the back of your
+head.</p>
+
+<h2>Learn how to test</h2>
+
+<p>Here's a good mistake: on one registration form, I forgot to insert
+email addresses into the database.  I was unaware of this until the
+organizer asked about emailing everyone to notify them of a change in
+venue.  I fixed my mistake (confirmation emails CC'd to myself FTW!);
+then I started looking for ways to test my code.</p>
+
+<p>There are three kinds of tests you'll hear about:</p>
+
+<ul>
+<li><i>Unit testing</i> ask "Does this module/function do what I think it
+does?"  In my case, I added a unit test that looped over all the
+data I *thought* I was inserting into the database and made sure
+they were there.</li>
+
+<li><i>Regression testing</i> asks "Have I re-introduced any old bugs in my
+latest changes?"  Every time you find a bug, add a test *before* you
+start work on a fix.  That test should fail <i>until</i> you commit your
+fix; after that, it should continue to pass.  If it doesn't, you've
+re-introduced a bug.  (The line between unit testing and regression
+testing can be fuzzy; don't worry about that.)</li>
+
+<li><i>Acceptance testing</i> asks "Does the customer like what I've done, and
+does it do what they expected?"  Depending on the project, the
+customer may be you, your boss, your co-workers or the public.  This
+is another way of saying "It's not done 'til they say it's done."</li>
+</ul>
+
+<p>You'll hear people talking about test-driven development.  This means
+you write a test <i>before</i> you write any code.  By laying out what you
+expect in advance, you know exactly when you're done (because the test
+passes) and you can refactor (rewrite) a function easily if it becomes
+cumbersome.  If you've got the time and you're starting from scratch,
+it's an excellent way of doing things.  Otherwise, you may find it
+difficult to bolt on afterward.</p>
+
+<p>The way you test your code may depend on what language you're using
+and what you're familiar with.  In my case, I used Perl for testing,
+even though the code it was testing was PHP.  I was more fluent in
+Perl, and there were two excellent modules (<a
+href="http://search.cpan.org/perldoc?WWW::Automate">WWW::Automate</a>
+and <a
+href="http://search.cpan.org/perldoc?Test::More">Test::More</a>) that
+made it easy to test my forms.  (I'm not familiar with tools for
+testing more AJAX-y web apps, but there are lots of <a
+href="http://freshmeat.net/search?q=web+browser+testing&submit=Search">open-source
+tools</a> that are worth investigating.)</p>
+
+<p>You should be testing your code <i>at least</i> in preparatation for beta
+testing; in my case, running the tests took less than a minute, so it
+was trivial to run them near-constantly.</p>
+
+<h2>Learn about development, testing and production</h2>
+
+<p>If you're a sysadmin at a larger company, you probably know about
+the difference between these environments already...but my background
+is different, and this was something I had to learn the hard way.</p>
+
+<ul>
+<li><i>Development</i> is exactly what it sounds like: you banging on your
+keyboard and writing stuff.</li>
+
+<li><i>Testing</i> is where you put the changes you've made through
+all your tests.</li>
+
+<i><i>Production</i> is when your code goes live.</li>
+</ul>
+
+<p>Big places will probably have different machines and environments
+for each.  (They probably also have golden coffee cup holders for
+their sysadmins.)  You may find that the line between these
+environments is more fuzzy.  But you should have some kind of sandbox
+for your development and/or testing.</p>
+
+<p>When you're testing, think about how you're going to get
+convincing/realistic data.  In my case, I was able to take a copy of
+the live database and test with that.</p>
+
+<p>At a small shop, you may find it difficult to isolate yourself
+completely from your production environment.  In that case, work hard
+to make it hard to shoot yourself in the foot.  In my case, I was
+paranoid about accidentally connecting to the live database while I
+was testing.  To get around that, my copy of the database was renamed
+and used completely different credentials...so I *couldn't* connect by
+accident.</p>
+
+<p>You should also think about how you're going to move this to
+production.  I set up my registration forms to automatically switch to
+testing mode if the file path they were in included "sandbox"; they
+used those different credentials for connecting to the database,
+emails went only to me, and more debugging info was shown.  This made
+it easy to make it live: just move the files over.</p>
+
+<p>(An important corrollary of this is: have all your configuration info
+in one file; <i>do not</i> have Multiple Sources of Truth(tm).  You will
+forget to edit something someday, and you will unwittingly unleash the
+Reign of Zuul.)</p>
+
+<h2>Everything should be a Makefile</h2>
+
+<p>The developer who hired me for my first SA job had a valuable piece of
+advice: Everything should be a Makefile.  What did he mean by that?
+Simple:</p>
+
+<ul>
+<li>You should be able to type one line, hit enter, then walk away and
+come back to a fully compiled and ready-to-install program.</li>
+
+<li>You should have everything you need to compile/assemble/test your
+program.</li>
+
+<li>You should be able to run through all tests with one command.</li>
+</ul>
+
+<p>Makefile syntax can be hairy, no question, but it's a good way of
+having <i>one</i> command do it all.  If you have to enter another command,
+it's not done yet.</p>
+
+<h2>Pick a coding style and stick with it</h2>
+
+<p>Placement of brackets, whitespace and functionNamingStyles are just
+like every other religious war: it's not usually worth your time.  The
+point is to pick <i>something</i> and move on.  Consistency will help you
+-- and your successor -- get familiar with your code again after a
+long absence.</p>
+
+<p>If you don't know where to start, have a look at the Linux coding
+style document, or at Perl Best Practices by Damien Conway --
+whichever is closest to hand right now.  If your language offers a
+tool that does automagic formatting (like Perltidy or phptidy), use
+it.  Otherwise, here are some things that work for me, cherry-picked
+from both of those books:
+
+<ul>
+<li>Stick to 80 columns, and remember that a function more than 3
+screens long should probably be split up.  (Why?  Because screen
+space is equivalent to brain space, and you don't have that much.)</li>
+
+<li>Don't use global variables.  (Why?  Because you'll change it
+somewhere else and <i>think</i> you'll keep track of it...but you
+won't.  Or you'll have to scroll through fourteen different functions
+to find where it changed; see above re: screen space.)</li>
+
+<li>If a function has more than two arguments and your language
+supports it, name them.  IOW, do:</i>
+
+<code>
+foo(foo="1", bar="2", baz="aardvark", bling="emacs")
+</code>
+
+<p>rather than</p>
+
+<code>
+foo(1, 2, "aardvark", "emacs")
+</code>
+
+<p>(Why?  Because you'll forget the right order.)</p>
+
+<p>Are you detecting a pattern here?  Good, because that brings me to
+the final point.</p>
+
+<h2>Remember, you're not going to remember</h2>
+
+<p>Documentation, comments, consistent coding style, shooting global
+variables on sight -- these are all synonyms for "I need to write this
+down."  Just like you document your network, or your web server
+config, or your vendor support, you need to write down what you've
+done, you need to make it understandable, and you need to make it
+simple.</p>
+
+<p>And keep in mind what <a
+href="http://en.wikiquote.org/wiki/Brian_Kernighan">Brian Kernighan
+said</a>:</p>
+
+<blockquote>
+Everyone knows that debugging is twice as hard as writing a
+program in the first place. So if you're as clever as you can be
+when you write it, how will you ever debug it?
+</blockquote>
+
+<p>Words worth remembering.</p>
+
+<p>Further reading:</p>
+
+<ul>
+<li><a href="http://svnbook.red-bean.com/">The Subversion Book</a></li>
+<li><a href="http://book.git-scm.com/">The Git Community Book</a></li>
+<li><a href="http://progit.org/book/">Pro Git Development</a></li>
+<li><a href="http://hgbook.red-bean.com/">Mercurial: The Definitive
+    Guide</a></li>
+<li><a href="http://cvsbook.red-bean.com/cvsbook.html">Open Source
+    Development with CVS</a></li>
+<li><a href="http://perltidy.sourceforge.net/">Perltidy</a></li>
+<li><a href="http://cmr.cx/phptidy/">phptidy</a></li>
+<li><a
+href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob_plain;f=Documentation/CodingStyle;hb=HEAD">The
+    Linux kernel coding style document</a></li>
+<li><a href="http://oreilly.com/catalog/9780596001735">Perl Best Practices</a></li>
+</ul>

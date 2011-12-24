@@ -1,0 +1,150 @@
+Communication and Organization of Changes
+
+<p>
+<a
+  href="http://sysadvent.blogspot.com/2008/12/day-23-change-management.html">Change</a>
+happens. Maintenance, (planned or unplanned) outages, upgrades, etc. A change
+can be something small, such as tweaking a configuration value, or they can be
+large, such as replacing power units on hundreds racks across multiple
+datacenters. Changes come in all shapes, sizes, scopes, and risks, and require
+varying degrees of planning, scheduling, and cooperation.
+
+<p>
+Communication is an important piece of the change process, and good
+communication allows you to inform users and groups about pending changes and
+change impact. Good communication requires using the right tools, so it's worth
+reviewing the tools that are available to you:
+</p>
+
+<ul>
+  <li> Email. Email is easy to send, and maintaining mailing lists for users of
+  any given component is pretty easy. Email seems cool by itself until you
+  learn that nobody actually reads email (kind of like that intranet wiki...).
+  I'll cover how to work around this shortly. </li>
+  <li> Calendar. Everyone understands calendars. They grew up living with them,
+  the presentation is familiar, and it is based on a concept everyone
+  understands: time. </li>
+  <li> Bug/Issue/Ticket systems. These systems are good for tracking work
+  units, such as changes. They tend to have status-setting features including
+  words like "need feedback," "in progress," and "resolved." Seems like a good
+  fit for tracking the progress of a change.</li>
+  <li> Phones. Phones are good when you need synchronous communication, such as
+  when coordinating a change across geographics, or calling customers to get
+  acknowledgement of a proposed change.</li>
+  <li> Meetings. Meetings are good places to announce changes, scheduling, and
+  impact. Attendees can nod quietly or object to the change or scheduling. This
+  helps you review a change and fit its schedule to minimize risk and impact.</li>
+</ul>
+
+<p>
+Every change will not need to involve every tool listed above. Further, the
+tools you use to communicate, plan, and log changes will depend greatly on the
+culture and size of your company and on the impact and risks of each change.
+Use the tools that fit best.
+</p>
+
+<p>
+For email, have an 'it-changes' or 'ops-changes' or 'yourteamname-changes'
+mailing list that has your team (which can just be you) and anyone else who is
+interested in the changes you are making. Additionally, create a mailing list
+for any component that might need maintenance, such as a datacenter location, a
+service like Active Directory, or the network filer; document these
+and encourag people needing a particular component subscribe to those mailing
+lists. Use your judgement here. If your company is small, you can probably
+create fewer mailing lists.
+</p>
+
+<p>
+Like engineers who need to consider unreliable networks in their design, you
+must consider unreliable readers in your change announcements. Folks don't read
+email; they skim and read things they think are important, which means they may
+skip your change announcement. You may have to resort to trickery in order to
+get people to read important change announcements; try prefixing your subject
+with "CAKE AND PIE" - it might work? Further, there is often no feedback from
+email - you won't get any acknowledgement of who has read an announcement, or
+more importantly, that they have understood it. 
+
+<p>
+
+The best way to ensure your announcements are read are by targeting only the
+people who need the information and by repeating your message. Depending on the
+size and impact of the change, you may need to send your change announcement up
+to three times.  First, to announce the scheduled change. Second, a day (or
+hour) before the change starts. Third, when the change starts. A final, "all
+clear," message should be sent when the maintennace is complete. 
+</p>
+
+<p>
+Email has some failings, like no acknowledgements. Calendars can do this, and
+more. Calendars are great visual tools for communicating schedules.  Online
+calendars (in Exchange, Google Calendar, whatever) are great for several
+reasons. First, you can invite people to the event, which gives them a visual
+reminder in their calendar.  Further, you get reminders for free: Just before
+the event starts, your invitees will likely get a popup reminding them of an
+change. Additionally, Calendars are shareable and publishable.  Calendar data
+exchange is pretty standardized - iCalendar format sends well over email.
+Invitees can acknowledge receipt, helping you figure out who hasn't
+acknowledged and might need a phone call. Finally, calendars can often be
+downloaded to smartphones and other devices. All of these are excellent
+features of modern online calendars which will help you communicate changes
+more effectively.
+
+</p>
+
+<p>
+You should schedule maintenance and outages in a calendar.  Create a calendar
+(or multiple, using the same principles from the mailing list creation above)
+to track these events. Invite people and groups who need to know about the
+event. The data in each event should include two things: a short description
+(think email subject) and a link to wherever the detailed plan/discussion for
+the change lives, which is likely an issue/bug system. For an unplanned outage,
+create an event that represents the actual time and duration of the outage.
+</p>
+
+<p>
+Ticket (aka bug or issue) systems should be used to track individual changes.
+As mentioned above, you get the state-tracking benefits (open, pending,
+in-progress, fixed, etc) and a reasonable place to record planning notes and
+actions taken during a change. Your emails and calendar entries should include
+links to the change ticket if it is relevant. The ticket should also, if
+possible, include a link to the calendar event for easy import into other
+calendars.
+</p>
+
+<p>
+Phones and meetings are of similar use as they both grant you synchronous
+communication. Phones and in-person meetings are good for the planning stage.
+They are also both good for reviewing pending changes or for confirming that
+all involved acknowledge the change. Your use depends on your needs. For
+example, a previous job had weekly meetings to discuss impact and scheduling of
+planned changes. Phone is also a useful tool for calling in more experienced
+teammates when there's a problem with a change.
+</p>
+
+<p>
+Lastly, you are a customer, too. Others will make changes that affect you.
+Datacenter facilities, ISPs, and other service providers make changes just like
+you do. I would love if my service providers sent me change notifications with
+calendar invites, but nobody does. Do your vendors send you change
+notifications? Do they include calendar data you can import into your own
+calendars? Do they follow the advice above?  If you said no to any of these,
+it's worth having a chat with your vendors and providers to help work towards
+this. I'm trying to work with my providers to get them to do this, but it's a
+slow battle - be prepared.
+</p>
+
+<p>
+Remember, we are often guilty of undercommunicating and even communicating
+poorly. Focusing on effective communication of changes will help ensure your
+customers (coworkers, users, clients, etc) are well-informed of the changes
+that affect them. Informed customers are happy customers. As mentioned in the
+previous paragraph, as a customer, making you a happy may require you working
+with your service providers to sell them on the advice here.
+</p>
+
+Further reading:
+<ul>
+  <li> <a href="http://en.wikipedia.org/wiki/ICalendar">iCalendar</a> and <a href="http://en.wikipedia.org/wiki/List_of_applications_with_iCalendar_support">Applications that support iCalendar</a> </li>
+  <li> Sysadvent 2008's <a href="http://sysadvent.blogspot.com/2008/12/day-19-visibility-and-communication.html">Visibility and Communication</a> </li>
+  <li> Sysadvent 2008's <a href="http://sysadvent.blogspot.com/2008/12/day-23-change-management.html">Change Management</a> </li>
+</ul>

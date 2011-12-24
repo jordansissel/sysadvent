@@ -1,0 +1,217 @@
+Cron best practices
+
+Cron is just about everywhere. It's configuration and behavior is pretty similar across any platform:
+<ul>
+  <li> every &lt;scheduled time&gt;, it runs your command as some user</li>
+  <li> output gets emailed to <code>MAILTO=</code> or <code>$USER</code> </li>
+</ul>
+
+Here's what I want:
+<ul>
+  <li> to prevent the same job from having overlapping execution. </li>
+  <li> want emailed output only on failures. </li>
+  <li> all output to be logged somewhere. </li>
+  <li> some jobs to timeout if they run too long. </li>
+  <li> randomize startup time to avoid resource contention. </li>
+</ul>
+
+It's easiest to first discuss each of these features individually.
+
+For this example, we'll show various improvements to the following cron job
+that does a twice-daily backup of mysql. 
+<pre>
+0 0,12 * * * backupmysql.sh
+</pre>
+
+The contents of our backupmysql.sh are:
+<pre>
+#!/bin/sh
+
+mysqldump ...
+</pre>
+
+For simplicity, we omit the mysqldump arguments. Let's get on to addressing individual problems.
+
+<h4> Overlapping jobs - Locks </h4>
+
+<p>
+Overlapping jobs can be prevented using locking. Last year, we covered <a
+  href="http://sysadvent.blogspot.com/2008/12/day-9-lock-file-practices.html">lock
+  file practices</a> which can be applied to solve this. Simply pick a unique
+lockfile for each cronjob and wrap your cron job with flock(1) (or lockf(1) on FreeBSD).
+</p>
+
+Let's prevent two backups from running simultaneously. Additionally, we want to
+abort if we can't grab the lock. flock(1) defaults to waiting indefinitely, so
+let's set the wait time to 0 and use "/tmp/cron.backupmysql" as the lockfile:
+
+<pre>
+#!/bin/sh
+
+# per 2008's lock file guide, re-exec ourselves wrapped in flock
+# unless we are already wrapped
+<b>
+lockfile="/tmp/cron.backupmysql"
+if [ -z "$flock" ] ; then
+  exec env flock=1 flock -w 0 $lockfile $0 "$@"
+fi
+</b>
+
+mysqldump ...
+</pre>
+
+<h4> Emailed output only on failures </h4>
+You don't necessarily need an email every time your job runs and succeeds.
+Personally, I only want to be contacted if there's a failure. In this case, we
+want to capture output somewhere and only emit the output if the exit status of
+something is nonzero.
+
+<pre>
+#!/bin/sh
+
+<b>output=$(mktemp)</b>
+mysqldump ... <b>&gt; $output 2&gt;&amp;1</b>
+<b>
+code=$?
+
+if [ "$code" -ne 0 ] ; then
+  echo "mysqldump exited with nonzero status: $code"
+  cat $output
+  rm $output
+  exit $code
+fi
+rm $output</b></pre>
+
+<h4> All output should be logged somewhere </h4>
+
+Regardless of exit status, I always want the output of the job to be logged so
+we can audit it later. This is easily done with the logger(1) command.
+
+<pre>
+#!/bin/sh
+
+# pipe all output to syslog with tag 'backupmysql'
+mysqldump ... <b> 2&gt;&amp;1 | logger -t "backupmysql"</b>
+</pre>
+
+<h4> Some jobs need timeouts </h4>
+
+Run-away cronjobs are bad. If you use locking as above to prevent overlaps, a
+stuck or frozen cron job can prevent any future jobs from running without
+manual intervention.
+
+For this, we'll need a tool to interrupt execution of a program. I don't know
+if there's a canonical, so I wrote one for this artcle.
+
+<p>
+<a href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day08/alarm.rb">Download alarm.rb</a>.
+
+<p>
+You'll need ruby, but that's it. We can now apply this to our backup script:
+
+<pre>
+#!/bin/sh
+
+<b>alarm.rb 28800</b> mysqldump ...
+</pre>
+
+This will abort if the mysqldump runtime exceeds 8 hours (28800 seconds). My alarm.rb will exit nonzero on timeouts, so if we use the email-on-error tip from above, we'll get notified on job timeouts.
+
+<h4> Randomized startup </h4>
+
+<p>
+If you have lots of hosts all doing backups at the same time, your backup server may get overloaded. You can hand-schedule all your similar jobs to not run simultaneously on multiple hosts, or you can take a shortcut and randomize the startup time.
+</p>
+
+<p>
+In this example, let's have all jobs in cron configured to start at "0 0,12 * *
+*" and then sleep for a random interval on startup.
+</p>
+
+<p>
+To do this in a shell script, you'll need something to generate random numbers
+for you. Doing this explicitly in shell requires a shell that can generate
+random numbers: bash, Solaris ksh, and zsh support the magic variable $RANDOM
+which evaluates to a random number between 0 and 32767. You'll also need
+something to applying your random value to your sleep duration, we'll use bc(1)
+and bash(1) here (Even though zsh's $(( )) math operations support floats,
+bash seems more common).
+</p>
+
+<pre>
+#!/bin/<b>bash</b>
+
+<b>
+maxsleep=3600
+sleeptime=$(echo "scale=8; ($RANDOM / 32768) * 3600" | bc | cut -d. -f1)
+echo "Sleeping for $sleeptime before starting backupmysql."
+sleep $sleeptime
+</b>
+mysqldump ...
+</pre>
+
+<h4> Combining everything </h4>
+
+<p>
+Now let's combine all of the above into one super script. Doing all of the
+above cleanly and safely in bash is not the most trivial thing. Here is the
+result:
+</p>
+
+<p>
+<a href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day08/cronhelper.sh">cronhelper.sh</a>
+</p>
+
+<p>
+Using cronhelper.sh is simple. It takes options as environment variables.
+Here's an example:
+
+<pre>
+% TIMEOUT=5 JOBNAME=helloworld cronhelper.sh sh -c "echo hello world; sleep 10"
+Job failed with status 254 (command: sh -c echo hello world; sleep 10)
+hello world
+/home/jls/bin/alarm.rb: Execution expired (timeout == 5.0)
+
+# and in /var/log/messages:
+Dec  8 02:58:02 snack helloworld[19565]: hello world
+Dec  8 02:58:07 snack helloworld[19565]: /home/jls/bin/alarm.rb: Execution expired (timeout == 5.0)
+Dec  8 02:58:07 snack helloworld[19573]: Job failed with status 254 (command: sh -c echo hello world; sleep 10)
+</pre>
+
+<p>
+Now armed with cronhelper.sh and alarm.rb, we can modify our cron job. Let us
+choose an 8 hour timeout and a 1 hour random startup delay:
+</p>
+
+<pre>
+0 0,12 * * * JOBNAME="backupmysql" SLEEPYSTART=3600 TIMEOUT=28800 cronhelper.sh backupmysql.sh
+</pre>
+
+The new cron entry is now:
+<ul>
+  <li> logging any output to syslog </li>
+  <li> only outputting to stdout when there's been a failure (and thus only emailing us on failures) </li>
+  <li> staggering startup across an hour </li>
+  <li> aborting after 8 hours if not finished </li>
+  <li> locking so overlapping runs are impossible </li>
+</ul>
+
+<p>
+Downloads:
+</p>
+
+<ul>
+  <li> <a href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day08/cronhelper.sh">cronhelper.sh</a> </li>
+  <li> <a href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day08/alarm.rb">alarm.rb</a> </li>
+</ul>
+
+<p>
+Further reading:
+</p>
+
+<ul>
+  <li> <a href="http://sysadvent.blogspot.com/2008/12/day-9-lock-file-practices.html">Sysadvent 2008 - Day 9 - Lock File Practices</a> </li>
+  <li> <a href="http://en.wikipedia.org/wiki/Cron#History">Cron's history</a> on Wikipedia</li>
+  <li> <a href="http://dev.mysql.com/doc/refman/5.1/en/mysqldump.html">mysqldump docs</a> </li>
+  <li> <a href="http://en.wikipedia.org/wiki/At_(Unix_command)">The at(8) command</a> - related to cron, but you schedule things once, not periodically. </li>
+</ul>

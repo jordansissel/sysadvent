@@ -1,0 +1,154 @@
+Title: "The Dungeon Masters Guide to IT: A Standard Primer"
+
+<i> This article written by <a href="http://www.cuddletech.com/blog/">Ben Rockwood</a>.</i>
+
+<p> A couple weeks ago, I was trying to architect the next evolution of security
+infrastructure and made an outline of major areas in which I need to focus.
+Pondering the list it occured to me that it looked like the table of contents
+of a standard.  I'd never really paid much attention to them, afterall,
+everyone gripes about them and claims they are beuocratic trash imposed on good
+engineers by dim-witted management.  Why waste my time? </p>
+
+<p> But then, I stepped back, with a childs eye, and admitted to myself that I
+really had no idea what any of this stuff meant.  Afterall, thats the problem
+with security: when are you done?  When can you say "Great!  Its secure!" and
+move on?  I've always hate security, and I think this ambiguity was precisely
+why. </p>
+
+<p> So I brew a strong pot of coffee and create a new page in my wiki:
+"Industry Standards".  Like many SysAdmin's I first need to get a "lay of the
+land", to orient myself in the subject before diving into componants.
+... About a week later, I think I'd started to make headway.  I had no idea just
+how deep the rabbit whole went and quickly became obsessed with the subject. </p>
+
+<p> Several things became clear during my studies.  The first was that IT is
+struggling to leave adolecense and grow into manhood.  The one thread that runs
+through all standards and frameworks out there is that IT can no longer be a
+special ops part of the company. Rather, it needs to mature and integrate with
+the larger corporation just like sales or marketing or facilities. </p>
+
+<p> There are several reasons IT needs to stop being the corporate step-child
+and come under the fold, chief among them SOX compliance.  Prior to SOX it was
+easy for management to say "Look, I don't want to know all this tech crap, just
+make sure our people have what they need and do your job." The blind eye of
+management. But with SOX, it became clear that the IT folks hold all the keys
+to the corporate data kingdom and needed strict oversite.  I mean, the
+government is putting the pressure on finance, its only a matter of time they
+put the pressure on the people that keep the data that finance is reporting on.
+Is the data managed properly?  Is the data secure?  Is the data protected?
+What started with accountants is now putting the entire IT operation into
+question. </p>
+
+<p> Thanks to SOX ambiguity, people start searching for solutions to help them
+comply, and thankfully a great deal of work had already been done.  Thus, a
+variety of "frameworks" to implement controls (procedures and checks that keep
+things on the up-and-up; like the guy that works the register doesn't count
+it).  Quickly auditors started agreeing that the best way to fill in the
+missing regulatory gaps was simply to verify the company against these
+frameworks and an industry of compliance and standards writing took on a whole
+new life. </p>
+
+<p> When looking at standards there are some details to understand up front.
+There are "standards specification" or "requirements" that you actually can be
+certified against.  There are "frameworks" which are series of controls which
+are basicly like Dungeons & Dragons DM Guides, they tell you how to play the
+game.  Lastly, there is "guidance" or "best practice", which aren't standards in
+the sense that you certify against them but rather you use them to help you
+implement the standand. </p>
+
+<p> So lets start at the top: COSO.  COSO is an internal control framework for
+corporations created in 1985 to combat the fraud and bad financial reporting of
+the 70's and 80's.  Companies would volentarily adopt COSO as a framework in
+which to run their business. </p>
+
+<p> Modeled after COSO, the COBIT (Control Objectives for Information and
+related Technology)  framework was created for IT governance.  Instead of being
+aimed at top management on how to run the company in a responsable way, like
+COSO, it outlines how the IT organization should interact with the company as a
+whole.  It tells the CEO what to expect from IT and what IT should do for the
+CEO. </p>
+
+<p> COBIT plays a big role in de-geek-ifying IT and making it a more integrated
+part of the overall business, with roles and responsibilities and processes.
+Some of its controls include managing people, quality, problems, assets, and
+all sorts of not so fun stuff. </p>
+
+<p> COBIT is a great framework, but how do you certify your organization?  How
+do you implement it?  This is where ITIL and ISO20K come in. </p>
+
+<p> Of all the IT standards guidance, the Information Technology Infrastructure
+Library (ITIL), has gotten the most interest.  Currently in its 3rd version,
+ITIL is nothing more than a series of 5 books (expensive books, $600 for the
+set) that define IT Service Management (ITSM) best practice guidence.  The
+emphasis is that IT is a service organization and should align itself to
+service the greater corporation, so it directly supports the direction set by
+COBIT. However, the two are distinct and not dependent on each other. </p>
+
+<p> Whether you're trying to become a compliant organization or you simply want
+some ideas on how to properly structure an IT group, ITIL has become the
+defacto authority on the subject. </p>
+
+<p> Inevitably, you'll want to certify that you're running a well-oiled IT
+organization and that your IT governance is up to spec, and so ISO 200000-1
+(ISO20K) defines "Information Technology - Service Management: Specification".
+If you're looking for SOX compliance this is one you may need to audit against.
+But lets step back. </p>
+
+<p> ISO20K can provide SysAdmin's in the trenches with something very useful, a
+checklist that outlines what a proper IT organization should look like.   Are
+you doing problem management?  Configuration management?  Change management?
+Do you see the value in these processes or are they just a burden?  How should
+an IT organization be organized and run?  ISO20K can help bring all these
+questions into a structured discussion and thought excersize.  Maybe you don't
+agree with parts of it, or think its too much, but ISO20K gives us a stick in
+the sand to orbit and ponder. </p>
+
+<p> So, to review so far, the big guys use the COSO framwork, the IT guys use
+the COBIT framework, and they turn to ITIL for guidence and certify itho
+touches credit card data.  The telcom industry gave us TIA-942, the
+"Telecommunications Infrastructure Standard for Data Centers".  On and on and
+on. </p>
+
+<p> In addition to these, I want to point out that they bump up against the two
+big project management standards as well, namely the popular US standard PMBOK
+("Project Management Body of Knowledge") and the popular European standard
+PRINCE2 ("PRojects IN Controlled Environments").  Whether or not you care much
+about project management, when you get into the standards would you will
+see these two pop up from time to time, so at least learn to recognize them.
+</p>
+
+--
+
+<p> So why am I writing sysadmins about all this?  Because I think generally
+we're a very curious bunch and have a natural desire to organize things into
+effecient systems.  While we also have a gung-ho DIY instinct, ultimately we do
+realize that having at least some point of reference is a useful measure.   </p>
+
+<p> Whether your in a shop thats implementing standards and your only seeing
+the tasks without the big picture, or your the big man in a small shop
+wondering how to better organize your shop, these standards and frameworks can
+really help you both better understand the direction of the industry and
+provide a helpful second opinion on your method.  No process created in
+commitee will be perfect for your specific needs, but I encourage you to at
+least educate yourself and see if it doesn't change the way you think about
+your job. </p>
+
+<p> The important takeaway is this: all these standards and frameworks and
+guidence are just books!  Read them.  Understand them as much as you can.  Some
+are free and some are not but seek them out and you'll find them.  Knowledge
+really is power and if you want to play a bigger role in your organization or
+prepare yourself for the future this is the to start. </p>
+
+
+<p> Further reading: </p>
+<ul>
+  <li> <a href="http://www.coso.org/">COSO</a> </li>
+  <li> <a href="http://www.isaca.org/Content/NavigationMenu/Members_and_Leaders1/COBIT6/Obtain_COBIT/Obtain_COBIT.htm">COBIT</a> </li>
+  <li> <a href="http://www.itil-officialsite.com/home/home.asp">ITIL</a> </li>
+  <li> <a href="http://en.wikipedia.org/wiki/ISO/IEC_20000">ISO20K</a> </li>
+  <li> <a href="https://www.pcisecuritystandards.org/">PCI DSS</a> </li>
+  <li> <a href="http://en.wikipedia.org/wiki/ISO/IEC_27000-series">ISO27K</a> </li>
+  <li> <a href="http://www.sei.cmu.edu/cmmi/">CMMI</a> </li>
+  <li> <a href="http://www.pmi.org/Resources/Pages/Library-of-PMI-Global-Standards-Projects.aspx#4th">PMBOK</a> </li>
+  <li> <a href="http://www.prince2.com/defaultunitedstates.asp">PRINCE2</a> </li>
+</ul>

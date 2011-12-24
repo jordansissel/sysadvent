@@ -1,0 +1,5 @@
+# hostlabels.yaml
+host1.prod.yourdomain:
+- mysql-debug
+host2.prod.yourdomain:
+- frontend

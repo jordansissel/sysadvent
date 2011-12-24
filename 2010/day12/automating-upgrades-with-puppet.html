@@ -1,0 +1,173 @@
+<h1>Scaling Operability with Truth</h1>
+<p><em>Written by <a href="http://semicomplete.com">Jordan Sissel</a> (<a href="http://twitter.com/jordansissel">@jordansissel</a>)</em></p>
+<p>This article is about separating your configuration model from your
+configuration inputs. You might have the same service (like frontend,
+loadbalancer, etc) in multiple environments, but versions, accounts, members,
+etc, may change between them. The 'scale' part, here, is that having
+inputs separate from models helps to scale operability and sanity. I use
+Puppet features to show how this is done, but this idea is applicable to any
+config management tool.</p>
+<p>Puppet and other configuration tools help you describe your infrastructure.
+Puppet's model is resources: files, users, packages, etc. Each resource has
+attributes like package version, file path, file contents, service restart
+command, package provider (gem, apt, yum), user uid, etc.</p>
+<p>Many of my puppet manifests used to look a bit like this:</p>
+<pre><code>class nginx::server {
+  package {
+    "nginx": ensure =&gt; "0.8.52";
+  }
+  ...
+}
+</code></pre>
+<p>To upgrade versions, I would just edit the manifest and change the version,
+then push out the change.</p>
+<p>Static manifests don't scale very well. Puppet has support for environments so
+you can use different manifests (say, a different nginx::server class) in
+different situations. You could also do it all in one like this:</p>
+<pre><code>class nginx::server {
+  package {
+    "nginx":
+      ensure =&gt; $environment {
+        "production" =&gt; "0.8.52",
+        "testing" =&gt; "0.8.53",
+        "dev" =&gt; "latest",
+      };
+  }
+}
+</code></pre>
+<p>The variable, <code>$environment</code>, comes from what puppet calls a 'fact.' Facts such as cpu speed,
+ip addresses, chassis make/model, virtualization source, etc, are provided to help
+you conditionally tune your infrastructure. Facts come from a puppet tool
+called Facter, which means facts are essentially an external input for puppet.</p>
+<p>This model of external inputs is a good one. Using facts, you could conditionally
+install things like Dell OpenManage, or template service configs based on ram
+or cpu counts. Combining the inputs (facts) with your model (puppet resources)
+helps you steer puppet into doing the correct thing for each machine it is run on.
+Very useful!</p>
+<p>Back to the nginx manifest above. The problem with the above puppet example is
+that it doesn't scale very well. Each time you add a new environment (a new
+testing environment, some one-off dev cluster, etc), you have to edit the
+manifest (your infrastructure model). For each 'environment' condition, you have
+to update it with the new environment-specific value, which could mean editing
+just about every file in your puppet manifests - and that's sucky and
+error-prone work.</p>
+<p>The solution here is to follow the facts example and allow yourself a way to
+specify your own inputs - what I would call, "truth," Truth is very similar to
+facts. It is just more human-driven, and I only use a different, but similar,
+term for the sake of identifying source. I use "truth" to refer to
+human-originated inputs (such as "what package version to install"), and I use
+"facts" to refer to machine-originated information (such as "number of cpus on
+this system").</p>
+<p>For the above puppet manifest, you could write truth in separate manifest that
+defines <code>$nginx_version</code> based on <code>$environment</code>:</p>
+<pre><code># truth.pp
+case $environment {
+  "production": { $nginx_version = "0.8.52" }
+  "testing": { $nginx_version = "0.8.53" }
+  "dev": { $nginx_version =  "latest" }
+}
+
+# modules/nginx/manifests/server.pp
+class nginx::server {
+  package {
+    "nginx": ensure =&gt; $nginx_version;
+  }
+}
+</code></pre>
+<p>This is better, but ultimately, setting variables with conditionals (case
+statements, etc) is more code than you need - in Puppet 2.6.1, a solution to
+this problem was included:
+<a href="http://docs.puppetlabs.com/references/stable/function.html#extlookup">extlookup</a>().
+(It existed prior, but it now officially ships with puppet)</p>
+<p>This new function lets you separate your configuration inputs from your
+infrastructure model. An example of the above manifest using extlookup:</p>
+<pre><code>class nginx::server {
+  package {
+    "nginx": ensure =&gt; extlookup("package/nginx");
+  }
+}
+</code></pre>
+<p>You configure extlookup in puppet by setting some variables, here's an example:</p>
+<pre><code>$extlookup_datadir = "/etc/puppet/manifests/extdata"
+$extlookup_precedence = ["nodes/%{fqdn}", "environments/%{environment}", "common"]
+</code></pre>
+<p>The values in <code>%{ ... }</code> are evaluated with each node's facts. This lets you
+put all production environment data in
+<code>/etc/puppet/manifests/extdata/environments/production.csv</code>.</p>
+<p>With the above configuration, I can easily add per-node and per-environment
+package versions for nginx. If all else fails, I can provide a default package
+version in the 'common' setting above. You can also easily extend the configuration
+to include more sources without modifying your infrastructure model.</p>
+<p>The data format extlookup uses currently is
+<a href="http://en.wikipedia.org/wiki/Comma-separated_values">csv</a> files.  It's
+basically a bunch of key-value pairs you can query with a precedence order. For
+example, the above config would look in <code>nodes/somehostname.csv</code> first, which
+would allow you to override environment-specific configuration values per host.
+If <code>nodes/somehostname.csv</code> file does not exist or if the requested value is not
+present in that file, extlookup will fall to the next file in the list. You can
+also specify default values in extlookup per call, but that is outside the
+scope of this article.</p>
+<p>Building on the examples above, here is what your extlookup files would look like:</p>
+<pre><code># /etc/puppet/manifests/extdata/environments/production.csv
+package/nginx,0.8.52
+
+# /etc/puppet/manifests/extdata/environments/testing.csv
+package/nginx,0.8.53
+
+# /etc/puppet/manifests/extdata/environments/dev.csv
+package/nginx,latest
+</code></pre>
+<p>This scales in meaningful ways. Common cases:</p>
+<ul>
+<li>
+<p>You want to clone production:</p>
+<pre><code>% cp production.csv productionclone.csv
+# Or, accept 'testing' as good, and ship it to production:
+% cp testing.csv production.csv
+</code></pre>
+</li>
+<li>
+<p>A security vulnerability makes you want to know what nginx versions you are installing:</p>
+<pre><code>% grep 'package/nginx' */*.csv
+</code></pre>
+</li>
+<li>
+<p>Tune settings per machine, per environment, etc.</p>
+</li>
+<li>All of your truth inputs are concentrated in one place. This has an
+  additional benefit of allowing non-puppet users (in this example) to upgrade
+  or tune values without needing puppet knowledge.</li>
+<li>If you author puppet modules, you can release modules with extlookup support
+  and document the values used. This allows users of your module to be happily ignorant
+  of the internals of your module.</li>
+</ul>
+<p>Point is, once you separate your model from your inputs (facts, truth, etc),
+you become more flexible and agile. I use extlookup for:</p>
+<ul>
+<li>package versions. Of note, for developer systems, I set some package
+  values to "absent" so developer activity won't be overwritten by puppet
+  trying to deploy our internal apps.</li>
+<li>application flags and tuning. For production, we want to do backups to Amazon
+  S3. For random development systems, we don't. In general, I use this for
+  helping generate production application configs.</li>
+<li>syslog configuration (what remote syslog host to ship logs to, per deployment)</li>
+<li>database information (database name, credentials, etc)</li>
+<li>some dns automation (what certain internal CNAME records point to)</li>
+<li>nagios contact configuration (example: notify pager in prod 24/7, only during
+  daytime for staging, but never for development)</li>
+</ul>
+<p>In closing, separating your model from your inputs increases the testability
+and maintainability of your infrastructure automation. Further, combining human
+input source (truth) with machine inputs (facts) can help you tune your
+infrastructure for any situation. Having a separate truth input allows you to
+abstract tunables in your infrastructure and opens up maintenance possibilities
+to non-experts (like allowing developers or QA folks managing their own
+clusters), which can help improve non-sysadmin throughput by allowing others
+to manage tunables you define. That helps you stay sane and uninterrupted, and it
+helps the business.</p>
+<p>Further reading:</p>
+<ul>
+<li><a href="http://www.puppetlabs.com/puppet-3/related-projects/facter/">Puppet facts with Facter</a></li>
+<li><a href="http://wiki.opscode.com/display/chef/Ohai">Chef facts with Ohai</a></li>
+<li><a href="http://www.devco.net/archives/2009/08/31/complex_data_and_puppet.php">Complex data and Puppet</a></li>
+</ul>

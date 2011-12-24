@@ -1,0 +1,126 @@
+In the introduction of "The Practice of System and Network Administration," the
+authors point out a few critical things to do first. One of these things is "start every new host in a a known state."
+
+<p>
+
+Having a single system image for each platform you support is a great way to
+save yourself time and mistakes. If you deploy Ubuntu on your servers, you can
+save yourself time by installing Ubuntu on a single server, configuring some
+defaults (which you document somewhere or automate), and then take a snapshot
+of the harddrive for cloning. Once you've done this, you have a very easy
+method for moving from a host in an unknown state to a host in a known state:
+clone the drive.
+
+<p>
+
+Automation depends highly on starting from a known state and ending in a known
+state. Some platforms give you a system for automated system installation, such
+as Solaris and JumpStart, or Red Hat and KickStart. These tools often perform
+all the normal tasks an installation would, which may take more time than you
+can budget for if you need to reimage machines often. Having a standard system
+image you push to every server (or set of servers) will help you automate both
+the installation and repair processes at the same time.
+
+<p>
+
+Building an imaging infrastructure yourself isn't the most trivial of tasks.
+Lots of moving parts, depending on the tools and hardware you have: dhcp, tftp, pxe,
+disk cloning, an image file server, etc.  There are many disk imaging and
+cloning tools available to you. Some are stand-alone suites, some are single
+tools that can help you build an imaging infrastructure.
+
+<p>
+
+If you don't have the budget to invest in imaging tools, or can't find a
+project (commercial or open source) that suits your needs, you may have to
+build your own. For sending and receiving disk images, you should use UDPcast.
+
+<p>
+
+UDPcast is a tool that can use multicast to transfer data to multiple systems
+at once. High-packet rates lead to dropped packets, which can lead to broken
+file transfers, so UDPcast compensates by periodically confirming if each
+connected client has received all packets and retransmits those that were
+dropped. It supports unicast too, if you only need one client or can't support
+multicast between the sender and receiver.
+
+<p>
+
+The UDPcast project has good documentation and tools for making a system for imaging under various situations. The UDPcast itself consists of two programs, udp-receiver and udp-sender. All configuration occurs in command-line flag arguments. To show UDPcast in a simple example, on two different hosts, A and B, on the same LAN:
+
+<pre>
+HostA % echo "hello" &gt; /tmp/udptest
+HostA % udp-sender --file=/tmp/udptest
+Udp-sender 2007-12-28
+Using mcast address 236.16.30.19
+UDP sender for /etc/motd at 172.16.30.19 on eth0 
+Broadcasting control to 172.16.31.255
+</pre>
+
+At this point, HostA is listening on the address listed above. When it says
+"broadcasting control" it means it broadcast a hello packet so any
+already-active udp-receiver processes.
+
+<pre>
+HostB % udp-receiver --file=/tmp/testoutput
+Udp-receiver 2007-12-28
+UDP receiver for /tmp/testoutput at 172.16.30.19 on eth0
+received message, cap=00000009
+Connected as #0 to 172.16.30.19
+Listening to multicast on 236.16.30.19
+Press any key to start receiving data!
+sending go signal
+bytes=              9  (  0.00 Mbps)              9 
+Transfer complete.
+
+HostB % cat /tmp/testoutput
+hello
+</pre>
+
+Seems simple enough. If you wanted to use it for imaging, you would send a
+cloned disk image with udp-sender and write it to your target harddrive. For
+example, "udp-receiver --file=/dev/hda"
+
+<p>
+
+You might get better performance if you use compression with your
+transfer.  Keep your disk image in a compressed format and then using
+udp-receiver's --pipe flag to decompress it.  If you compress it with gzip,
+using 'udp-receiver --pipe "gzip -dc"' will decompress it before writing to
+disk. Personally, I've had better experience with lzop for compression. Gzip
+beats lzop slightly in compression ratio, but lzop makes up for it by much
+faster decompression and less cpu usage.
+
+
+<p>
+
+How can UDPcast fit into your imaging infrastructure?
+
+<p>
+
+If you're stuck rolling your own system, reimaging a system might involve
+netbooting a linux and using udp-receiver to dump a disk image to /dev/sda.
+You'll need another server broadcasting these disk images on request. For that,
+udp-sender has a daemon mode. If daemon mode doesn't suit you, running it in a
+loop will work too.
+
+<p>
+
+Automation needs to have a starting point, and automated system installs is
+critical to saving yourself or others trips to the datacenter.
+
+<p>
+
+<i>As a side note, udpcast works for deploying a Windows disk image too, not just Linux, Solaris, and other unix-like platforms.</i>
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://udpcast.linux.lu/">UDPcast homepage</a> </li>
+  <li> <a href="http://www.sun.com/bigadmin/features/articles/jumpstart_x86_x64.jsp">Solaris + JumpStart</a> </li>
+  <li> <a href="http://www.redhat.com/docs/manuals/linux/RHL-9-Manual/custom-guide/ch-kickstart2.html">Red Hat + KickStart</a> </li>
+  <li> <a href="http://clonezilla.org/">Clonezilla</a> - an imaging suite that uses udpcast. </li>
+  <li> <a href="http://www.busybox.net/">BusyBox</a> - project to help you build a small system, useful for embedding or netbooting </li>
+  <li> <a href="http://etherboot.org/wiki/index.php">gPXE</a> - a very useful network bootloader. </li>
+</ul>

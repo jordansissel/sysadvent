@@ -1,0 +1,215 @@
+<h1>A Journey to NoSQL</h1>
+<p><em>Written by Michael Stahnke (<a href="http://twitter.com/stahnma">@stahnma</a>)</em></p>
+<h2>The N00b</h2>
+<p>When I was first learning about being a Unix Admin, I just wanted to know what
+systems my team supported, so that when I got called at 2 AM, I could either
+make some weak attempt at getting online and fixing a problem (I was new...very
+new), or promptly help that application analyst find the correct support team
+pager number.  It was the week before I first went into our pager rotation that
+I realized something was very wrong.  I had no idea what systems we actually
+supported.  I wasn't the only one.</p>
+<p>There had recently been some form of reorganization right before I hired in at
+this company.  What was once four teams (IBM AIX, HP-UX, Sun Solaris and Red
+Hat Linux), was becoming three teams (Capacity Planning, Systems Implementation
+and Systems operations).  However, there were still other server teams at other
+sites, plus Unix workstation support, and some IRIX somewhere out there.  The
+fundamental problem, though, was, "Do I have the ability to help the person who
+has paged my team?"</p>
+<h2>A solution...sort of</h2>
+<p>I found this state to be extremely non-desired, so  I started writing a Unix
+server tracking system.  It started out as a basic web application utilizing a
+<a href="http://www.mysql.com" title="MySQL.com">MySQL</a> back-end.  It worked great.  The
+teams loved it.  They knew what we supported and what we didn't.  Then, the
+requests for enhancement came in.  I needed to add MAC addresses, world wide
+port names, cluster licensing terms, customer information, out-of-band
+management URLs, etc.  This quickly grew, but I was still happy with it. We
+designed several workflow automations through the tool as well. However, as the
+tool grew larger, and less maintainable, I was starting to get extremely
+frustrated with it. </p>
+<p>While problems for this application were abundant, there were two issues that
+made it less of an operational platform than I desired.  The first problem was
+that in order to do any type of CRUD actions, you have to have database drivers
+on the client.  This was a big challenge.  We had an extremely heterogenous
+environment, multiple firewalls, and some ancient operating systems that
+probably couldn't have had a MySQL driver loaded on them without sacrificing
+some type of domesticated animal and praying to a deity that was anything but
+righteous. </p>
+<p>The other problem was flexibility of schema.  Each time we added a new piece of
+data to track, it had to be analyzed, and then added into the schema.
+Normalization was great for one:many and many:many relationships, but then made
+the SQL queries much more complex with joins or sub-queries, especially for
+unix admins without much or any SQL background.  In short, the relational
+portion of the RDBMS system was in the way.<br />
+</p>
+<h2>Another solution...getting warmer</h2>
+<p>I left that shop before that problem was really solved, but since I had an
+opportunity again at my next assignment to solve a similar problem, I decided I
+would try some things in a different way. My first thoughts were around putting
+some form of web-services infrastructure in front of a basic RDBMS backed web
+application. I thought that speaking HTTP would be easier than MySQL, Oracle or
+even DBI for most clients.  I toyed with it and did some mock-ups, but I still
+felt like the data model was complicated and required many calls and
+client-side parsing to really get the data into usable formats for automation,
+updates, or to generate <a href="http://www.nagios.com" title="Nagios.com">Nagios</a>
+configuration, etc.  It was time for something completely different.<br />
+</p>
+<p>NoSQL. It was obvious. Of course, at this time (2006) I had never heard of the
+term NoSQL, but looking back on it, that was the epiphany I had.  If
+relationships are difficult to model and manage, maybe some other model would
+work.  Then it hit me:  LDAP.  The LDAP container is designed for easy
+replication, extremely granular security controls, and availability.  On top of
+that, those features were all there out of the box.  Schemas could be
+programatically  deployed, and many of the data model questions were things
+like 'should this be single-valued or multi-valued'.  Those questions were
+quite simple when compared to joining 17 tables to see a complete system
+configuration in the old RDBMS I had authored.  As an added bonus, using LDAP
+didn't introduce a new source of truth for the environment since it was in use
+for account management.<br />
+</p>
+<p>LDAP also had a good solution for the driver problem.  We were using LDAP for
+user authentication, so our systems already had LDAP client libraries loaded.
+Even the few that didn't, the client-side libraries were readily available,
+even on my less-than-favorite flavors of Unix. <br />
+</p>
+<p>We modified schema, populated data by hand, and then with some simple scripts.
+Life was good...at least for a while.  After a couple years operating in this
+mode, the schema became a bit more problematic.  Extending schema at will was
+not the greatest idea I've ever had.  We also had a problem where some admins
+would make new objectClasses rather than extend one, or inherit from one.  This
+led to conflicts in schema and some data integrity issues.  None of it was
+absolutely horrible, but in the end it smelled like a chilli dog left in a desk
+drawer overnight.</p>
+<h2>The search continues</h2>
+<p>I had a lot of discussion about this problem with a group of my friends (and
+eventual business partners).  We spent hours going back and forth on how to
+model host information and metadata and expose that information to our
+configuration management, monitoring, accounting, chargeback, and provisioning
+systems.  It always came back to a discussion on discrete math: use <a href="http://en.wikipedia.org/wiki/Set_theory" title="Set Theory">Set
+Theory</a>.  The best, and
+possibly only sane way, to keep this data organized was to use set theory.<br />
+</p>
+<p>Luckily, we had a greenfield to play with as we forming a new company.  We
+tried it out.  We tried to not extend or customize schema for host information
+beyond loading in well-known <a href="http://www.iana.org" title="IANA">IANA</a> referenced
+schemas. The basic premise, obviously, is that everything can be grouped into
+sets.  We created an <code>OU=Sets</code> at the top level our LDAP directory.  Under
+<code>OU=Sets</code>, we created a DN of of 'set name' for example <code>dn:
+cn=centos5,ou=Sets,dc=websages,dc=com</code> is an entry in our directory.  It is
+setup as a <code>groupOfUniqueNames</code> and contains the DN of each host that is in
+fact a CentOS 5 host.  The nice thing about <code>OU=Sets</code> is you can just keep
+adding things into it, without extending schema.<br />
+</p>
+<p>It may seem a bit backward at first to have the attribute as the set name and
+then the host <code>dn</code> as the entry, but it seems to work.  LDAP also allows groups
+within groups, so nesting works perfectly. As an example, if
+<code>cn=ldap_servers,ou=sets</code> exists, it may contain
+<code>cn=ldap_write_servers,ou=sets</code> and <code>cn=ldap_replicas,ou=sets</code>.  Grouping in
+this manner allows one change to cascade through the directory.<br />
+</p>
+<p>Of course, with every good solution, there are more problems to be solved.  In
+this case it's recursion.  <a href="http://www.openldap.org" title="OpenLDAP.org">OpenLDAP</a>
+and <a href="http://directory.fedoraproject.org/" title="389
+Site">389</a>/<a href="http://www.redhat.com/directory_server/" title="RHDS">RHDS</a>/Fedora-DS/SunOne/iPlanet/et all don't seem to automatically recurse
+nested groups, though I have heard that some LDAP implementations do.  Luckily,
+it's not that big of a problem.<br />
+</p>
+<h2>Recursion</h2>
+<p>In this example, I'll be looking for all LDAP servers.  Our directory
+information tree is setup such that we have three groups:</p>
+<ul>
+<li>ldap_write_servers</li>
+<li>ldap_replicas</li>
+<li>ldap_servers</li>
+</ul>
+<p>The <code>ldap_servers</code> entry is a <code>groupOfUniqueNames</code> whose <code>uniqueMembers</code> are
+the other two groups.  To traverse this, we'll need some recursion.<br />
+</p>
+<h2>Sample Code</h2>
+<p>In my code, I most often use ruby.  When working with LDAP, I've used the
+<a href="http://ruby-ldap.sourceforge.net/" title="ruby/ldap">classic ldap bindings</a> heavily,
+but recently I've really taken a liking to
+<a href="http://rubyforge.org/projects/ruby-activeldap/" title="activeldap">activeldap</a>.
+Activeldap borrows heavily from the <a href="http://en.wikipedia.org/wiki/Active_record_pattern" title="Active Record
+Pattern">Active Record design
+pattern</a> and applies it to LDAP.  It is not a perfect translation of active
+record, but it is quite nice for most operations on a directory server.</p>
+<p>Activeldap requires some minimal setup to be useful.  You can install it with
+gems or your favorite package manager.<br />
+</p>
+<pre><code>require 'rubygems'
+require 'active_ldap'
+
+class Entry &lt; ActiveLdap::Base
+end
+
+ActiveLdap::Base.setup_connection(
+  :host =&gt; 'ldap.websages.com', :port =&gt; 636, :method =&gt; :ssl,
+  :base =&gt; 'dc=websages,dc=com',
+  :bind_dn =&gt; "uid=stahnma,ou=people,dc=websages,dc=com",
+  :password =&gt; ENV['LDAP_PASSWORD'], :allow_anonymous =&gt; false)
+</code></pre>
+<p>This is a simple setup section for some code using activeldap.  Require the
+library (and rubygems unless your environment will load them, or you installed
+activeldap in some other method).  Then you run <code>setup_connection</code>.  The Websages
+directory server requires SSL and does not allow anonymous bind, so a few more
+parameters are used than you might see on a clear-text, anonymous setup. </p>
+<p>From there, it's really not very difficult to recurse through groups and find
+the entries. </p>
+<pre><code># Returns the members of a ldap groupOfUniqueNames
+def find_members(search, members = [])
+  Entry.find(:all , search).each do |ent|
+    # Ensure the search result is a group
+    if ent.classes.include?('groupOfUniqueNames')
+       # Check to see if each member is a group
+       ent.uniqueMember.each do |dn|
+         members &lt;&lt; find_members(dn, members)
+       end
+    else
+    # Add the results to the members array
+     members &lt;&lt;  search
+    end
+  end
+  # clean up the array before returning
+  members.flatten.uniq
+end
+</code></pre>
+<p>The above code will find all members of a groupOfUniqueNames including entries of
+groups within groups.<br />
+</p>
+<p>My calling function is just:</p>
+<pre><code>puts find_members('cn=ldap_servers')
+</code></pre>
+<p>Another excellent feature of activeldap is that if you simple <code>puts</code> an
+activeldap object, the
+<a href="http://en.wikipedia.org/wiki/LDAP_Data_Interchange_Format" title="LDIF">LIDF</a>  text
+for the object is displayed on standard out. </p>
+<pre><code>Entry.find(:all , "cn=ldap_servers").each do |h|
+  puts h
+end
+</code></pre>
+<p>Produces a simple LDIF output:</p>
+<pre><code>version: 1
+dn: cn=ldap_servers,ou=Sets,dc=websages,dc=com
+cn: ldap_servers
+description: Hosts acting as LDAP Servers
+objectClass: groupOfUniqueNames
+objectClass: top
+uniqueMember: cn=ldap_replicas,ou=sets,dc=websages,dc=com
+uniqueMember: cn=ldap_write_servers,ou=sets,dc=websages,dc=com
+</code></pre>
+<h2>LDAP is a good answer</h2>
+<p>Now I can basically apply set theory for system management of meta data and
+configuration information.  At Websages, we use our LDAP directory for nearly
+everything and integrate it into our fact generation for puppet, our backup
+schedules, our controlling IRC bots, and our broadcast SMSing while acting like
+idiots at the bar.<br />
+</p>
+<p>So next time you're faced with storing a bunch of host information or meta-data,
+you might turn back to a technology that is non-relational, scales
+horizontally, offers extensive ACL options, and is lightweight and fast.  LDAP was
+NoSQL before the term was coined and often loses out on today's NoSQL
+discussions, but it's track record is proven.<br />
+</p>
+<p>When I see the term NoSQL, I am reminded of a classic Dilbert, "I assure you,
+it has a totally different name."</p>
+<p><img alt="Dilbert" src="http://dilbert.com/dyn/str_strip/000000000/00000000/0000000/000000/00000/2000/200/2292/2292.strip.gif" title="It has a new name!" /></p>

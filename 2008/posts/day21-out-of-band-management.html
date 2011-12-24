@@ -1,0 +1,86 @@
+Knowing I don't have to drive to the datacenter to reboot a machine gives me a
+warm fuzzy feeling. Do you have remote out-of-band management on your servers?
+Do you need it? If you need it, read on.
+
+<p>
+
+Remote management features include power management, KVM, serial console, and
+other things. Remote management is most critical when the host is not fully booted: when it's off, or you need to configure bios settings, or debug a kernel crash. 
+
+<p>
+
+When deciding on what vendor and model to buy, knowing
+which of these features will save you time and money in the long term will help
+ you decide what features to buy. More features often more money. For example,
+ KVM-over-LAN is probably going to increase the server cost by quite a bit, so
+be sure to only buy features you need.
+
+<p>
+
+Remote management systems offer many different ways to interface: serial
+console, web browser, IPMI, OPMA, SSH, telnet, and others. Serial (ie; RS232) 
+costs the most to own because the rest work over the network (which you already provide). Serial port control probably requires a separate device to provide you remote access to that
+serial port.
+
+<p>
+
+The most basic remote management feature, I think, is power management: Power
+on, off, and reset. Power management alone comes in two main forms, smart power
+strips and remote access controllers (RAC). Smart power strips offer an
+interface for controlling the state of each power port. RACs live closer to
+your system and connect to the power, reset, and other controls on your system
+motherboard (via wires or a separate interface).
+
+<p>
+
+Smart power strips are an easy way to provide remote power control to systems
+that don't have RACs, but there are drawbacks. A smart power strip toggling
+power won't do anything if your server is plugged into a UPS that's plugged
+into your power strip (for obvious reasons). Further, if your servers have
+redundant power supplies, you'll need one managed power port per power supply,
+and rebooting the server requires turning off all power ports before
+turning any back on, for a given server.
+
+<p>
+
+RAC modules come in varying forms. Like smart power strips, they offer
+interfacing over serial or network, depending on the model. Avoid serial if you
+can for reasons already stated. There are some standardized RAC network
+interfaces, such as IPMI and OPMA. Exact vendor support varies. Many Dell and
+HP server models come with IPMI. SuperMicro offers 'Supermicro Intelligent
+Management' which supports IPMI. Rackable's RAC goes by the 'Roamer' name, some
+of which support IPMI. Recent Intel chipsets support AMT (branded with the 'vPro' name).
+
+<p>
+
+IPMI RACs live on the same server and share power and often share layer 1
+connectivity with an onboard network device. IPMI can be configured while the
+server is online, which lends itself to easy automation. In Linux, for example,
+you'll want the IPMI kernel drivers (from OpenIPMI) and the ipmitool tool.
+Ipmitool will let you talk to the local system's  IPMI (via OpenIPMI kernel
+drivers) or to remote hosts using the IPMI protocol.
+
+<p>
+
+Simple power management isn't the only feature provided by the RACs mentioned
+here. IPMI, the protocol, supports serial-over-lan, sensor information, event
+logging, etc, but the features supported will vary by hardware. I don't have
+experience with OPMA or Intel AMT, but from their respective descriptions, they
+sound similar to IPMI in features.
+
+<p>
+
+Be sure to include out-of-band management (power, serial, etc) when considering
+your future purchases. I don't want to define your own server requirements, but for a point of note, even Dell's cheapest 1U rack server appears to come with IPMI support, so there may not be any reason for you not to buy hardware that supports remote, out-of-band management.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://en.wikipedia.org/wiki/IPMI">IPMI</a> on Wikipedia </li>
+  <li> <a href="http://en.wikipedia.org/wiki/Out-of-band_management"> Out of
+  Band management</a> on Wikipedia. Lists other manifestations of remote
+  management. </li> 
+  <li> <a href="http://en.wikipedia.org/wiki/Intel_Active_Management_Technology">Intel AMT</a> on Wikipedia. </li>
+  <li> <a href="http://ipmitool.sourceforge.net/">ipmitool homepage</a> </li>
+</ul>

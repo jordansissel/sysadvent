@@ -1,0 +1,31 @@
+body common control
+{
+  bundlesequence => { "packages" };
+}
+
+body package_method apt {
+  # from http://www.cfwiki.org/cfwiki/index.php/Using_APT_as_a_package_manager
+  package_changes => "bulk";
+  package_list_command => "/usr/bin/dpkg -l";
+
+  package_list_name_regex    => "ii\s+([^\s]+).*";
+  package_list_version_regex => "ii\s+[^\s]+\s+([^\s]+).*";
+  package_installed_regex => ".*"; # all reported are installed
+  package_name_convention => "$(name)";
+  package_add_command => "/usr/bin/apt-get --yes install";
+  package_delete_command => "/usr/bin/apt-get --yes remove";
+  package_update_command =>  "/usr/bin/apt-get --yes dist-upgrade";
+}
+
+bundle agent packages
+{
+vars:
+    "match_package" slist => {
+                           "figlet",
+                           "cowsay"
+                           };
+packages:
+   "$(match_package)"
+      package_policy => "add";
+}
+

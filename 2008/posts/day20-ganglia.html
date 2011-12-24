@@ -1,0 +1,168 @@
+Ganglia is a monitoring tool designed originally to help scalably monitor
+computing grids and clusters. How can it help you, even if you don't run
+traditional computing grids or clusters?
+
+<p>
+
+Ganglia is an RRDtool-based (like Cacti) monitoring and graphing system.
+Ganglia differs from Cacti in that configuration is much more automatic.
+Ganglia's design centers around two programs: gmond and gmetad. The gmond
+program listens for metric reports from other gmond programs (or tools that
+emit the same messages).  The gmetad program periodically polls a single gmond
+for data on an entire cluster. The trick, here, is that every time gmond gets
+data, it sends that data via multicast to other gmonds, so every gmond has
+state for the whole cluster. I presume that the actual gmond used by gmetad is
+chosen at random, and if the chosen gmond host fails, another gmond host is
+chosen.
+
+<p>
+
+In addition to clusters (one gmetad for N gmonds), Ganglia supports a higher
+level collection they call a grid. A grid is automatically learned when you
+have one gmetad polling from another gmetad. I am unaware if you can have more
+than these levels (host, cluster, grid).
+
+<p>
+
+Multicast: This means your network gear will need multicast routing enabled if
+you hope to span broadcast domains with this monitoring. Alternately, gmond can
+be configured to send updates to a unicast address which can avoid needing
+multicast routing and other potentially difficult network features.
+
+<p>
+
+Both gmond and gmetad have reasonably easy-to-use configuration files and come
+with very reasonable default values. Simply running gmond and gmetad from the
+default configurations will result in data you can access easily. The primary
+Ganglia human interface is through a webserver.
+
+<p>
+
+Getting data out of Ganglia is easy. The historical data is stored in RRD files
+ in a known location organized by cluster and hostname, so you can use your
+ favorite rrdtool interface to query data. The current data is stored on any
+ gmond which is queryable by connecting to  ganglia's xml port (default 8649). The service listening on that port will dump the metric data by cluster and host in XML.
+ XML might make you groan, but it's use will help you write tools (like nagios checks)
+to use the current data.
+
+<p>
+
+My first question after playing with Ganglia for a few minutes was, "How do I
+monitor my network gear?" Typical network gear won't allow you to run arbitrary
+binaries on them. Luckily, Ganglia comes with a tool for broadcasting metric
+messages, gmetric. With gmetric, you can spoof the source of a piece of data
+and easily claim that it came from your switch or router. This tool is also
+the easiest way to extend the metrics ganglia monitors for you. For example:
+
+<pre>
+% gmetric -S "192.168.0.254:myrouter" -n uptime -v 3644 -t uint32 -u seconds
+  spoofName: myrouter    spoofIP: 192.168.0.254 
+</pre>
+
+And the metric reported on the xml port is:
+<pre>
+&lt;HOST NAME="myrouter" IP="192.168.0.254" REPORTED="1229761211" TN="28" TMAX="20" DMAX="0" LOCATION="unspecified" GMOND_STARTED="0"&gt;
+&lt;METRIC NAME="uptime" VAL="3644" TYPE="uint32" UNITS="seconds" TN="28" TMAX="60" DMAX="0" SLOPE="both" SOURCE="gmetric"/&gt;
+&lt;/HOST&gt;
+</pre>
+
+You can also specify the lifetime of the value, which will cause it to
+automatically be dropped from your gmond processes.
+
+<p>
+
+In addition to the gmetric command, there is are C and Python interfaces to
+gmetric. Additionally, if you want your own software to emit gmetric messages,
+there's an embedded gmetric library you can use.
+
+<p>
+
+My second question was, "What if a host is retired, is renamed, or is
+reconfigured?" If a host never again reports data about itself, the last state
+is still kept on every gmond and gmetad. To expire hosts that haven't spoken in
+a while, you should set the <code>host_dmax</code> value in gmond.conf to some
+value of seconds after which the host's state will be dropped. However, I am
+not sure the RRDs for this host will be cleaned up automatically. Host renaming
+probably requires that you rename the rrd directory holding the host's data if
+you wish to maintain historical data across the rename. If you reconfigure a
+host, deleting no-longer-used metric rrds is probably prudent. All of the above
+changes will likely require walking around in the ganglia rrd storage directory
+in your gmetad.
+
+<p>
+
+My last concern with ganglia was that the monitoring unit was a host. I
+think most often in services, not hosts. Thankfully, there are workarounds.
+Since you can spoof hostnames with gmetric, I decided to try something
+not-hostname-like to identify a service+host combo. I tried to spoof
+"service/hostname," but Ganglia uses this as the directory name and fails mkdir
+for not doing it recursively.  Choosing another delimiter, comma, works fine:
+
+<p>
+
+<i> Note: <code>gmetric -S "foo/bar"</code> will succeed, but gmetad will crash
+trying to write to that file path (mkdir not so smart). If you try this, you'll
+have to stop all gmond and gmetad instances then start them all again to clear
+the knowledge of the host named "foo/bar" </i>
+
+<pre>
+% gmetric -S "192.168.0.1:apache,aaa123" -n "apache errors" -v 5 -t uint32 -u "errors"
+ spoofName: apache,aaa123    spoofIP: 192.168.0.1 
+</pre>
+
+However, it appears that ganglia keys on IP as unique, so trying to add another
+entry of "192.168.0.1:mysql,aaa123" will appear in the web interface. Further
+testing revealed that the IP portion of the spoof is not validated. If we use
+the unique combination of "service,host" as both the IP and hostname,
+everything is peachy:
+
+<pre>
+% gmetric -S "apache,aaa123:apache,aaa123" ...
+% gmetric -S "mysql,aaa123:mysql,aaa123" ...
+</pre>
+
+Pushing only apache-related data to the 'apache' host prefixes will help you
+organize your monitoring by service. This means you could easily view only
+apache data for a host, etc. 
+
+<p>
+
+Ganglia makes me happy because I can worry only about giving it data. Adding a
+new data source only requires knowing how to get the data and feed it
+periodically to gmetric. After that, the data is automatically available in
+Ganglia's web interface. I fed (with gmetric) some fake data about mysql 
+connections to see what happens, and <a
+href="http://docs.google.com/Doc?id=dckv5f97_11cwhbrqdq">this was the
+result</a>.-
+
+
+<p>
+
+The wish-list of Ganglia features includes a talk of making it easy to provide
+custom graphs and views. Adding your own custom graphs requires, currently,
+hacking on the php code that presents the web interface. Glancing at the PHP
+powering the web interface doesn't make me cringe (easy to read!), so extending
+ganglia by adding your own views is probably reasonable.
+
+<p>
+
+Considering what I've found so far with Ganglia, the shortcomings mentioned
+here are easily worked around, and the potential benefits of
+less-painfully-configured data trending and monitoring seem quite good.
+
+<p>
+
+Oh, by the way, gmond works in Windows. The project has a cygwin binary that
+works by itself and can report data about a windows host. You can also use
+gmetric from windows hosts to report info about themselves.
+
+<p>
+
+Further reading:
+<ul>
+  <li> <a href="http://ganglia.info/">Ganglia home page</a> </li>
+  <li> <a href="http://ganglia.wiki.sourceforge.net/">Ganglia docs </a> </li>
+  <li> <a href="http://meta.rocksclusters.org/ganglia/">Ganglia Clusters and
+  Grid Demo</a> (web interface) </li>
+  <li> <a href="http://ganglia.wiki.sourceforge.net/ganglia_wish-list">Ganglia feature wish list </a> </li>
+</ul>

@@ -1,0 +1,7 @@
+# labelchecks.yaml
+frontend:
+- check-http-getroot
+- check-https-certificate-age
+- check-https-getroot
+mysql-debug:
+- check-mysql

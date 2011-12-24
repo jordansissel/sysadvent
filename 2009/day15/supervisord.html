@@ -1,0 +1,142 @@
+<p>
+I find it kind of tragic that System V (SysV) init (/etc/init.d, etc) has
+survived as long as it has. Looking at its features, it's a pretty plain
+system, so why is it still here? Because it does enough, or has, historically.
+However, in the places it lacks, folks make workarounds, extensions, and even
+<a
+  href="http://developer.apple.com/macosx/launchd.html">try</a> to <a
+  href="http://upstart.ubuntu.com/">vanquish</a> it <a
+  href="http://www.sun.com/bigadmin/content/selfheal/smf-quickstart.jsp">entirely</a>.
+</p>
+
+<p>
+Sometimes these workarounds and extensions are done improperly. SysV init often
+forces upon programs common tasks such as pid file management, daemonizing
+(backgrounding), log management, etc. Most things don't use pid files
+correctly, many startup scripts lack a functioning 'status' check, and everyone
+reimplements the act of daemonizing (backgrounding) differently. Yuck, I want
+less of that.
+
+<p>
+Sometimes you also need more. What was <a href="http://images.google.com/images?q=parachute+pants">cool in 1980</a> may not be cool today. Providing you more is a project called <a href="http://supervisord.org/"><code>supervisord</code></a>.
+</p>
+
+<p>
+We need less poorly reimplemented functionality and more modern features.
+</p>
+
+<p>
+What more is needed? Tools like <a
+  href="http://sysadvent.blogspot.com/2008/12/day-3-babysitting.html">daemontools</a>,
+give you automatic restarts and a single point for controlling
+services. 
+</p>
+
+<p>
+What if you need more? That's where <a
+  href="http://supervisord.org/">supervisord</a> comes in. Supervisord gets you
+a few more goodies you may find useful, including a management web interface,
+an API, including process startup backoff..
+</p>
+
+<p>
+<a href="http://supervisord.org/install/">Installation</a> is pretty simple and
+comes with a <a
+  href="http://supervisord.org/manual/current/installing.html#creating_a_configuration_file">sample
+  config</a> generator for helping decrease the learning curve. Further, the <a
+  href="http://supervisord.org/manual/current/configuration.html">config format</a>
+looks like <a href="http://en.wikipedia.org/wiki/INI_file">INI
+  format</a>, so the learning curve there should also be pretty short.
+</p>
+
+<p>
+I decided to try putting mysql into supervisord for testing, so after creating the default config file:
+
+<pre>
+# echo_supervisord_conf > /etc/supervisord.conf
+</pre>
+
+I checked ps(1) for how I was running mysql, and put that invocation in <code>supervisord.conf</code>:
+
+<pre>
+[program:mysqld]
+command=/usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --user=mysql --pid-file=/var/run/mysqld/mysqld.pid --skip-external-locking --port=3306 --socket=/var/run/mysqld/mysqld.sock
+</pre>
+
+Then I ran supervisord (you probably want supervisord to to have an init
+script, so it launches on boot, etc)
+
+<pre>
+% sudo supervisord
+
+# it's running, so let's check on our mysql server:
+% sudo supervisorctl help
+
+default commands (type help <topic>):
+=====================================
+add    clear  fg        open  quit    remove  restart   start   stop  update 
+avail  exit   maintail  pid   reload  reread  shutdown  status  tail  version
+
+snack(~) % sudo supervisorctl status       
+mysqld                           RUNNING    pid 26028, uptime 0:00:28
+</pre>
+
+Hurray! Supervisord even tries understanding what exit statuses mean. If I send
+SIGTERM to mysqld, then mysqld will shutdown gracefully and exit with status 0.
+By default, supervisord is configured that an exitcode of 0 is "expected" and
+thus it won't restart the process. You can change this by setting the
+'autorestart' option to 'true' or by changing which exit codes supervisord
+understands as expected with the 'exitcodes' option:
+
+<pre>
+[program:mysqld]
+command=/usr/sbin/mysqld ...
+autorestart=true
+</pre>
+
+Supervisord can be told to reload (restarts itself) or to reread the config file. In this case, we can just tell it to reread the config file:
+
+<pre>
+snack(~) % sudo supervisorctl reread 
+mysqld: changed
+</pre>
+
+Now any mysqld exit will be restarted automatically.
+
+<p>
+
+Additional features include the management web interface, which can be enabled
+in the config file with the <a
+  href="http://supervisord.org/manual/current/configuration.html#inet_http_server"><code>[inet_http_server]</code></a>
+configuration and also with the <a
+  href="http://supervisord.org/manual/current/configuration.html#unix_http_server"><code>[unix_http_server]</code></a>
+  configuration for local-only management. The supervisorctl tool can talk to
+  remote servers, so the http server portion isn't just for people.
+</p>
+
+<p>
+Supervisord also seems easy to extend and supports <a href="http://supervisord.org/manual/current/configuration.html#eventlistener">event notifications</a> if you need it. Supervisord also handles logging of stdout and stderr for you in a reasonably configurable way.
+
+<p>
+At time of writing, there are a few shortfalls.
+</p>
+<ul>
+  <li> No HTTPS support on the management interface </li>
+  <li> No decent per-program access control </li>
+  <li> No 'retry forever' option. <code>startretries</code> defaults to 3 and
+  has no value for infinity. Perhaps setting a really huge value for
+  startretries is a reasonable workaround, though I tried
+  <code>startretries=100000000</code> which seems to work,
+  </li>
+</ul>
+
+<p>
+Supervisord may not replace all of your startup scripts, but I highly recommend
+it, or something like it, for your important services. 
+</p>
+
+<p>
+Further reading:
+<ul>
+  <li> <a href="http://www.sanityinc.com/articles/init-scripts-considered-harmful">Init scripts considered harmful</a> </li>
+</ul>

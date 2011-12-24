@@ -1,0 +1,9 @@
+body common control {
+  bundlesequence => { "helloworld" };
+}
+
+bundle agent helloworld {
+  commands:
+    "/bin/echo hello world >&2";
+}
+

@@ -1,0 +1,173 @@
+Logging is good, right? There are 
+<a href="http://logging.apache.org/"> lots </a>
+<a href="http://log4cpp.sourceforge.net/"> of </a>
+<a href="http://docs.python.org/library/logging.html"> logging </a>
+<a href="http://www.ruby-doc.org/core/classes/Logger.html"> libraries </a>
+for various languages to help you with logging events and behavior in your
+software.
+
+<p>
+
+You can log to files, log to email, log to the network, log from the network,
+and log to stdout, etc. As a software developer, you get to make a choice on
+where, how, and why you log. What if you're a systems administrator? What if
+the software developer chose to write everything to stdout without identifying
+information such as timestamps?
+
+<p>
+
+If the tools you are using all have configurable logging, you may not benefit
+from this article. If you have something without configurable logging, you're
+still in luck. There are a few tools out there that will help you turn output
+into good logging.
+
+<p>
+
+For this task, you have at least two options: multilog or logger.
+
+<p>
+
+<h4> logger </h4>
+
+Logger is a helpful command-line interface to sending syslog messages. Since it
+uses syslog, you get all the beneficial configurability of syslogd.conf.  The
+logger tool come standard on just about every unix-like OS (Linux, Solaris,
+FreeBSD, etc), and vary by feature. Here's an example of logger usage:
+
+<pre>
+% logger "hello world"
+% tail -1 /var/log/messages
+Dec 17 22:20:13 snack jls: hello world
+</pre>
+
+The default tag (-t flag) is $USER, or "jls" for me. Most programs use the tag
+for the program name and pid. If you run logger with no message, it reads
+messages from stdin:
+
+<pre>
+% echo "hurray logging" | logger -t myprocess
+% tail -1 /var/log/messages
+Dec 17 22:21:58 snack myprocess: hurray logging
+</pre>
+
+If you're on FreeBSD, logger can log to a remote host using <code>logger -h
+&lt;hostname&gt;</code>, meaning you can log to a remote host without modifying
+syslogd.conf, if you desire.
+
+<p>
+
+As a more useful example, here's how to make a cronjob log its output to syslog:
+<pre>
+0 3 * * * rsync -av /data filer:/backups/data | logger -t "backup-data"
+</pre>
+
+All of rsync's output will show up in syslog logs:
+
+<pre>
+Dec 17 22:31:48 snack backup-data: sending incremental file list
+Dec 17 22:31:48 snack backup-data: data/
+&lt; other output trimmed &gt;
+</pre>
+
+Configurability: You can choose where your log messages go (by file or host) with /etc/syslog.conf. Log rotation is done by using logrotate (linux) or newsyslog (freebsd), and most systems come with log rotation enabled by default.
+
+<h4> multilog </h4>
+
+The multilog tool is part of the <a
+href="http://cr.yp.to/daemontools.html">daemontools</a> suite of tools.
+Multilog's configuration is done completely on the command-line. With multilog,
+you can timestamp logs and even filter them to different logfiles. As a bonus,
+it supports logfile rotation.
+
+<p>
+
+Multilog logs to directories, not files. Each directory contains a few files:
+current, lock, and state. Other files that will show up here are rotated
+logfiles.
+
+A very simple example of multilog with timestamps follows:
+
+<pre>
+% echo "Hello there" | multilog t ./log
+% ls log
+current  lock  state
+% cat log/current
+@400000004949f46513a31f5c Hello there
+</pre>
+
+The wacky @4000....f5c is a timestamp in tai64n format. To convert tai64n to
+local, readable time, use the tai64nlocal command that comes with daemontools:
+
+<pre>
+% tai64nlocal < log/current
+2008-12-17 22:57:31.329457500 Hello there
+</pre>
+
+The timestamps in the logs are very high precision, as you can see. And yes,
+tai64nlocal will convert to the correct timezone based on your environment
+(/etc/localtime or the TZ environment variable).
+
+<p>
+
+As a more complex example, we can have multilog log lines starting with 'ERROR'
+in them to another log directory in addition to the normal one. Here's how:
+
+<pre>
+multilog t '-*' '+* ERROR*' ./errors '+*' ./log
+</pre>
+
+This says to timestamp. By the way, 't' is required to be the first config
+option if you want timestamps. Then we use a few line selections: '-*' means
+deselect everything and '+* ERROR*' will select any line starting with error.
+This may not make sense, but the '* ' before 'ERROR' is because timestamps are
+added immediately, so the '*' matches the timestamp. Awkward, but it is what it
+is.
+
+<pre>
+% alias mylog="multilog t '-*' '+* ERROR*' ./errors '+*' ./log"
+% echo "Hello world" | mylog
+% echo "ERROR something is wrong" | mylog
+% cat errors/current
+@400000004949f71c36d3a30c ERROR something is wrong
+% cat log/current 
+@400000004949f71c362af374 Hello world
+@400000004949f71c36d3a30c ERROR something is wrong
+</pre>
+
+Once you understand the configuration syntax for multilog, you can do some
+neat things with it as exampled above. Using multilog in the cronjob example above:
+
+<pre>
+0 3 * * * rsync -av /data filer:/backups/data | multilog t /var/log/data-backups
+</pre>
+
+And the output looks like this:
+<pre>
+% head -2 /var/log/data-backups/current
+@400000004949f9930274befc sending incremental file list
+@400000004949f993038ece04 data/
+
+# Let's make it readable:
+% head -2 /var/log/data-backups/current | tai64nlocal
+2008-12-17 23:19:37.041205500 sending incremental file list
+2008-12-17 23:19:37.059690500 data/
+</pre>
+
+<p>
+
+One benefit to tai64n is that your log files are sorted simply by being prefixed with the timestamp (no sort(1) call necessary), so if you have gigs and gigs of logs, you could use binary search to very quickly find a small time range to investigate. Syslog's timestamp format does not sort properly, so you can't do this.
+
+<p> 
+
+Logging is super useful. The tools described here will help you bring sane
+logging with timestamps and log rotation to any program that only outputs to
+stdout.
+
+<p>
+
+Further reading:
+<ul>
+<li> <a href="http://cr.yp.to/daemontools/multilog.html">multilog docs</a> </li>
+<li> <a href="http://cr.yp.to/daemontools.html">daemontools</a> </li>
+<li> <a href="http://www.faqs.org/rfcs/rfc3164.html">Syslog's network protocol</a> is pretty simple </li>
+</ul>

@@ -1,0 +1,63 @@
+Software Installer Management
+
+I find reinstalling Windows laptops and workstations pretty tedious. You need to
+reinstall Windows, first, right? Then hope that the network bits are supported
+by the base install, and when they aren't, get a thumbdrive and shuttle over the
+network drivers, then download the rest of the drivers for any devices you need.
+After that you need to go about installing extra software like web browsers,
+office tools, printers, etc, and then go about configuring all of that madness.
+
+It makes me tired just thinking about it. The biggest pain point for me is
+tracking down all of those installable bits each time I need to do a reinstall.
+Some vendors are nice and ship a driver cd. Dell does this, but the interface it
+provides is worse than horrible.
+
+Ultimately, this boils down to wanting to avoid the time and effort required to
+find the right drivers for the right system. The cost (time, patience) of
+finding each driver or support software is relatively fixed, so let's optimize
+the process and only perform this "find the right driver" once.
+
+The end result we want is really a local, central, and organized repository of
+things we need to install on workstations and laptops. I like subversion for
+solving this. You may not want to use subversion, or any revision control at
+all, and that's fine - it is just a means to an end of "local, central,
+organized repository of software/drivers."
+
+My search path for finding a given piece of laptop software usually starts with
+the hardware model, then the thing I need (network driver, or whatever), so it
+makes sense to use that order in the subversion layout: Such as
+/vendor/model/category - where vendor is the vendor of your laptop or
+workstation. This saves you from having to remember that a given laptop has a
+broadcom network chip, you just know what laptop you have and that it needs a
+network chip.
+
+<dl>
+<dt> /Dell/Latitude_E5400/network/... </dt>
+<dd> Network drivers for a Dell Latitude E5400 </dd>
+<dt> /Dell/Latitude_E5400/audio/... </dt>
+<dd> Audio driver for a Dell Latitude E5400 </dd>
+</dl>
+
+For cases where you have the same piece of software (such as a wireless driver)
+across different models, you can use <a
+  href="http://svnbook.red-bean.com/en/1.0/ch07s03.html">svn externals</a>,
+which let you do symlink-like things in your svn repository. Doing that, you can
+have 'network' in the example above be an external reference to another
+directory that contains the common driver for that network device, which can
+save you some space in your svn repo.
+
+The next step is getting those drivers portable and making them available to
+fresh-installs that may not have networking. Doing an svn checkout to a
+thumbdrive lets you easily get these drivers to the host that needs them, if
+there's no network on that host. Updating your thumbdrive is a simple 'svn up'
+(or right-click, update via Tortoise SVN in Windows) and you're done.
+
+You can easly extend this repository to include configs and installer
+automation. Further, since we're sorting by vendor and model, you can
+extend this idea to include things like switch firmware and other versionable
+blobs.
+
+This practice of having a local, central, and organized repository of drivers
+and other software packages helps you avoid repeatedly having to search for the
+same piece of software multiple times.
+

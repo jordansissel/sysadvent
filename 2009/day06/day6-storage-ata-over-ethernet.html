@@ -1,0 +1,212 @@
+<p>
+When your environment has grown beyond direct attached storage (internal
+drives, or an external drive array) and basic network attached storage (NAS),
+the next step is generally to consider implementing a storage area network
+(SAN); however, the cost and complexity of existing Fibre Channel and iSCSI SAN
+solutions can be daunting. Fortunately, ATA over Ethernet (AoE) can often be
+used as a simpler, lower-cost alternative.
+</p>
+
+<p>
+Before diving into AoE, you should be aware of its limitations.  The major
+idiosyncrasy of AoE is that it does not use TCP/IP; therefore, it is not
+routable.  Also, compared to iSCSI, it lacks encryption and user-level access
+control.  AoE truly shines when you simply need storage over a local network,
+and can limited access by control over physical ports on a switch, VLANs, etc.
+</p>
+
+<p>
+AoE is supported on a wide variety of operating systems, including 
+<a href="http://support.coraid.com/support/linux/">Linux</a>,
+<a href="http://www.winaoe.org/">Windows</a>,
+<a href="http://support.coraid.com/support/freebsd/">FreebSD</a>,
+<a href="http://support.coraid.com/support/esx/">VMWare ESX</a>,
+<a href="http://support.coraid.com/support/solaris/">Solaris</a>,
+<a href="http://www.2degreesfrost.com/index.html">Mac OS X</a>,
+and OpenBSD.  Like Fibre Channel, iSCSI, and other storage protocols, the AoE
+protocol implements an initiator-target architecture - the initiator sends
+commands, and the target receives them.  On Linux, various pieces of software
+are used to provide initiator and target functionality.  Four independently
+developed AoE targets exist for Linux: <a href="http://code.google.com/p/qaoed/">qaoed</a>, <a href="http://code.google.com/p/ggaoed/">ggaoed</a>, <a href="http://freshmeat.net/projects/kvblade/">kvblade</a>, and <a href="http://aoetools.sourceforge.net/">vblade</a>.
+Since vblade is part of <a
+  href="http://aoetools.sourceforge.net/">aoetools</a>, it generally seems to
+have the most active development community; therefore, we'll use that for our
+example setup. Depending on the version of AoE you use, it can be used with
+Linux kernels 2.4.x or 2.6.x; however, it is best used with kernel 2.6.14 or higher and newer
+  versions of <a href="http://aoetools.sourceforge.net/">aoetools</a>.  
+</p>
+
+<p>
+For our example configuration, we'll be setting up AoE on Debian Linux (Lenny),
+and using <a href="http://sourceware.org/lvm2/">LVM2</a>.  The AoE module
+should be included if you're using a standard Debian kernel, but let's check
+using:
+</p>
+
+<pre>
+grep ATA_OVER /boot/config-`uname -r`
+</pre>
+
+Which should return:
+
+<pre>
+CONFIG_ATA_OVER_ETH=m
+</pre>
+
+<p>
+That means AoE is supported through a kernel module.  If you aren't already
+using AoE, the module is probably not loaded yet.  Let's load it, and add it to
+/etc/modules so it is automatically loaded at when the system is started in the
+future:
+</p>
+
+<pre>
+modprobe aoe
+echo "aoe" >> /etc/modules
+</pre>
+
+On Debian, we'll use apt to install the remaining necessary components:
+
+<pre>
+apt-get update
+apt-get install lvm2 vblade vblade-persist aoetools
+</pre>
+
+<p>
+Note that aoetools includes the following tools:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="3">
+  <tr>
+    <td> aoecfg </td>
+    <td> manipulate AoE configuration strings </td>
+  </tr>
+  <tr>
+    <td> aoe-discover </td>
+    <td> trigger discovery of AoE devices </td>
+  </tr>
+  <tr>
+    <td> aoe-flush </td>
+    <td> flush down devices out of the AoE driver            </td>
+  </tr>
+  <tr>
+    <td> aoe-interfaces </td>
+    <td> restrict network interfaces used for AoE           </td>
+  </tr>
+  <tr>
+    <td> aoe-mkdevs            </td>
+    <td> create character and block device files </td>
+  </tr>
+  <tr>
+    <td> aoe-mkshelf            </td>
+    <td> create block device files for one shelf address </td>
+  </tr>
+  <tr>
+    <td> aoeping </td>
+    <td> simple userland communication with AoE devices </td>
+  </tr>
+  <tr>
+    <td> aoe-revalidate </td>
+    <td> revalidate the disk size of an AoE device </td>
+  </tr>
+  <tr>
+    <td> aoe-stat </td>
+    <td> print status information for AoE devices           </td>
+  </tr>
+  <tr>
+    <td> aoe-version           </td>
+    <td> print AoE-related software version information </td>
+  </tr>
+  <tr>
+    <td> coraid-update </td>
+    <td> upload an update file to a Coraid appliance </td>
+  </tr>
+</table>
+ 
+<p>
+For our example, we'll use LVM2 and AoE to allocate space and make it available
+over the network, using two disks.  For a recent project, I used 13 drives on a
+hardware RAID controller and divided them into two RAID6 arrays of 6 (4TB) and
+7 (5TB) drives.
+</p>
+
+<p>
+Assuming the disks are the second and third disks on a Linux system, configure
+LVM2 to recognize the physical volumes:
+</p>
+
+<pre>
+pvcreate /dev/sdb
+pvcreate /dev/sdc
+</pre>
+
+<p>
+Create two LVM2 volume groups on the physical volumes - for our example, let's
+call them content and backups:
+</p>
+
+<pre>
+vgcreate content /dev/sdb
+vgcreate backups /dev/sdc
+</pre>
+
+<p>
+Then create two 1TB LVM2 logical partitions (/dev/content/server1,
+/dev/backups/server1):
+</p>
+
+<pre>
+lvcreate -L 1TB -n server1 content
+lvcreate -L 1TB -n server1 backups
+</pre>
+
+<p>
+Although there are many different types of filesystems available under Linux,
+for familiarity and to avoid unnecessary complexity in our example, we'll use
+ext3:
+</p>
+
+<pre>
+mkfs.ext3 /dev/content/server1
+mkfs.ext3 /dev/backups/server1
+</pre>
+
+<p>
+Now that we have our drives configured with LVM2 and formatted with a usable
+filesystem, we can setup the AoE target using vblade-persist:
+</p>
+
+<pre>
+vblade-persist setup 0 1 eth0 /dev/content/server1
+vblade-persist setup 0 2 eth0 /dev/backups/server1
+vblade-persist start 0 1
+vblade-persist start 0 2
+</pre>
+
+<p>
+To mount our newly created AoE devices on a remote server, run the following on
+a second server:
+</p>
+
+<pre>
+modprobe aoe
+apt-get install aoetools
+aoe-discover
+aoe-stat    # should show the available AoE exports
+mkdir /mountpoint
+# replace e0.1 with the appropriate device from aoe-stat
+mount /dev/etherd/e0.1 /mountpoint 
+</pre>
+
+<p>
+Your options in the storage are many. This introduction should give you the
+necessary tools to decide if AoE is the storage solution that meets your
+requirements.
+
+<ul>
+  <li> <a href="http://www.linuxjournal.com/article/8149"> ATA over Ethernet: Putting Hard Drives on the LAN </a> at Linux Journal</li>
+  <li> <a href="http://www.howtoforge.com/using-ata-over-ethernet-aoe-on-debian-lenny-initiator-and-target"> Using AoE on Debian Lenny</a> on HowtoForge 
+  <li> <a href="http://www.completefusion.com/wordpress/debian-nas-using-aoe-part-2/"> Debian NAS using AoE</a> by the author </li>
+  <li> <a href="http://www.howtoforge.com/using-ata-over-ethernet-aoe-on-fedora-10-initiator-and-target"> Using AoE on Fedora 10 </a> on HowtoForge </li>
+  <li> <a href="http://en.wikipedia.org/wiki/ATA_over_Ethernet"> ATA over Ethernet</a> on Wikipedia </li>
+</ul>

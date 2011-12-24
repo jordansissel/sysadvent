@@ -1,0 +1,106 @@
+Do you monitor your hosts with snmp? Ever wanted to add additional data sources
+to your snmp agent? Net-SNMP's snmpd lets you do this.
+
+<p>
+
+There are a few different options available to extend snmpd. The first is the
+most primitive, simply running a program and reporting the first line of output
+and the exit status. This is done with the 'exec' statement in snmpd.conf.
+
+<pre>
+# Format is
+# exec &lt;name&gt; &lt;command&gt; [args]
+exec googleping /bin/ping -c 1 -w 1 -q
+</pre>
+
+You need to specify the full path for 'exec' commands. If you want to run your command in /bin/sh, swap in 'sh' for 'exec' and you get to avoid the full path requirement. The 'exec' and 'sh' extensions command show results through the UCD-SNMP-MIB::extTable table:
+
+<pre>
+% snmpwalk -v2c -c secret localhost UCD-SNMP-MIB::extTable
+UCD-SNMP-MIB::extIndex.1 = INTEGER: 1
+UCD-SNMP-MIB::extNames.1 = STRING: googleping
+UCD-SNMP-MIB::extCommand.1 = STRING: /bin/ping
+UCD-SNMP-MIB::extResult.1 = INTEGER: 0
+UCD-SNMP-MIB::extOutput.1 = STRING: PING www.l.google.com (74.125.19.147) 56(84) bytes of data.
+UCD-SNMP-MIB::extErrFix.1 = INTEGER: noError(0)
+UCD-SNMP-MIB::extErrFixCmd.1 = STRING: 
+</pre>
+
+You can see that the first line of output is available in extOutput. This is
+nice, but the order of commands depends entirely on the order in snmpd.conf, so
+if you put another 'exec' above the googleping one, the googleping check
+becomes .2 instead of .1, which is not so stable with respect to adding new
+exec statements or moving them around. Boo.
+
+<p>
+
+The second option available is called 'extend,' and it works similarly to
+'exec,' but better. The 'extend' configuration accepts multiline output from
+your command and is indexed on the name (ie; "googleping") instead of an index
+number (ie; 1, 2, etc). Just change 'exec' to 'extend':
+
+<pre>
+extend googleping /bin/ping -c 1 -w 1 -qn www.google.com
+extend mysqlstatus /usr/bin/mysqladmin status
+</pre>
+
+These 'extend' commands show up in NET-SNMP-AGENT-MIB::nsExtensions. If you
+only want the output, you can walk NET-SNMP-EXTEND-MIB::nsExtendOutput1Table
+(or nsExtendOutput2Table). If you want only the exit code, you can walk
+nsExtendResult. If you want to view the output of walking nsExtensions (it's too long to post here), <a
+href="http://docs.google.com/View?docid=dckv5f97_0zx46q8fp">click here</a>.
+
+<p>
+
+Remember the benefit of 'extend' over 'exec' was that the indexing was on the
+name, so let's query for only the googleping result:
+
+<pre>
+% snmpget -v2c -c secret localhost 'NET-SNMP-EXTEND-MIB::nsExtendResult."googleping"' 
+NET-SNMP-EXTEND-MIB::nsExtendResult."googleping" = INTEGER: 0
+
+# If I null route all www.google.com IPs, and requery:
+% snmpget -v2c -c secret localhost 'NET-SNMP-EXTEND-MIB::nsExtendResult."googleping"' 
+NET-SNMP-EXTEND-MIB::nsExtendResult."googleping" = INTEGER: 2
+</pre>
+
+Take note above that the OID is in single quotes and "googleping" still needs
+to be sent as quoted to snmpget, this is so snmpget understands that this is
+really an octet-string OID. (See what "googleping" becomes with snmpget -On)
+
+<p>
+
+The output and exit code of your 'extend' and 'exec' statements are cached for a short period of time. The exact time saved in cache is determined by the nsExtendCacheTime OID. If you have write access configured in snmp, you can issue a SET command to change the cache time.
+
+<pre>
+# Cache the googleping results for 15 seconds
+% snmpset -v2c -c secret localhost 'NET-SNMP-EXTEND-MIB::nsExtendCacheTime."googleping"' i 15
+NET-SNMP-EXTEND-MIB::nsExtendCacheTime."googleping" = INTEGER: 15
+
+% snmpwalk -v2c -c secret localhost NET-SNMP-EXTEND-MIB::nsExtendCacheTime
+NET-SNMP-EXTEND-MIB::nsExtendCacheTime."googleping" = INTEGER: 15
+NET-SNMP-EXTEND-MIB::nsExtendCacheTime."mysqlstatus" = INTEGER: 5
+</pre>
+
+Lastly, you can tell snmpd to 'pass' (that's the name of the config statement)
+handling of an entire OID subtree to an external program, which seems like a
+nice feature. This lets you write a subtree handler in your language of choice
+rather than being required (while still an option) to write your more complex
+handlers using snmpd's perl support or C module support. For brevity, I'll skip
+coverage of that, but it works similar to 'extend' and 'exec,' but has it's own
+(simple) text protocol for telling your subprocess what OID it wants data on
+(See further reading).
+
+<p>
+
+Extending SNMP to support your own data sources is a good way to allow your
+existing monitoring tools (nagios, etc) to monitor remotely without having to
+have local access such as with ssh or nrpe.
+
+<p>
+
+Further reading:
+<dl>
+  <dt> <a href="http://www.net-snmp.org/docs/man/snmpd.conf.html#lbAW">Net-SNMP snmpd extension configuration and documentation </a> </dt>
+  <dd> See the "EXTENDING AGENT FUNCTIONALITY" section </dd>
+</dl>

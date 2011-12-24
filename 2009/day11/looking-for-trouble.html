@@ -1,0 +1,117 @@
+<i> This article was written by <a href="http://bitfieldconsulting.com/">John Arundel</a>.</i>
+
+<p>
+Good sysadmins use <strong>automation</strong> and <strong>monitoring</strong>,
+but good sysadmins don't rely only on this. The problem with automated monitoring,
+as we know from the movie <em>Jurassic Park</em>, is that you only find what
+you're looking for. Where are those pesky raptors, anyway?
+</p>
+ 
+<div style="float:right; margin:0 0 10px 10px;cursor:pointer; cursor:hand">
+  <a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://3.bp.blogspot.com/_u-5lMShiO40/SyIHZIra50I/AAAAAAAAABg/B7aFNf0lf9E/s1600-h/jurassic-park.jpg">
+    <img src="http://3.bp.blogspot.com/_u-5lMShiO40/SyIHZIra50I/AAAAAAAAABg/B7aFNf0lf9E/s320/jurassic-park.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5413897830460483394" />
+  </a>
+  <p><em>Jurassic Park</em>: when monitoring isn't enough.</p>
+</div>
+ 
+<p>
+The other night I was looking at the process list on a server and saw there
+were several copies of the nightly backup script running. I found that the
+script was trying to upload the backup tarball to a remote NAS, and as part of
+this process, it tried to delete the previous week's tarball. This file didn't
+exist, so the command was failing, but the script wasn't smart enough to handle
+this, so it just kept retrying. As a result, the backup never got properly
+copied offsite, and the machine was starting to become overloaded with backup
+jobs.
+</p>
+ 
+<p>
+Why is this important? Many monitoring systems would not pick up this
+condition. Would yours? You may want to improve your monitoring to detect at
+least the following:
+</p>
+ 
+<ul> 
+  <li>Check that the job actually ran by looking at the modified date on the
+  job's logfile. </li> 
+  <li>Check that the job terminated (look for a completion message in its log)
+  and check its exit status.</li> 
+  <li>If the job creates a file, check for the existence and the size of this
+  file.</li> 
+  <li>If something gets copied offsite, check the offsite copy and make sure it
+  exists and matches the source file.</li> 
+</ul> 
+ 
+<p>
+You get the idea. No automated monitoring system is perfect. A great way to
+improve it is to look at your servers with an open mind, and when you find
+problems you didn't expect, add monitoring checks to catch them. Jordan's
+article on <a href="http://sysadvent.blogspot.com/2009/12/cron-practices.html"
+  target="_blank">Cron Practices</a> is a good place to start improving the
+reliability of your cron jobs.
+</p>
+ 
+<p>
+I found several other little gotchas in <a
+  href="http://semicomplete.googlecode.com/svn/sysadvent/2009/day08/cronhelper.sh">cronhelper</a>
+script which needed fixing. It's easy to assume that a script that's been in
+production for years is free of bugs. That's almost certainly not the case, and
+many of those bugs won't be found until you go through the script with a
+critical eye. If you use
+<strong>version control</strong> and <strong>test-driven development</strong>
+for your scripts, as recommended by <a
+  href="http://saintaardvarkthecarpeted.com/blog/" target="_blank">Hugh
+  Brown</a> in his <a
+  href="http://sysadvent.blogspot.com/2009/12/day-3-development-for-sysadmins.html"
+  target="_blank">Development for Sysadmins</a> article, this will be a big
+help.
+</p>
+
+<p>
+A good sysadmin is a good detective. You should make time as part of your job
+to pick on a random machine every so often and examine it forensically, like a
+crime scene. What's here that shouldn't be? Are things working like they're
+supposed to? Are there any problems with this machine that have gone unnoticed
+by the automatic monitoring?
+</p>
+ 
+<p>
+Here are some places to look:
+</p>
+ 
+<ul> 
+  <li><a href="http://www.logwatch.org/" target="_blank">Logwatch</a> output
+  (ideally, have this mailed to you and read it every day).</li> 
+  <li>Root's <strong>mailbox</strong>: errors from cron jobs will come here, as
+  will mail bounces.</li> 
+  <li>The <strong>syslog</strong> is a great resource, but often very large and
+  hard to read. Try configuring your syslog.conf to send messages from
+  different subsystems (mail, for example) to different logfiles.</li> 
+  <li>The <strong>process list</strong> (<code>ps</code> or <code>top</code>).
+  What's running that you don't expect to see? Is anything using an unusual
+  amount of CPU? Is the machine spending more time in iowait than it should
+  (may indicate a disk problem or a degraded RAID array).</li> 
+  <li>The <strong>crontab</strong> (not all jobs may run as root, so go looking
+  in the <code>/etc/cron.*</code> directories and
+  <code>/var/spool/cron</code>). What jobs are running? Are they working?
+  Should they be there? Is their output logged and monitored?</li> 
+  <li>netstat, iostat, and vmstat anomalies.</li>
+  <li>Places you (and I) wouldn't think of. Go snooping. See what catches your
+  eye. A detective looks without preconceptions, so she's ready to spot the
+  unexpected.</li> 
+</ul> 
+ 
+<p>
+I hope the above makes you suspicious and paranoid, in a good way - a way that
+makes you a better sysadmin. <a href="http://en.wikipedia.org/wiki/Murphy's_law">Anything that can go wrong will go wrong</a>, and is
+going wrong somewhere on your network, right now. If you get into the habit of
+looking for trouble, you're sure to find it! Finding trouble is better than
+trouble finding you.
+</p>
+
+<p>Further reading:</p>
+<ul>
+  <li> <a href="http://serverfault.com/questions/37477/proactive-sysadmin-tasks">Proactive sysadmin tasks</a> discussion on Server Fault </li>
+  <li> <a href="http://xkcd.com/135/">Raptor math</a> on XKCD. </li>
+</ul>
+

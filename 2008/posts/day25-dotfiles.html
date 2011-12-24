@@ -1,0 +1,171 @@
+Dotfiles are precious. They help you maintain your desired environment. My
+dotfiles have been built very slowly over time as I find features I like or
+change the way I use a tool. Additionally, I learn by reading other people's rc
+files. Ignoring your ability to make very useful changes in behavior and
+operation of your favorite tools will leave you at a very minimal level of
+productivity.
+
+<p>
+
+The more time you spend using a tool should mean putting more time into
+configuring it and learning about it. Using a program with its defaults alone,
+over time, is a massive productivity killer. For example, the speed at which I
+was able to do things in a unix shell skyrocketed when I learned that I could
+have vi keybindings in my shell (with 'set -o vi' or 'bindkey -v' in most
+shells).
+
+<p>
+
+As mentioned above, part of learning how to configure a tool is simply reading
+documentation, or searching online for how to do something. Another important
+part is by learning from others: reading their dotfiles. In order to read your
+dotfile, it must be available somewhere. I heavily encourage you to post your
+rc files online. Not only publish them, but make sure you put comments
+describing what each configuration decision does. Knowledge grows faster when
+there's a community contributing to it, so post documented snippets online!
+
+<p>
+
+Rather than covering another best practice or tool, today's article is an
+attempt to try and fill your mind with some useful things you may want to try
+in your own tools. Covered below are some of my configurations for various
+tools. Each configuration has a link to respective documentation (if available
+online) about that option. Futher, it is not my hope that you agree with my
+configurations, but that you find options here that you didn't know about that
+might help you.
+
+<p>
+
+In the process of reading peer rc files and gathering data for this article, I
+found a neat website where people can publish their own dotfiles, <a
+href="http://dotfiles.org/">dotfiles.org</a>. This site lets you view
+everyone's uploaded dotfiles.
+
+<p>
+
+There are far too many tools and options to cover, so I'll cover the three
+tools closest to my heart: zsh, vim, and screen. However, before I get into it,
+I want to make a few, important points.
+
+<ol>
+  <li> Vi mode in your shell is one of the best features available if you are
+  familiar with vi. Bash, ksh, zsh, and tcsh all support 'vi mode' in varying
+  degrees of compatibility. In your shell, type 'set -o vi' (bash, ksh) or
+  'bindkey -v' (zsh, tcsh), and be happy with your increase in productivity.
+  </li>
+  <li> Set your terminal (screen or terminal) title! There are lots of existing
+  rc files that show you how to do this. For zsh, try searching <a
+  href="http://www.google.com/search?q=zsh+screen+title">zsh screen title</a>.
+  </li>
+  <li> Don't ignore configuration of tools you use every day. Being a power
+  user doesn't mean you automatically do lame things like recompiling vim with
+  -O9999, it means understanding the tools you use and how to configure them to
+  best fit your pattern of work and your style preferences. </li>
+</ol>
+
+To repeat one more time, publish and document your dotfile configurations. Ok,
+on to some options for zsh, vim, and screen.
+
+<ul>
+  <li> zsh
+    <pre>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX365">setopt append_history</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX380">setopt auto_pushd</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX399">setopt beep</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX417">setopt no_cdable_vars</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX465">setopt extended_glob</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX467">setopt extended_history</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX502">setopt hist_ignore_all_dups</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX525">setopt interactive_comments</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX433">setopt no_correct</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX569">setopt no_no_match</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX595">setopt no_prompt_cr</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX571">setopt notify</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX621">setopt rm_star_silent</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX650">setopt sh_word_split</a>
+<a href="http://zsh.sourceforge.net/Doc/Release/zsh_15.html#IDX669">setopt vi</a>
+    </pre>
+
+If you're a vi (or vim) user, you should 'setopt vi' or 'bindkey -v' (same
+thing). It makes line editing heavenly, just like vi :)
+
+<p>
+
+  </li>
+
+  <li> vim - part of my vimrc includes:
+  <pre>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'autoindent'">set autoindent</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'background'">set background=dark</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'backspace'">set backspace=indent,eol</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'cindent'">set cindent</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'cinkeys'">set cinkeys=!^F</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'cinoptions'">set cinoptions=(0t0c1</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'comments'">set comments=b:#</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'complete'">set complete=.,w,b,i,t,u</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'expandtab'">set expandtab</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'foldclose'">set foldclose=</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'foldmethod'">set foldmethod=marker</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'formatoptions'">set formatoptions=tcrqn</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'ignorecase'">set ignorecase</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'list'">set list</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'listchars'">set listchars=tab:&gt;-,trail:-</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'matchpairs'">set matchpairs+=&lt;:&gt;</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'compatible'">set nocompatible</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'errorbells'">set noerrorbells</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'hlsearch'">set nohlsearch</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'incsearch'">set noincsearch</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'showmode'">set noshowmode</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/options.html#'title' href="http://vimdoc.sourceforge.net/htmldoc/filetype.html#filetype">filetype on</a>
+<a href="http://vimdoc.sourceforge.net/htmldoc/syntax.html#:syntax-on">syntax off</a>
+  </pre>
+</li>
+
+<li> screen
+
+<p>
+
+Unfortunately, screen doesn't have official documentation on it's site, so
+you'll have to <a href="http://www.google.com/search?q=man+screen">search for it
+</a> or read it locally.
+
+<pre>
+deflogin on
+defscrollback 10000
+autodetach on
+startup_message off
+
+vbell off
+msgwait 0
+msgminwait 1
+
+# Nethack-like screen messages are more fun.
+nethack on
+
+# Show '[screennum] location - title' as hardstatus
+hardstatus string "[%n] %h - %t"
+windowlist title "Num Name%=Location Flags"
+windowlist string "%03n %t%=%h %f"
+
+# Disable flow control (^S and ^Q)
+flow off
+bind s
+bind ^S
+bind q
+bind ^Q
+
+# For the following, search the screen man page for 'ESC ] 83'
+# Lets you have a tool execute commands in screen itself.
+# This aclchg allows only the 'select' screen command to be run.
+multiuser on
+aclchg :window: +x select
+
+# emulate .logout message
+pow_detach_msg "Screen session of \$LOGNAME \$:cr:\$:nl:ended."
+
+# advertise hardstatus support to $TERMCAP
+termcapinfo  * '' 'hs:ts=\E_:fs=\E\\:ds=\E_\E\\'
+</pre>
+
+  </li>
+</ul>
