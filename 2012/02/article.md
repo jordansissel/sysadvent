@@ -1,6 +1,6 @@
 # Day 2 - Building Community for Fun and Profit
 
-> Community usually refers to a larger than a small village that shares common
+> Community usually refers to a village that shares common
 values. In human communities, intent, belief, resources, preferences, needs,
 risks, and a number of other conditions may be present and common, affecting
 the identity of the participants and their degree of cohesiveness.
