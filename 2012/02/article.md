@@ -150,8 +150,8 @@ About the author
 ------------------
 
 Brandon Burton is currently a webops engineer at Mozilla, where he spends his
-time herding Apache servers, writin Puppet manifests, and mostly posting gifs
-in IRC channels.
+time herding Apache servers, writin Puppet manifests, and mostly posting
+[gifs](http://i.imgur.com/ficVp.gif) in IRC channels.
 
 He can be found on Twitter as [@solarce](twitter.com/solarce] where he (also)
 cat gifs, memes, and sometimes interesting links. 
