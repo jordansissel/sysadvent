@@ -18,7 +18,7 @@ What community means to me
 --------------------------
 
 Community has always been a critical part of my life long obsession with
-computers and the Internet. At every stage it was some community that took me a
+computers and the Internet. At every stage, it was some community that took me a
 new level of my computer usage, starting with BBSes and gaming clubs, through
 the community around the [Englightenment](http://www.englightenment.org),
 particularly its irc channel __#e__ (now on [Freenode](http://freenode.net)),
@@ -111,12 +111,13 @@ tweet or gist).
 In reflecting on the growth of the hangops community over the last three or so
 months, I think the key things were
 
-* lots of ops people work from home, like to socialize
-* lots of ops people like to hear people they consider smart talk about things
+* Ops people who work from home like to socialize
+* Ops people like to hear people they consider smart talk about things
   they are interested in
 * I had fun with it
 * I was willing to invest time and money into it, with no guarantee it would be
-  more than jordan and myself describing cat gifs every week
+  more than Jordan and myself sharing [cat gifs](http://i.imgur.com/VAXju.gif)
+  every week.
 * I've worked hard to make it an open community and encourage people to join
   the hangout even if they're unsure what they may add
 * I've made the format a mix of roundtable and topical discussions
