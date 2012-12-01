@@ -65,7 +65,7 @@ Import` will let you do it.
 
 Once imported, I get a nice spreadsheet with three columns:
 
-![imported results](link to imported.png)
+![imported results](https://lh5.googleusercontent.com/-MkIp2Q8-v_s/ULmpdU2GuzI/AAAAAAAAAGw/ijo_47TjwEk/s437/imported.png)
 
 Each line in your file becomes a row in the spreadsheet.
 
@@ -75,6 +75,8 @@ Pivot tables let you group and aggregate data.
 
 Select all the data in your spreadsheet, then create a pivot table with the
 `Data -> Pivot table report` menu.
+
+Let's try to answer some questions with a pivot table.
 
 ### Which server has the largest total logs?
 
@@ -90,13 +92,13 @@ To see which server has the largest total logs:
 At the end of each column and row will be a 'Grand Total' entry which
 summarizes the whole column or row.
 
-![pivot table](pivot-host-file-size.png)
+![pivot table](https://lh4.googleusercontent.com/-7uT_3qM7daA/ULmpexPn7EI/AAAAAAAAAG8/F2iRLgjO_v0/s657/pivot-host-file-size.png)
 
 Since I'm looking for 'largest total logs', for the 'Group by: host' panel on
 the right, choose 'Sort by -> SUM of size in...' 'Grand Total' - which results
 in this nicely sorted display:
 
-![pivot table](pivot-host-file-size-sorted.png)
+![pivot table](https://lh6.googleusercontent.com/-ue2kdhUjMjs/ULmpdxldPfI/AAAAAAAAAG4/OvgnICXmuDI/s652/pivot-host-file-size-sorted.png)
 
 ### Which log is largest across all servers?
 
@@ -104,7 +106,7 @@ Create a new pivot table, but this time specify 'file' as the rows, don't add
 any columns, and specify 'size' for the values. The result is a table showing
 total sum by each log file:
 
-![pivot table](pivot-file-size.png)
+![pivot table](https://lh3.googleusercontent.com/-LqjLNtqCnpw/ULmpdSqoSlI/AAAAAAAAAHE/UGI0xD5-Xw0/s287/pivot-file-size.png)
 
 ## Visualization
 
@@ -117,11 +119,11 @@ data easily. Simply select the data in the pivot table (or the spreadsheet) and
 choose `Insert -> Chart` from the menu. How about a bar chart with comparing
 log sizes across servers?
 
-![chart from pivot table](pivot-horizontal-bar.png)
+![chart from pivot table](https://lh4.googleusercontent.com/-oVRd3bCMHwc/ULmpdSylyWI/AAAAAAAAAG0/NzTn-OXnMfc/s599/pivot-horizontal-bar.png)
 
 Or a pie chart?
 
-![chart from pivot table](pivot-pie-chart.png)
+![chart from pivot table](https://lh5.googleusercontent.com/-16W3V1-Njio/ULmpfcdWPYI/AAAAAAAAAHA/pRAW-l1v-lA/s494/pivot-pie-chart.png)
 
 There are two main points to make here. First, that this tool gives you a wide
 array of tools to mold your data into something that answers your questions.
@@ -180,7 +182,8 @@ be useful for light logging and metric recording, right? I think so!
 
 Spreadsheets in general are really useful tools because they let you treat
 your data like Play-Doh - squish and shape your data into whatever form
-is most useful for you!
+is most useful for you. Google Docs is an easy way to get these spreadsheet and
+forms features.
 
 ## Further Reading
 
