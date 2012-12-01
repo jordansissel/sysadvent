@@ -1,5 +1,7 @@
 # Easy Visualizations with Google Spreadsheets
 
+This was written by [Jordan Sissel](http://twitter.com/jordansissel).
+
 On the [8th day of the first
 sysadvent](http://sysadvent.blogspot.com/2008/12/day-8-one-off-graphs.html), I
 talked about ways to get graphs from arbitrary data. I was never really satisfied
