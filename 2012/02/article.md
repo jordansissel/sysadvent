@@ -1,5 +1,7 @@
 # Day 2 - Building Community for Fun and Profit
 
+This was written by [Brandon Burton](http://twitter.com/solarce).
+
 > Community usually refers to a village that shares common
 values. In human communities, intent, belief, resources, preferences, needs,
 risks, and a number of other conditions may be present and common, affecting
@@ -17,15 +19,15 @@ Taken from http://en.wikipedia.org/wiki/Community
 what community means to me
 --------------------------
 
-Community has always been a critical part of my life long obsession with
-computers and the Internet. At every stage, it was some community that took me a
-new level of my computer usage, starting with BBSes and gaming clubs, through
-the community around the [Englightenment](http://enlightenment.org/),
-particularly its irc channel __#e__ (now on [Freenode](http://freenode.net)),
-and the online open source community, that at the time revolved around
+Community has always been a critical part of my life-long obsession with
+computers and the Internet. It was always a community that took me a new level
+of my computer usage, starting with BBSes and gaming clubs, then the
+[Englightenment](http://enlightenment.org/) project, particularly its IRC
+channel, __#e__ (now on [Freenode](http://freenode.net)), and ultimately,
+online open source community as a whole, which then revolved around
 [Slashdot](http://www.slashdot.org), [Freshmeat](http://www.fresmeant.net), and
-[Themes.org](http://www.themes.org). All of which I got involved in back in
-High School. It was through these sites and the __#e__ irc channel that I
+[Themes.org](http://www.themes.org). I got involved in all of these back
+in high school. It was through these sites and the __#e__ irc channel that I
 encountered people who got __paid!__ to manage Linux boxes all day. I knew
 immediately that this is what I wanted to do for a living to. I loved Linux. I
 loved building servers at home. My path was set.
@@ -62,7 +64,7 @@ Some of the key things the DevOps community has done are
 * created google groups for discussion
 * created irc channels for discussion
 * accepted that marketing and sales will become a part of any vibrant community
-* encouraged civil discourse and respect (see ["the No Asshole rule"](http://en.wikipedia.org/wiki/The_No_Asshole_Rule)
+* encouraged civil discourse and respect (see ["the No Asshole rule"](http://en.wikipedia.org/wiki/The_No_Asshole_Rule))
 * inclusive by default, encourage "noobs" with passion to step and up and be a part
 * "lead the herd" by speaking, blogging, tweeting, ircing, posting to newsgroups
 * busted ass to create real change for the topic at hand, not worrying about fame or fortune
@@ -105,9 +107,9 @@ recap](http://www.youtube.com/watch?v=TLAH-Z4Ai3I&feature=plcp),
 an upcoming session on
 [#monitoringlove](https://twitter.com/hangops/status/271118704631226368).
 
-There has been an amazing response from people in the community and coworkers
-at Mozilla about hangops. People love the style of the sessions and the material,
-and they keep asking for more. We even saw a __live hangops__ at Puppetconf.
+There has been an amazing response about hangops. Folks love the style of the
+sessions and the material, and they keep asking for more. We even saw a __live
+hangops__ at Puppetconf.
 
 Reflecting on the growth of the hangops community, I think the key things were:
 
@@ -136,7 +138,7 @@ Conclusion
 
 The key to building a community is a mix of passion and fearlessness. You have
 to really be invested in the idea of the community you want to help build, but
-you also have to [be willing to fail](https://www.google.com/search?q=%22willing%20to%20fail%22)
+you also have to [be willing to fail](https://www.google.com/search?q=%22willing%20to%20fail%22).
 
 You have a huge array of communication tools available today; Things like
 Twitter, Google Hangouts, IRC channels, and a fun hash tag make it
