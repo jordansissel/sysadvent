@@ -4,9 +4,9 @@ This was written by [Jordan Sissel](http://twitter.com/jordansissel).
 
 On the [8th day of the first
 sysadvent](http://sysadvent.blogspot.com/2008/12/day-8-one-off-graphs.html), I
-talked about ways to get graphs from arbitrary data. I was never really satisfied
-with the result since I find gnuplot to be a bit cumbersome (though it is
-powerful).
+talked about ways to get graphs from arbitrary data, but I was never really
+satisfied with the result since I find gnuplot to be a bit cumbersome (though
+it is powerful).
 
 Since then, technology and tools have improved greatly. For one, Google's got
 some pretty neat features in their Google Spreadsheets product.  Bonus, it's
@@ -16,19 +16,17 @@ way to share data and spreadsheets easily among coworkers.
 So why care? Well, the spreadsheets product has some excellent statistical and
 visual tools.
 
-The first time I was exposed to this was when I worked at a web advertising
-company. When debugging some odd user tracking data, the workflow usually
+The first time I was exposed to this tool was when I worked at a web advertising
+company: When debugging some odd user tracking data, the workflow usually
 included dumping the logs to csv, loading into Excel, doing some magic, and
-somehow the problem seemed to identify itself. When watching this process
-somewhat reminded me of those ['enhance that photo!' scenes in some crime
-dramas](http://www.youtube.com/watch?feature=player_embedded&v=Vxq9yj2pVWk),
-but this wasn't fiction, even if sometimes the person driving Excel moved
-so quickly my face had this ["are you a
-wizard?"](http://static2.fjcdn.com/comments/ARE+YOU+A+WIZARD+_324436c69cd6c0b9ba6bda42bdd0ab01.jpg)
-expression on it.
+somehow the answer seemed to reveal itself. My first times watching this
+process reminded me of those 
+['enhance that photo!' scenes in some crime dramas](http://www.youtube.com/watch?feature=player_embedded&v=Vxq9yj2pVWk),
+but this wasn't fiction. Sometimes the person driving Excel moved so quickly my
+face had this ["are you a wizard?"](http://static2.fjcdn.com/comments/ARE+YOU+A+WIZARD+_324436c69cd6c0b9ba6bda42bdd0ab01.jpg) expression on it.
 
-Load the data, do some grouping, sort, filter, summarize, and all pretty
-easily. 
+Load the data, do some grouping, sort, filter, summarize, "enhance" ... Bam.
+Answer!
 
 Let's figure out how to do that, but first we need a data set to play with.
 
@@ -39,17 +37,18 @@ sizes and compare them in a spreadsheet (sounds exciting, I know!)
 
 ```
 (
+  # ssh into a few servers and get the file sizes of certain logs
   echo "host\tfile\tsize"
-  for i in server1 server2 server3 server4 ... ; do 
+  for i in server1 server2 server3 server4 ; do 
     ssh $i du -sb /var/log/{mail.log,auth.log,syslog}.1 \
     | awk '{ OFS="\t"; print "'$i'", $2, $1}
   done
-) /tmp/maildata.tsv
+) > /tmp/maildata.tsv
 ```
 
-The output is tab-delimited and is hostname, logfile, size-in-bytes. In general,
-most spreadsheet tools can import data that is comma or tab-separated quite
-easily. My data looks like this:
+The output is hostname, logfile, size-in-bytes; tab-delimited. In general, most
+spreadsheet tools can import data that is comma or tab-separated quite easily.
+My data looks like this:
 
 ```
 host  file  size
@@ -67,23 +66,23 @@ Import` will let you do it.
 
 Once imported, I get a nice spreadsheet with three columns:
 
-![imported results](https://lh5.googleusercontent.com/-MkIp2Q8-v_s/ULmpdU2GuzI/AAAAAAAAAGw/ijo_47TjwEk/s437/imported.png)
+![](https://lh5.googleusercontent.com/-MkIp2Q8-v_s/ULmpdU2GuzI/AAAAAAAAAGw/ijo_47TjwEk/s437/imported.png)
 
-Each line in your file becomes a row in the spreadsheet.
+As you see, Each line in the imported file becomes a row.
 
 ## Pivot Tables
 
 Pivot tables let you group and aggregate data.
 
-Select all the data in your spreadsheet, then create a pivot table with the
-`Data -> Pivot table report` menu.
+To make one, select all the data in your spreadsheet, then choose `Data ->
+Pivot table report` from the menu.
 
 Let's try to answer some questions with a pivot table.
 
 ### Which server has the largest total logs?
 
-On the right, you'll see "Report Editor" where you can add rows, columns, and
-values to your pivot table. 
+On the right of the spreadsheet, you'll see "Report Editor" where you can add
+rows, columns, and values to your pivot table. 
 
 To see which server has the largest total logs: 
 
@@ -94,13 +93,13 @@ To see which server has the largest total logs:
 At the end of each column and row will be a 'Grand Total' entry which
 summarizes the whole column or row.
 
-![pivot table](https://lh4.googleusercontent.com/-7uT_3qM7daA/ULmpexPn7EI/AAAAAAAAAG8/F2iRLgjO_v0/s657/pivot-host-file-size.png)
+![](https://lh4.googleusercontent.com/-7uT_3qM7daA/ULmpexPn7EI/AAAAAAAAAG8/F2iRLgjO_v0/s657/pivot-host-file-size.png)
 
 Since I'm looking for 'largest total logs', for the 'Group by: host' panel on
 the right, choose 'Sort by -> SUM of size in...' 'Grand Total' - which results
 in this nicely sorted display:
 
-![pivot table](https://lh6.googleusercontent.com/-ue2kdhUjMjs/ULmpdxldPfI/AAAAAAAAAG4/OvgnICXmuDI/s652/pivot-host-file-size-sorted.png)
+![](https://lh6.googleusercontent.com/-ue2kdhUjMjs/ULmpdxldPfI/AAAAAAAAAG4/OvgnICXmuDI/s652/pivot-host-file-size-sorted.png)
 
 ### Which log is largest across all servers?
 
@@ -108,24 +107,23 @@ Create a new pivot table, but this time specify 'file' as the rows, don't add
 any columns, and specify 'size' for the values. The result is a table showing
 total sum by each log file:
 
-![pivot table](https://lh3.googleusercontent.com/-LqjLNtqCnpw/ULmpdSqoSlI/AAAAAAAAAHE/UGI0xD5-Xw0/s287/pivot-file-size.png)
+![](https://lh3.googleusercontent.com/-LqjLNtqCnpw/ULmpdSqoSlI/AAAAAAAAAHE/UGI0xD5-Xw0/s287/pivot-file-size.png)
 
 ## Visualization
 
 Often, problems aren't easy to solve if your only method is to eye-ball a table
-full of numbers. Often the table just looks like noise, so you need a better 
-way to represent the data.
+full of numbers. A big table of numbers is indistinguishable from noise, so you
+need a better way to represent the data.
 
-The nice property of Google Spreadsheets is that you can build charts from
-data easily. Simply select the data in the pivot table (or the spreadsheet) and
-choose `Insert -> Chart` from the menu. How about a bar chart with comparing
-log sizes across servers?
+Graphs are nice, right? Simply select the data in the pivot table (or the
+spreadsheet) and choose `Insert -> Chart` from the menu. How about a bar chart
+with comparing log sizes across servers?
 
-![chart from pivot table](https://lh4.googleusercontent.com/-oVRd3bCMHwc/ULmpdSylyWI/AAAAAAAAAG0/NzTn-OXnMfc/s599/pivot-horizontal-bar.png)
+![](https://lh4.googleusercontent.com/-oVRd3bCMHwc/ULmpdSylyWI/AAAAAAAAAG0/NzTn-OXnMfc/s599/pivot-horizontal-bar.png)
 
 Or a pie chart?
 
-![chart from pivot table](https://lh5.googleusercontent.com/-16W3V1-Njio/ULmpfcdWPYI/AAAAAAAAAHA/pRAW-l1v-lA/s494/pivot-pie-chart.png)
+![](https://lh5.googleusercontent.com/-16W3V1-Njio/ULmpfcdWPYI/AAAAAAAAAHA/pRAW-l1v-lA/s494/pivot-pie-chart.png)
 
 There are two main points to make here. First, that this tool gives you a wide
 array of tools to mold your data into something that answers your questions.
@@ -179,6 +177,12 @@ You can view the results of form submissions to this specific form here:
 The spreadsheet updates in near-real-time with form postings. Any charts you
 are using are also updated when the spreadsheet changes. Smells like this could
 be useful for light logging and metric recording, right? I think so!
+
+Looking back at the 'mail logs size' data set above, we can use forms to
+automate this. Set up a daily cron job that publishes the size of each log file
+to a form and you can trend usage patterns over time. If you don't have a graphing
+system available right now, like Graphite or Ganglia, this Forms solution could
+be just the right tool for you.
 
 ## Conclusion
 
