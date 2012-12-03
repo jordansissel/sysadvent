@@ -1,43 +1,66 @@
-Zero Downtime Deployments with Active-Passive MySQL
-=========
+# Zero-Downtime Deployments with Active-Passive MySQL
 
 This was written by [Bob Feldbauer](http://twitter.com/bobfeldbauer).
 
 There are generally at least two basic parts to deploying new code: 
 
-  - Rolling out application code
-  - Running any database schema changes/migrations
+* Rolling out application code
+* Running any database schema changes/migrations
 
-Zero downtime deployments can be solved by load balancing and implementing a [Blue-Green](http://martinfowler.com/bliki/BlueGreenDeployment.html *Blue-Green Deployment*) deployment methodology.
+Zero downtime deployments can be solved by load balancing and implementing a
+[Blue-Green](http://martinfowler.com/bliki/BlueGreenDeployment.html *Blue-Green
+Deployment*) deployment methodology.
 
-"Blue-Green deployment" is a fancy term that basically means you have two sets of an application stack. You start with Blue (version N) and Green (N-1), deploy version N+1 to the Green stack, and then cutover to the Green stack.
+"Blue-Green deployment" is a fancy term that basically means you have two sets
+of an application stack. You start with Blue (version N) and Green (N-1),
+deploy version N+1 to the Green stack, and then cutover to the Green stack.
 
-Traffic for a basic example high-availability architecture for an application might look like this:
-
-  - Incoming traffic hits a pair of high-availibility load balancers
-  - That traffic is routed to a pair of high-availability web servers/proxies 
-  - It is proxied to a pair of high-availability load balancers
-  - It is routed to a pair of high-availability application servers, with Blue-Green versions (N and N-1 respectively)
-  - The application servers talk to a database
+Traffic for a basic example high-availability architecture for an application
+might look like this:
 
 IMAGE1
 
-Changing the load balancers to point to different web or application servers with new versions to implement Blue-Green is generally trivial; however, deployments with database schema changes that require locking the database are often problematic.
+Summarizing the above image: 
 
-Many people have tried Master-Master MySQL over the years, and found it to be a painful experience. The traditional Master-Master MySQL setup involves two active database servers (we'll call this "Active-Active"). The problem is that both servers can accept reads and writes, and conflicting writes will cause replication to break.
+* Incoming traffic hits a pair of high-availibility load balancers
+* That traffic is routed to a pair of high-availability web servers/proxies 
+* It is proxied to a pair of high-availability load balancers
+* It is routed to a pair of high-availability application servers, with
+  Blue-Green versions (N and N-1 respectively)
+* The application servers talk to a database
 
-Instead of the traditional Active-Active approach, we can use an Active-Passive MySQL setup to achieve many of the same benefits while avoiding the danger of conflicting writes breaking replication, *and* allow us to do zero downtime deployments with database schema changes.
+Changing the load balancers to point to different web or application servers
+with new versions to implement Blue-Green is generally trivial; however,
+deployments with database schema changes that require locking the database are
+often problematic.
 
-In an Active-Passive setup, there are two database servers, but only one can accept writes at any given time. (The one that can accept writes is the "Active" server, while the read-only server is "Passive".) To achieve this, we simply add an additional load balancer layer between the application and database tiers.
+Many people have tried Master-Master MySQL over the years, and found it to be a
+painful experience. The traditional Master-Master MySQL setup involves two
+active database servers (we'll call this "Active-Active"). The problem is that
+both servers can accept reads and writes, and conflicting writes will cause
+replication to break.
 
-Traffic in our new example architecture would swap the last step ("The application servers talk to a database") for these two new steps:
+Instead of the traditional Active-Active approach, we can use an Active-Passive
+MySQL setup to achieve many of the same benefits while avoiding the danger of
+conflicting writes breaking replication, *and* allow us to do zero downtime
+deployments with database schema changes.
 
-  - The application servers connect to a pair of high-availability load balancers for their database queries
-  - The load balancer sends database connections to the Active MySQL server
+In an Active-Passive setup, there are two database servers, but only one can
+accept writes at any given time. (The one that can accept writes is the
+"Active" server, while the read-only server is "Passive".) To achieve this, we
+simply add an additional load balancer layer between the application and
+database tiers.
+
+Traffic in our new example architecture would swap the last step ("The
+application servers talk to a database") for these two new steps:
+
+* The application servers connect to a pair of high-availability load balancers
+  for their database queries
+* The load balancer sends database connections to the Active MySQL server
 
 IMAGE2
 
-MySQL Replication Details
+## MySQL Replication Details
 
   Each server (both Active and Passive) has a MySQL Master and Slave running on it, just like a Master-Master (Active-Active) setup. Changes occur as follow:
   
