@@ -17,8 +17,8 @@ a technique called [Blue-Green](http://martinfowler.com/bliki/BlueGreenDeploymen
 of an application stack. You start with Blue (version N) and Green (N-1),
 deploy version N+1 to the Green stack, and then cutover to the Green stack.
 
-Traffic for a basic example high-availability architecture for an application
-might look like this:
+Traffic for a high-availability architecture for an application might look like
+this:
 
 ![](https://lh5.googleusercontent.com/-lh0WFxOXlac/ULwyLBXg5BI/AAAAAAAAAHo/0OckggXE7Cs/s419/zero-downtime-mysql1.jpg)
 
