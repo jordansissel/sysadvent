@@ -128,6 +128,14 @@ more than a few days old.
 This monitoring check has come in handy for other people too, so it was well
 worth my time to have written even aside from its use in this project.
 
+## Conclusion
+
+ZooKeeper provided a fairly simple solution to a rather annoying problem. I
+wanted to be able to decomission servers at will and have them do so in a way
+that did not impact the cluster. Using ZooKeeper allowed me to limit the
+number of active decomissions, effectively solving this problem without
+requiring any special scheduling tooling or special baby-sitting by humans.
+
 ## Further Reading
 
 * [Chubby](http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en/us/archive/chubby-osdi06.pdf) - the Google software ZooKeeper is based on
