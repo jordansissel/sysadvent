@@ -138,5 +138,7 @@ requiring any special scheduling tooling or special baby-sitting by humans.
 
 ## Further Reading
 
-* [Chubby](http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en/us/archive/chubby-osdi06.pdf) - the Google software ZooKeeper is based on
+* [Chubby](http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en/us/archive/chubby-osdi06.pdf) - a very similar project at Google for a distributed locking service
 * [ZooKeeper Administrator Guide](http://zookeeper.apache.org/doc/r3.4.5/zookeeperAdmin.html)
+* [Net::ZooKeeper](http://search.cpan.org/~cdarroch/Net-ZooKeeper-0.35/ZooKeeper.pm) for talking to zk from perl
+* [Kazoo](http://kazoo.readthedocs.org/en/latest/) for talking to zk from python
