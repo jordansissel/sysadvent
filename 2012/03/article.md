@@ -115,15 +115,12 @@ One small caveat to the whole process is that you must be able to
 follow/enforce two basic rules for schema changes to work:
 
 1. The new schema must be backwards compatible with the previous schema:
-
-  * Add new columns with triggers rather than modifying in place
-  * New columns cannot be required immediately, or old writes will not replicate appropriately
-  * No use of server-generated data functions (UUID, NOW, RAND, etc)
-
+ * Add new columns with triggers rather than modifying in place
+ * New columns cannot be required immediately, or old writes will not replicate appropriately
+ * No use of server-generated data functions (UUID, NOW, RAND, etc)
 2. It cannot conflict with pending writes:
-
-  * No auto-increment INSERT unless the application doesn't insert to that table
-  * No DROP COLUMN nor DELETE rows if they are used in the previous schema version
+ * No auto-increment INSERT unless the application doesn't insert to that table
+ * No DROP COLUMN nor DELETE rows if they are used in the previous schema version
 
 ## Conclusion
 
