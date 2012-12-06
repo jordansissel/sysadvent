@@ -74,7 +74,7 @@ importing Active Directory users and groups, nor was there an API that
 would allow us to "pretend". It was a miserable experience for
 everyone involved.
 
-## Be Aware of SaaS limitation
+## Be Aware of Provider Limitations
 
 Don't rely on a service provider with a lesser infrastructure than your own. A
 chain's only as strong as its weakest link. You use multiple AWS regions. Or
