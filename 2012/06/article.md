@@ -1,10 +1,12 @@
-This was written by [Matt Simmons]() ([blog](http://www.standalone-sysadmin.com/blog/))
+# Watching out for Vendor Lock-In
+
+This was written by [Matt Simmons](https://twitter.com/standaloneSA) ([blog](http://www.standalone-sysadmin.com/blog/))
 
 Welcome to the dystopia your parents warned you about.
 
 Vendor lock-in used to mean that your data was stuck in a proprietary
 format, requiring you to buy expensive services to migrate to another
-provider. With [*aaS](http://en.wikipedia.org/wiki/Software_as_a_service), it
+provider. With [[PS]aaS](http://en.wikipedia.org/wiki/Software_as_a_service), it
 means that your [entire company can
 disappear](http://www.nbcnews.com/technology/technolog/amazon-web-services-outage-takes-down-netflix-other-sites-1C6611522)
 in a puff of smoke if you weren't careful about your choices. 
