@@ -1,3 +1,5 @@
+This was written by [Matt Simmons]() ([blog](http://www.standalone-sysadmin.com/blog/))
+
 Welcome to the dystopia your parents warned you about.
 
 Vendor lock-in used to mean that your data was stuck in a proprietary
