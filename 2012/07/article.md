@@ -320,9 +320,7 @@ additive and addictive.
 
 So local snapshots are awesome, but ZFS does you one better:
 
-````
-zfs send tank/kwatz@snapshot | ssh backups1 zfs recv -vdF tank
-````
+    zfs send tank/kwatz@snapshot | ssh backups1 zfs recv -vdF tank
 
 That will send that one snapshot to another system. That particular command
 will overwrite any datasets named `kwatz` on the target.
@@ -333,25 +331,23 @@ taken of a dataset and all of its children, off-system or off-site entirely?
 And you don’t actually want to send the entire dataset every time, for obvious
 reasons, so ZFS handily provides deltas in the form of ZFS incremental sends:
 
-````
-#!/bin/bash -e
+    #!/bin/bash -e
 
-REMOTE_POOL=tank2
-LOCAL_POOL=tank
-TARGET_HOST=foo
+    REMOTE_POOL=tank2
+    LOCAL_POOL=tank
+    TARGET_HOST=foo
 
-LAST_SYNCED=$( ssh $TARGET_HOST zfs list -t snapshot -o name -r $REMOTE_POOL/zones/icg_db/mysql | tail -1 )
-echo "r: $LAST_SYNCED"
+    LAST_SYNCED=$( ssh $TARGET_HOST zfs list -t snapshot -o name -r $REMOTE_POOL/zones/icg_db/mysql | tail -1 )
+    echo "r: $LAST_SYNCED"
 
-LAST_SNAPSHOT=$( zfs list -t snapshot -o name -r tank/zones/icg_db/mysql | tail -1 )
-echo "l: $LAST_SNAPSHOT"
+    LAST_SNAPSHOT=$( zfs list -t snapshot -o name -r tank/zones/icg_db/mysql | tail -1 )
+    echo "l: $LAST_SNAPSHOT"
 
-# In case the target/source pool names are different.
-RENAMED_STREAM=$( echo $LAST_SYNCED | sed -e "s/$REMOTE_POOL/$LOCAL_POOL/" )
-echo "s: $RENAMED_STREAM : $LAST_SNAPSHOT -> $REMOTE_POOL"
+    # In case the target/source pool names are different.
+    RENAMED_STREAM=$( echo $LAST_SYNCED | sed -e "s/$REMOTE_POOL/$LOCAL_POOL/" )
+    echo "s: $RENAMED_STREAM : $LAST_SNAPSHOT -> $REMOTE_POOL"
 
-zfs send -vI $RENAMED_STREAM $LAST_SNAPSHOT | ssh $TARGET_HOST zfs recv -vdF $REMOTE_POOL
-````
+    zfs send -vI $RENAMED_STREAM $LAST_SNAPSHOT | ssh $TARGET_HOST zfs recv -vdF $REMOTE_POOL
 
 I tend to ship all my snapshots to a backup host. Mail stores, databases, user
 home directories, everything. It all constantly streams somewhere. The blocks
@@ -407,48 +403,42 @@ don’t have to spend hours (or days) reimporting from your most recent dump.
 The best part about this bacon-saving process is how trivial it is. Here’s a
 production MySQL master:
 
-````
-# zfs list tank/zones/icg_db/mysql
-NAME                      USED  AVAIL  REFER  MOUNTPOINT
-tank/zones/icg_db/mysql  54.8G   184G  46.8G  /var/mysql
+    # zfs list tank/zones/icg_db/mysql
+    NAME                      USED  AVAIL  REFER  MOUNTPOINT
+    tank/zones/icg_db/mysql  54.8G   184G  46.8G  /var/mysql
 
-# zfs list -t snapshot -r tank/zones/icg_db/mysql | tail -1
-tank/zones/icg_db/mysql@20121202-1005  15.6M      -  46.8G  -
+    # zfs list -t snapshot -r tank/zones/icg_db/mysql | tail -1
+    tank/zones/icg_db/mysql@20121202-1005  15.6M      -  46.8G  -
 
-# zfs clone tank/zones/icg_db/mysql@20121202-1005 tank/database
+    # zfs clone tank/zones/icg_db/mysql@20121202-1005 tank/database
 
-# zfs list tank/database
-NAME            USED  AVAIL  REFER  MOUNTPOINT
-tank/database     1K   184G  46.8G  /tank/database
+    # zfs list tank/database
+    NAME            USED  AVAIL  REFER  MOUNTPOINT
+    tank/database     1K   184G  46.8G  /tank/database
 
-# zfs set mountpoint=/var/mysql tank/database
-````
+    # zfs set mountpoint=/var/mysql tank/database
 
 So we've got our data cloned and mounted. Now we need to start MySQL. Once we
 do so, InnoDB will run through its crash recovery and replay from its journal.
 
-````
-# ./bin/mysqld_safe --defaults-file=/etc/my.cnf 
-# tail -f /var/log/mysql/error.log
-121202 10:11:37 mysqld_safe Starting mysqld daemon with databases from /var/mysql
-...
-121202 10:11:41  InnoDB: Database was not shut down normally!
-InnoDB: Starting crash recovery.
-...
-121202 10:11:50 [Note] /opt/mysql/bin/mysqld: ready for connections.
-````
+    # ./bin/mysqld_safe --defaults-file=/etc/my.cnf 
+    # tail -f /var/log/mysql/error.log
+    121202 10:11:37 mysqld_safe Starting mysqld daemon with databases from /var/mysql
+    ...
+    121202 10:11:41  InnoDB: Database was not shut down normally!
+    InnoDB: Starting crash recovery.
+    ...
+    121202 10:11:50 [Note] /opt/mysql/bin/mysqld: ready for connections.
 
 MySQL is now running with the most recent snapshot of the database we have.
 
-````
-# mysql
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 3 to server version: 5.5.27-log
+    # mysql
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 3 to server version: 5.5.27-log
 
-Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+    Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
 
-mysql> 
-````
+    mysql> 
 
 This entire process took under a minute by hand.
 
