@@ -72,10 +72,9 @@ everything, and then giving you, the administrator, access to them. Typically
 these are exposed via the generic
 [`kstats`](http://illumos.org/man/3kstat/kstat) facility:
 
-````
-# kstat -l | wc -l
-   42690
-````
+    # kstat -l | wc -l
+       42690
+
 ZFS is no different. It exposes several hundred metrics to `kstats`.
 
 Ben Rockwood’s [`arc_summary.pl`](http://www.cuddletech.com/arc_summary.pl) is
@@ -124,9 +123,7 @@ Depending on your workload, ZFS gives you several easy performance wins.
 ZFS provides a Separate Log Device (the “slog” or “write log”) to offload the
 ZFS Intent Log to a device separate from your ZFS pool.
 
-````
-zpool add tank log c1t7d0p1
-````
+    zpool add tank log c1t7d0p1
 
 In effect, this allows you to ship all your synchronous writes to a very fast
 storage device (SSD), rather than waiting for your I/O to come back from a
@@ -156,9 +153,7 @@ but will shrink when applications start allocating memory.
 You can also add extra cache devices to a ZFS pool, creating a Layer 2 ARC
 (L2ARC):
 
-````
-zpool add tank cache c2d0
-`````
+    zpool add tank cache c2d0
 
 The caveat for the L2ARC is it consumes main memory for housekeeping. So even
 if you attach a very fast, battery-backed Flash device as an L2ARC, you may
@@ -176,9 +171,7 @@ You can view both slog and L2ARC usage in the output of `zpool iostat -v`.
 However, there is an even simpler way to get more performance out of your
 disks: 
 
-````
-zfs compression=on tank
-````
+    zfs compression=on tank
 
 You can enable compression on a per-dataset level, or at the pool level. The
 latter will cause all child datasets to inherit the value.
@@ -234,9 +227,7 @@ you'll need to move the files around yourself.
 ZFS gives you an unlimited number of atomic dataset-level snapshots. You can
 also do atomic recursive snapshots for a parent dataset and all its children.
 
-````
-zfs snapshot tank/kwatz@snapshot
-````
+    zfs snapshot tank/kwatz@snapshot
 
 For application data, I tend to take snapshots every five minutes via a `cron`
 job. Depending on the backing disk space and how often the data changes, this
@@ -245,39 +236,36 @@ hours, or days, or months.
 
 For simple centralized host backups, I tend to use something like this:
 
-````
-#!/bin/bash
+    #!/bin/bash
 
-source /sw/rc/backups.common
+    source /sw/rc/backups.common
 
-now=`/bin/date +%Y%m%d-%H%M`
+    now=`/bin/date +%Y%m%d-%H%M`
 
-HOSTS="
-host1
-host2
-host3
-...
-"
+    HOSTS="
+    host1
+    host2
+    host3
+    ...
+    "
 
-DIRS="/etc /root /home /export/home /mnt/home /var/spool/cron /opt"
+    DIRS="/etc /root /home /export/home /mnt/home /var/spool/cron /opt"
 
-for HOST in $HOSTS ; do
+    for HOST in $HOSTS ; do
 
-  echo "==> $HOST"
+      echo "==> $HOST"
 
-  /sbin/zfs create -p $BACKUP_POOL/backups/hosts/$HOST
-  /sbin/zfs snapshot $BACKUP_POOL/backups/hosts/$HOST@$now
+      /sbin/zfs create -p $BACKUP_POOL/backups/hosts/$HOST
+      /sbin/zfs snapshot $BACKUP_POOL/backups/hosts/$HOST@$now
 
-  for DIR in $DIRS; do
-    rsync $RSYNC_OPTIONS --delete root@$HOST:$DIR /var/backups/hosts/$HOST/
-  done
+      for DIR in $DIRS; do
+        rsync $RSYNC_OPTIONS --delete root@$HOST:$DIR /var/backups/hosts/$HOST/
+      done
 
-  /sw/bin/print_epoch > /var/run/backups/host-$HOST.timestamp
-done
+      /sw/bin/print_epoch > /var/run/backups/host-$HOST.timestamp
+    done
 
-/sw/bin/print_epoch > /var/run/backups/hosts.timestamp
-
-````
+    /sw/bin/print_epoch > /var/run/backups/hosts.timestamp
 
 So the root of your backups is always the most recent version (note `rsync
 --delete`). Not only are we only transferring the changed files, we're only
@@ -291,20 +279,18 @@ Getting access to the snapshots is trivial as well: There is a hidden
 there, you’ll find all your snapshots and the state of your files at that
 snapshot.
 
-````
-# cd /var/backups/hosts/lab-int
-# ls -l .zfs/snapshot | head
-total 644
-drwxr-xr-x   7 root     root           7 Aug 31 22:04 20120901-2200/
-drwxr-xr-x   7 root     root           7 Sep  1 22:03 20120902-2200/
-drwxr-xr-x   7 root     root           7 Sep  2 22:03 20120903-2200/
-...
+    # cd /var/backups/hosts/lab-int
+    # ls -l .zfs/snapshot | head
+    total 644
+    drwxr-xr-x   7 root     root           7 Aug 31 22:04 20120901-2200/
+    drwxr-xr-x   7 root     root           7 Sep  1 22:03 20120902-2200/
+    drwxr-xr-x   7 root     root           7 Sep  2 22:03 20120903-2200/
+    ...
 
-# ls -l etc/shadow
-----------   1 root     root        2043 Oct 12 00:22 etc/shadow
-# ls -l .zfs/snapshot/20120901-2200/etc/shadow
-----------   1 root     root        1947 Jul 30 13:13 .zfs/snapshot/20120901-2200/etc/shadow
-````
+    # ls -l etc/shadow
+    ----------   1 root     root        2043 Oct 12 00:22 etc/shadow
+    # ls -l .zfs/snapshot/20120901-2200/etc/shadow
+    ----------   1 root     root        1947 Jul 30 13:13 .zfs/snapshot/20120901-2200/etc/shadow
 
 It makes building recovery processes rather painless. If you have customers who
 often delete files they’d rather not, for instance, this is a very simple win
