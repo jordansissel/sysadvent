@@ -1,21 +1,12 @@
 # Bacon Preservation with ZFS
 
+This was written by [Bryan Horstmann-Allen](https://twitter.com/bdha)
+
 ## An Intermediate Guide to Saving Your Butt
 
+ZFS is a pooled storage filesystem with many advanced features.
 This article will describe several circumstances where trivial ZFS usage can
 aid you, as a systems administrator or developer, immensely.
-
-Very briefly, ZFS is a pooled storage filesystem with many advanced features.
-If you'd like an introductory view into ZFS and managing it, have a look at:
-
- * http://en.wikipedia.org/wiki/ZFS
- * http://illumos.org/man/1m/zfs
- * http://illumos.org/man/1m/zpool
- * http://www.solarisinternals.com/wiki/index.php/Solaris_Internals_and_Performance_FAQ
-
-Ben Rockwood has also blogged extensively on ZFS features:
-
- * http://bit.ly/XeEyb1
 
 Everything in this article is applicable to any version of ZFS, including
 Oracle Solaris or an [illumos](http://www.illumos.org) distribution
@@ -84,6 +75,8 @@ ARC below.
 I also use [OmniTI’s resmon](https://github.com/omniti-labs/resmon) memstat
 plugin to generate
 [graphs](https://circonus.com/embedded/graphs/abaf826e-e17d-e87a-9a71-f9a8ffd120af/lqESWm).
+
+<!-- above, in case the link expires: zfs-arc-example.png -->
 
 You can also use command-line utilities on Solarish derivatives like `fsstat
 zfs` and, more recently, `arcstat` to get live usage information.
@@ -206,6 +199,8 @@ old.
 Once we enabled compression, well, you can see
 [here](https://circonus.com/embedded/graphs/f679b074-bccd-4eeb-8b9f-c08399904a1b/LnyJvw).
 
+<!-- above, in case the link expires: refill-age.png -->
+
 A job going from around an hour to a minute or less by running one command? Not
 bad. We also minimized the I/O workload for this job, which was very helpful
 for a highly multi-tenant system.
@@ -213,6 +208,8 @@ for a highly multi-tenant system.
 We later parallelized the process, so it now it takes only a [few
 seconds](https://circonus.com/embedded/graphs/5ecf5944-c4ed-cfa6-888f-fb6b770bcc3c/ETRQZN)
 to complete a run.
+
+<!-- above, in case the link expires: spam-index-age.png -->
 
 The caveat with compression is what when you send a compressed stream
 (described below), you lose compression. You can compress inline through a
@@ -471,3 +468,11 @@ might find in other solutions.
 
 (Much thanks to @horstm22, @rjbs, @jmclulow, and @richlowe for help with this
 article.)
+
+## Further Reading
+
+* [Ben Rockwood has blogged extensively on ZFS features](https://www.google.com/search?q=site:cuddletech.com+"understanding+zfs")
+* [ZFS on Wikipedia](http://en.wikipedia.org/wiki/ZFS)
+* [zfs(1) man page](http://illumos.org/man/1m/zfs)
+* [zpool(1) man page](http://illumos.org/man/1m/zpool)
+* [Solaris internals and performance](http://www.solarisinternals.com/wiki/index.php/Solaris_Internals_and_Performance_FAQ)
