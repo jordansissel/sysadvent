@@ -1,5 +1,6 @@
-Scheduling projects with TaskJuggler
-====================================
+# Scheduling projects with TaskJuggler
+
+This was written by [Ben Cotton](https://twitter.com/funnelfiasco).
 
 "Ew! Project management?" you say, "that does nothing but get in my way!" But
 let's face it, most sysadmins don't have a project manager to work with, so they
@@ -15,12 +16,15 @@ this writing, there is no GUI for version 3). Output is generated with a command
 line program. This lends it well to working with tools like make, vi, and
 version control systems. 
 
-To get started, install TaskJuggler. Some Linux distributions have a package in
-the repository, but if your preferred platform (including Windows and Mac OS X)
-doesn't, you can install it from source or from ruby gems. More information on
-installation can be found on the
-[TaskJuggler download page](http://www.taskjuggler.org/download.html). Note that
-the example used here is done with TaskJugger 3.3.0.
+To get started, [install
+TaskJuggler](http://taskjuggler.org/tj3/manual/Installation.html). Some Linux
+distributions have a package in the repository, but if your preferred platform
+(including Windows and Mac OS X) doesn't, you can install it from source or
+from ruby gems. More information on installation can be found on the
+[TaskJuggler download page](http://www.taskjuggler.org/download.html). Note
+that the example used here is done with TaskJugger 3.3.0.
+
+## Moving To a New Building
 
 The example we explore today is that of a site move. Sysadvent, Inc. has
 outgrown its current building and will be moving to a new, shiny tower downtown.
@@ -29,7 +33,8 @@ is expected to take three months to complete.
 
 Fortunately, Sally doesn't have to do all the work herself. She has two helpdesk
 staff, Harry Helpdesk and Henrietta Helpdesk (no relation!), and a network
-engineer who works from 5 AM until 1 PM, Norbert Network. In addition, the CEO has said that Sally can use Iggy
+engineer who works from 5 AM until 1 PM, Norbert Network. In addition, the CEO
+has said that Sally can use Iggy
 Intern for four hours a week.
 
 Sally gets her TaskJuggler file started:
@@ -160,7 +165,7 @@ HTML output there:
     tj3 sysadvent.tjp -o /var/www/html/moving
 
 Here's her schedule, simplified for easier blog viewing.
-![Sally's first Gantt chart](chart1.png)
+![Sally's first Gantt chart](https://lh4.googleusercontent.com/-h8uPIjQwxoo/UMLbomVj4PI/AAAAAAAAAIE/MyjgtocPUQ0/s875/chart1.png)
 
 Pleased with her work, Sally shows the boss. "That's nice," he says, "but I
 don't want to have to wait forever for Iggy to box up the unused workstations.
@@ -172,7 +177,7 @@ pack.unused_workstations and adds an additional line to that task:
 
 This shortened the length of the project considerably.
 
-![Sally's second Gantt chart](chart2.png)
+![Sally's second Gantt chart](https://lh6.googleusercontent.com/-QWlf0UeXMDQ/UMLbovWR5KI/AAAAAAAAAIA/K5Anyu-_200/s714/chart2.png)
 
 Sally presented the schedule to the rest of the team. Everyone was excited until
 Harry mentioned that he would be on vacation January 3-7. Oh! And the 1st is a
@@ -185,11 +190,11 @@ following line above the resource definitions:
 Then she adds Harry's vacation to his resource definition:
 
     resource harry "Harry Helpdesk" {
-	    vacation 2013-01-03 - 2013-01-07
+      vacation 2013-01-03 - 2013-01-07
     } 
 
 Finally, the project is scheduled.
-![Sally's third Gantt chart](chart3.png)
+![Sally's third Gantt chart](https://lh5.googleusercontent.com/-oX6j-RH8DCw/UMLbojbYD3I/AAAAAAAAAII/jA1ZaMs-NQ0/s715/chart3.png)
 
 Everyone's happy with the schedule now, but it can be easy to overlook tasks.
 Sally decides to make a report for each person showing the tasks assigned to
@@ -215,15 +220,29 @@ are assigned to.
     ${Staff_Report "norbert"}
     ${Staff_Report "iggy"}
 
-![Sally's task list](sallys_tasks.png)
+![Sally's task list](https://lh5.googleusercontent.com/-w9MtGAOMtoI/UMLbpOTusRI/AAAAAAAAAIM/GjnAs5LBP_k/s676/sallys_tasks.png)
 
 As the project went along, Sally occasionally re-ran her project. She liked to
 see the completion bars grow. Because Sally is a perfect estimator, TaskJuggler
 was safe in assuming that everything was being completed exactly on time.
 
-This example presented only a small portion of what TaskJuggler can do. On the
-scheduling side, you can create multiple scenarios. TaskJuggler can keep track
-of leave information, track costs, even send and process timesheets.  For more
-information, see the [TaskJuggler website](http://www.taskjuggler.org). The
-final example taskjuggler file is available at
-<http://www.funnelfiasco.com/sysadvent/2012>.
+## Conclusion
+
+TaskJuggler is a popular tool for planning out projects. Bonus points that
+it is open source and has an active community. 
+
+The example above only shows a small set of this tool's features. For example,
+on the scheduling side, you can create multiple scenarios. TaskJuggler can keep
+track of leave information, track costs, even send and process timesheets.  
+
+For more information, see the [TaskJuggler
+website](http://www.taskjuggler.org). The final [example taskjuggler
+file](http://www.funnelfiasco.com/sysadvent/2012/sysadvent.tjp) is available if
+you want take a peek.
+
+## Further Reading
+
+* [Project Management Software](http://en.wikipedia.org/wiki/Comparison_of_project-management_software) 
+  on wikipedia (you can sort by license to see open source ones)
+* [taskjuggler-users](https://groups.google.com/forum/?fromgroups#!forum/taskjuggler-users) mailling list.
+* [How to Make Things Happen](http://msdn.microsoft.com/en-us/library/aa480154.aspx) - a chapter from 'The Art of Project Management' book.
