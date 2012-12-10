@@ -1,16 +1,22 @@
-                                                                     
-                                                                     
-                                                                     
-                                             
+# Backups
+
+This was written by [Joseph Kern](https://twitter.com/josephkern).
+
+## Death of a Business
+
 In a blinding moment of schadenfreude, a promising social bookmarking
 startup Gnolia disappeared after a common misunderstanding, mistaking
 a fault tolerant mirror for a disaster recovery backup. [All user
 data was lost and the startup soon dissolved][gn].
 
 Another painfully public backup failure example comes from [Jeff
-Atwood][jf], having relied on his hosting company to provide disaster
+Atwood][ja], having relied on his hosting company to provide disaster
 recovery backups without testing or verification. He was soon to find
 out that they were not maintained correctly.
+
+Journalspace [suffered a similar disaster](http://www.brentozar.com/archive/2009/01/why-back-up-ask-journalspace/) that ultimately destroyed it because it had no backups.
+
+## Ready to Backup?
 
 Let’s talk about your backups. You're busy, I know. Startups are fast
 moving operations, and backups are boring, but this is important!
@@ -19,7 +25,7 @@ We won’t go into any great technical depth. This will be a high level overview
 of backups, their purpose, and how to make effective choices when designing a
 backup system that will scale with your need.
 
-Essentially a backup is an offline point-in-time snapshot - nothing
+Essentially a backup is an offline, point-in-time snapshot - nothing
 more and nothing less. A backup is not created for fault tolerance. It
 is created for disaster recovery. Disaster recovery begins after your
 fault tolerance threshold has been exceeded. For example, a RAID 5 is
@@ -28,12 +34,16 @@ fail, or the array has been corrupted, you are in a disaster recovery
 mode. Your only tool for recovery is a good backup and a stiff drink
 (preferably after you've finished the restore).
 
+### About RAID
+
 A RAID or active mirror is [often mistaken][mis] as an effective means
 of creating a backup solution. A RAID is not a backup, it is only a
 fault tolerant array of disks. Likewise a mirror is not a backup because all
 write operations, including data corruption or destruction, are mirrored
 as well. Backups must be offline (that is, not writable) and should
 be stored in a different media than the original data.
+
+## Getting Started
 
 Let’s begin by making a list of all your critical data. In a typical
 startup, this includes your code repository, the user data, and all of the
@@ -51,6 +61,8 @@ their potential growth over time. The growth of your data sources will
 determine what media and technique that best fits your needs. Today
 there are many options, hard drives, magnetic tape, and even solid
 enough cloud solutions (such as Amazon’s S3).
+
+## Capacity Planning
 
 Several factors are involved in capacity planning this project: time
 to complete a backup, time to transfer your backup to your backup
@@ -77,6 +89,8 @@ to the server rack on tape. Similarly, living on Amazon Web Services
 infrastructure benefits from using Amazon’s S3. Ultimately, it will depend on
 your infrastructure, budget, and the amount of data which backup solution
 best fits your needs.
+
+## Backup Methods
 
 Next, you’ll want to determine your rotation and retention
 scheme. There are many kinds of backups, some are vendor specific,
