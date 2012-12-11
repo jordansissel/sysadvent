@@ -1,6 +1,8 @@
-# DC Ops ProTips
+# DC Ops Tips
 
-With all the talk and movement to the cloud, it is easy to forget that many of us still have DC Ops responsibilities. For many, they don't even know it as DC Ops, but just simply as a job duty. DC Ops, or Datacenter Operations, is, in it's simplest form, taking care of the operations that happen inside the datacenter. This datacenter may very well be a closet for some of us, but it is nevertheless, the datacenter.
+This was written by [Chris Webber](https://twitter.com/cwebber).
+
+With all the talk and movement to the cloud, it is easy to forget that many of us still have datacenter ops responsibilities. For many, they don't even know it as DC Ops, but just simply as a job duty. DC Ops, or Datacenter Operations, is, in it's simplest form, taking care of the operations that happen inside the datacenter. This datacenter may very well be a closet for some of us, but it is nevertheless, the datacenter.
 
 Like the terms Operations or Systems Administration, what tasks are involved in DC Ops vary widely. Nothing said herein is written as a rule but as something to think about. Additionally, just like all things in our field, what has worked for me won't necessarily work in your environment. So here are a few things that I think are important and find that even people that have been doing this for years don't always know.
 
