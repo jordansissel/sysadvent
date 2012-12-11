@@ -12,16 +12,16 @@ nevertheless, the datacenter.
 Like the terms Operations or Systems Administration, what tasks are involved in
 DC Ops vary widely. Nothing said herein is written as a rule but as something
 to think about. Additionally, just like all things in our field, what has
-worked for me won't necessarily work in your environment. So here are a few
-things that I think are important and find that even people that have been
-doing this for years don't always know.
+worked for me won't necessarily work in your environment. Here are a few
+things that I think are important and that I find that even people with
+many years of experience don't always know.
 
 ## Equipment
 
-For me there is always a basic set of tools and gear that I take with me to the
-DC. When I had multi-DC responsibilities, all of these things went into a
-backpack that went with me. Now that I really only have responsibilities at one
-location, they sit on the table and on the shelf in the DC. 
+For me, there is always a basic set of gear that I take with me to the DC. When
+I had multi-DC responsibilities, all of these things went into a backpack that
+went with me. Now that I really only have responsibilities at one location,
+they sit on the table and on the shelf in the DC. 
 
 ### The Basics
 
@@ -30,18 +30,19 @@ location, they sit on the table and on the shelf in the DC.
  * *Variable Speed* - There are two parts to this. A switch on top that changes
    the max and the ability to adjust based on how the trigger is pulled.
  * *Variable Torque* - This is the numbers that you can change on front of the
-   drill. In general I find that it is good to keep this number around 3-6 on
-   most drills.
+   drill. In general, I find that it is good to keep this number around 3-6 on
+   most drills. This setting will help prevent accidental stripping of screw heads.
 * **Drill Bits** - This is one of the areas where the more the better, but here
   is a list of what I would make sure you have as a minimum. Additionally,
   magnetic bits will save your ass… Just sayin.
- * *\#1, \#2 & \#3 Philips Head Bits* - Yes you need all three. \#2 is the most
+ * *\#1, \#2 & \#3 Philips Head Bits* - Yes, you need all three. \#2 is the most
    common, but you will need the \#3 when dealing with most M6 screws and the
    \#1 when dealing with the smaller screws inside systems.
  * *Standard (Flat) Head Bit* - These come in handy for various things, not to
    mention standard screws. It is good to keep a few sizes handy.
  * *Bit Extension* - You will want an extension in your kit. I use one that is
-   about 12" long but anything 3" or longer should be good enough.
+   about 12" long but anything 3" or longer should be good enough. Look for
+   ones that are magnetic.
 * **Kneepads** - Yes, kneepads. These will make all the difference in the world
   if you are up and down off the floor at all. I tend to prefer the ones with
   hard caps on them because I can slide on the DC floor.
@@ -57,7 +58,7 @@ location, they sit on the table and on the shelf in the DC.
 * **Hearing Protection** - If you are going to be in the DC for any substantial
   amount of time, earplugs or earmuffs will make a world of difference.
   Everyone I know that has been doing this for more than a decade seems to have
-  hearing loss, probably a good idea to protect ourselves.
+  hearing loss, and it's always a good idea to protect ourselves.
 * **Adjustable Wrench** - Also known as a Crescent wrench, these are great for
   lowering feet on racks and other misc things.
 
@@ -69,8 +70,9 @@ kit over the years.
 
 * **Impact Driver** - Between putting holes in racks and "gently" modify rail
   kits, having an impact driver for those stubborn tasks is nice.
-* **Torque/Security Bit Set** - I swear some vendors have an obsession with
-  making things hard. These usually solve that problem.
+* **Torx/Security Bit Set** - Torx bits are also called 'star' bits. I swear
+  some vendors have an obsession with making things hard. These usually solve
+  that problem.
 * **Titanium Drill Bit Index** - These usually get combined with the impact
   driver for what I like to refer to as, "creative problem solving."
 * **Headlamp** - It is nice to have light and both your hands free.
@@ -89,7 +91,7 @@ kit over the years.
 * **Console Cables** - If you use serial consoles, keep a set of the cables in
   your bag.
 * **USB Serial Adapter** - You never know when you need to console into the
-  switch, or NetApp.
+  switch or NetApp.
 * **C13 to C14 Power Cable** - This is an easy way to keep a box powered while
   you push it out of the rack, or as a way to power your laptop with the next
   adapter.
@@ -111,8 +113,8 @@ while they seem small make a huge difference.
 
 ## Labeling
 
-Since I normally label cables before I run them and label other things very
-early on in their lifecycle, it only seems appropriate to start there. There
+Since I label cables before I run them and generally label other things very
+early on in their lifecycle, it only seems appropriate to start here. There
 are a few schools of thoughts on how to label and what to label. All of those
 things influence or are influenced by the label maker you use. The one thing
 that us pretty universally true though, is that a bad label is worse than no
@@ -159,14 +161,15 @@ endpoints camp. The following are how I deal with each kind of thing.
  * Label the doors in addition to the rack frame if you have doors.
 
 ### Label Maker
+
 The best thing I have found is the Brother TZ labelers. The nice thing about
-these labelers is that the tape is reasonably inexpensive and it is easy to
-find label makers at a reasonable price. If you watch the Office Depot and
-Staples ads, there is usually a battery powered TZ label maker for $9.99 every
-few months. Additionally, you can get label makers that you can connect to your
-workstation and print them from some external datasource. I tend to use the
-TZ231 tape almost exclusively, but if you had a need to color code things, it
-isn't hard to get ahold of other colors.
+these labelers is that the tape is inexpensive and it is easy to find label
+makers at a reasonable price. If you watch the Office Depot and Staples ads,
+there is usually a battery powered TZ label maker for $9.99 every few months.
+Additionally, you can get label makers that you can connect to your workstation
+and print them from some external datasource. I tend to use the TZ231 tape
+almost exclusively, but if you had a need to color code things, it isn't hard
+to get ahold of other colors.
 
 ## Cabling
 
@@ -235,7 +238,7 @@ around 1.15A.
 
 ### How Much Load Can I Put On A Circuit?
 
-The rule I use is 40%. Yes, you read that correctly, 40%. So why so low? First
+The rule I use is 40%. Yes, you read that correctly, 40%. Why so low? First
 off, in general, most breakers are not designed to carry more than 80% load for
 any amount of time. Anytime you are consistently over 80% for more than a few
 minutes, you are not in a good place. 
@@ -299,3 +302,7 @@ to call things. Below you will find my general rules on what to call things.
 * Panel - The panel is where the circuits are terminated and the breakers live.
 * PDU - Power Distribution Unit - This is the strip that systems connect to,
   assuming it is plugged directly into a circuit.
+
+# Further Reading
+
+* [Inside a Google Datacenter](http://www.google.com/about/datacenters/inside/streetview/)
