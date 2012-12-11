@@ -1,5 +1,7 @@
 ## Packages do too much.
 
+This was written by [Miah Johnson](https://twitter.com/miah_).
+
 Before we had configuration management tools our UNIX vendors added
 similar functionality to their package managers. For example, the ability to
 run arbitrary scripts during a package installation enabled automatically
