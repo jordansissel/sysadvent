@@ -87,7 +87,7 @@ that helped.  Getting database servers to the point where they were operating
 with extremely similar configurations reduced outages by about half. Then we
 started learning how to actually tune and install Oracle properly.
 
-## Breaking Down Silos
+## Break Down Silos
 
 Can culture change begin by fixing some database servers? We worked with our
 customers. In this case, it was mostly DBAs, but our business analysts and
@@ -103,7 +103,7 @@ be up at 3AM trouble-shooting something, so were they. We shared the pain. I
 tried to push the DB specific pain to them. People who carry the pager will
 make better design decisions when not on-call.
 
-## Admitting Failure Builds Trust
+## Admit Failure, Build Trust
 
 Post-mortem meetings were a major exercise in blame-storming. I decided that
 instead of redirecting blame or telling customer groups to design for failure,
@@ -168,3 +168,8 @@ conference, I realized we were doing those things. It now had a label. DevOps
 was about using technology to solve problems. Using automation, showing results
 with numbers, and having heavy collaboration. We changed the culture of a
 team. We made our business better. We changed into a DevOps culture.
+
+## Further Reading
+
+* [Ben Rockwood's talk on DevOps Transformation](http://www.youtube.com/watch?v=3KpPBnEtRj4)
+* [DevOps Days Conference](http://devopsdays.org/)
