@@ -1,6 +1,6 @@
 # Configuration Management as Legos
 
-This was written by Adrien Thebo.
+This was written by [Adrien Thebo](https://twitter.com/nullfinch).
 
 Configuration management is hard. Configuring systems properly is a lot of hard
 work, and trying to manage services and automate system configuration is a
