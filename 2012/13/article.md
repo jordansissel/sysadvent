@@ -6,7 +6,7 @@ Configuration management is hard. Configuring systems properly is a lot of hard
 work, and trying to manage services and automate system configuration is a
 serious undertaking.
 
-[cablefail]: http://i.imgur.com/Cukun.jpg
+[cablefail]: https://lh6.googleusercontent.com/-mrCp_-fZfEY/UMmCyadDWkI/AAAAAAAAAJM/YMi-0GgUL8U/s512/cable-mess.jpg
 
 Even when you've managed to get your infrastructure organized in Puppet
 manifests or Chef cookbooks, organizing your code can get ugly, fast. All too
@@ -96,7 +96,7 @@ it with other modules to build the rest of your configuration.
 
 ## The Weird Blocks and Code Layout
 
-![](lego-axle-hub.png)
+<img src="https://lh6.googleusercontent.com/-VNAY3iwgrHI/UMl_xLS8DpI/AAAAAAAAAI4/NyRfhaPJN7M/s150/lego-axle-hub.jpg" style="float: right; border: 0">
 
 Of course every site has their own internal services and applications, and this
 is where the weird blocks come in. Weird blocks are analogous to the lego
@@ -142,7 +142,7 @@ blocks.
 
 ## Composing Blocks into Services (like lego kits)
 
-http://geekadelphia.com/wp-content/uploads/2009/01/back-to-the-future-lego-kit.jpg
+<img src="https://lh5.googleusercontent.com/-3MLuMsRdjFQ/UMl_xK4_xzI/AAAAAAAAAI8/Smhy5n864n0/s200/back-to-the-future-lego-kit.jpg" style="float: right; border: 0">
 
 So we have all of these well defined modules and classes, but without
 assembling them you have a pile of legos - something that's not useful and
@@ -209,7 +209,7 @@ mrepo implementation, and how we're using it.
 
 ## Roles: They’re Like Lego Cities
 
-http://seboslegoschool.edublogs.org/files/2011/08/legoCity-2cyt7cu.jpg
+<a href="http://seboslegoschool.edublogs.org/files/2011/08/legoCity-2cyt7cu.jpg"><img src="https://lh3.googleusercontent.com/-xJUV0OLw5Ho/UMmBB4xCNnI/AAAAAAAAAJI/Xi_r47VcX60/s200/legoCity-2cyt7cu.jpg" style="float: right; border: 0"></a>
 
 At this point we have the modules built in site-services that configure our
 environment the way we need it. The final step is taking these services and
@@ -269,14 +269,14 @@ This gives us the following hierarchy
 If you use this pattern, in no time flat you could have configuration
 management code that is about as awesome as a seven foot replica of Serenity.
 
-http://io9.com/5931903/seven+foot-long-minifig+scale-serenity-model-is-a-lego-masterpiece
+<a href="http://www.flickr.com/photos/brickfrenzy/sets/72157630914408000/with/7717701618/"><img src="http://farm9.staticflickr.com/8434/7717708760_365a1c0df8.jpg" style="border: 0"></a>
+(image credit [brickfrenzy](http://www.flickr.com/photos/brickfrenzy/))
 
+## Further Reading:
 
-Learn More:
-
-Links - Forge? specific modules called out? additional docs of goodness? 
-
-http://bombasticmonkey.com/2011/12/27/stop-writing-puppet-modules-that-suck/
+* [Stop Writing Puppet Modules That Suck](http://bombasticmonkey.com/2011/12/27/stop-writing-puppet-modules-that-suck/)
+* [Simple Puppet Module Structure](http://www.devco.net/archives/2012/12/13/simple-puppet-module-structure-redux.php)
+* [Guide to Writing Chef Cookbooks](http://www.opscode.com/blog/2011/09/07/guide-to-writing-chef-cookbooks/)
 
 
 
