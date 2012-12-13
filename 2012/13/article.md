@@ -33,7 +33,7 @@ philosophy][unix]. This pattern can be used to organize code for any
 configuration management tool, but for the sake of brevity, I'll be using
 Puppet to provide examples.
 
-# The Base Blocks
+## The Base Blocks
 
 Fundamental behavior is provided by a set of base modules. These are akin to
 the rectangular lego blocks - they're generic, they're reusable, and you can
