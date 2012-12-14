@@ -268,3 +268,9 @@ Migrating your server into your cloud this way allows you to continue
 supporting legacy systems while improving flexibility and operational control.
 I hope you found this article informative and useful. Feel free to contact me
 and I'll help you through them!
+
+## Further Reading
+
+* [Dope 'n Stack](http://www.dopenstack.com/)
+* [Getting Started with OpenStack](http://wiki.openstack.org/GettingStarted)
+
