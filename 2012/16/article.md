@@ -9,7 +9,7 @@ a Nintendo. Gaming in the ‘80s was all about the NES, and it was freaking
 awesome!  I spent more hours than I care to admit playing all sorts of games,
 but one sticks out in particular:
 
-![](https://lh4.googleusercontent.com/-GVmY2WLDbgs/UM5z00hqxaI/AAAAAAAAAJg/Yz1MEa_1jfc/s256/bad-dudes.png Bad Dudes)
+<img src="https://lh4.googleusercontent.com/-GVmY2WLDbgs/UM5z00hqxaI/AAAAAAAAAJg/Yz1MEa_1jfc/s256/bad-dudes.png">
 
 That’s how you introduce a video game. No 15 minute cutscenes and no confused
 anti-heroes, just a straight-up challenge: Are you a Bad Enough Dude?
