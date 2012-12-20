@@ -71,7 +71,7 @@ the work be done.
 For a long time, I thought that all the talk of data driven was just for the
 big cloud providers or large enterprise, but data-driven infrastructure is just
 a mechanism to distill your configuration into reusable pieces - something we
-do with configuration management already.  In puppet, for example, modules are
+do with configuration management already.  In Puppet, for example, modules are
 the resusable units.
 
 When I think of a data-driven infrastructure, I think of constructing a
@@ -104,7 +104,7 @@ tack on some VLANs.
           vlan: 230
 
 Now we can load the YAML data and take some action. I'm loading this data with
-[hiera](http://projects.puppetlabs.com/projects/hiera) into a hash for puppet
+[hiera](http://projects.puppetlabs.com/projects/hiera) into a hash for Puppet
 to use. Putting the above YAML data into a file called `network.yaml`, you can
 load it up with a hiera call like so:
 
@@ -112,10 +112,10 @@ load it up with a hiera call like so:
 
 This will look for a key called 'network' in a file called 'network.yaml' with
 a default value of an empty hash, '{}'.  Now you can access your data as just a
-puppet hash.
+Puppet hash.
 
 We use FreeBSD as our firewall platform and PF for the packet filtering.  Since
-we use puppet, I've compiled some defined types to create the VLAN interfaces
+we use Puppet, I've compiled some defined types to create the VLAN interfaces
 and manage parts of FreeBSD. (All of this  all of which is up on GitHub.
 
 Our firewalls also act as our gateways for the various VLANs, so we can
@@ -130,8 +130,8 @@ firewalls.
     # Create all the VLANs
     create_resources('freebsd::vlan', $vlans)
 
-One function that puppet provides to inject the VLAN interface resources into
-the puppet catalog is
+One function that Puppet provides to inject the VLAN interface resources into
+the Puppet catalog is
 [`create_resources()`](http://docs.puppetlabs.com/references/latest/function.html#createresources).
 If the parameters on the hash match exactly the parameters the defined type
 expects as in the case above, this works wonders.  If not, you'll need to
@@ -199,13 +199,13 @@ physical interface address properties.
 
     create_resources('freebsd::network::interface', $interfaces)
 
-The puppet type `shell_config` just sets a key value pair in a specified file,
+The Puppet type `shell_config` just sets a key value pair in a specified file,
 which is really useful for FreeBSD systems where lots of the configuration is
 exactly that.
 
 Now that we have network configuration for the firewall, lets do some filtering
 on those interfaces.  In the same spirit as before, we'll look up some data
-from a file and use puppet to enforce it.
+from a file and use Puppet to enforce it.
 
 For those new to PF, tables are named lists of address or networks, so you can
 refer to the names throughout your rule set.  This keeps your code much cleaner
@@ -273,7 +273,7 @@ data blob for 'pf' might look like this:
             list:
               - '10.0.0.0/24'
 
-While the puppet configuration might look like this:
+While the Puppet configuration might look like this:
 
     include pf
     $pf = hiera_hash('pf',{},'pf')
@@ -298,7 +298,7 @@ available from other networks.
 
 ## An Example Implementation
 
-Now that we can build firewall resources with puppet, this opens the doors for
+Now that we can build firewall resources with Puppet, this opens the doors for
 all kinds of interesting things.  For example, say we want to open the firewall
 for all of our cloudy boxes so they could write some metrics directly to our
 graphite server.  On all of your cloud boxes you might, for example, include
@@ -328,7 +328,7 @@ directly to your NATed graphite box, completely dynamically.
 
 This method still requires that you know the syntax of PF.  It also requires
 that you know which macros to escape in the rule string and which to interpret
-as puppet variables.  Personally, I am okay with this because I like the
+as Puppet variables.  Personally, I am okay with this because I like the
 language of PF.  Also, I don't know if the code complexity required to abstract
 the PF language is worth the effort.  The `pf.conf` is very picky about the
 order of rules in the file.  This complicates the issue even more.
@@ -356,6 +356,7 @@ Happy filtering.
 ## Further Reading
 
 * [puppet-pf](https://github.com/puppetlabs-operations/puppet-pf)
+* [puppet-freebsd](https://github.com/puppetlabs-operations/puppet-freebsd)
 * [External Data in
 Puppet](http://www.youtube.com/watch?v=z9TK-gUNFHk&feature=youtu.be) - covers
   hiera and other data tools with puppet.
