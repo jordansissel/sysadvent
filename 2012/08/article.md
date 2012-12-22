@@ -127,6 +127,7 @@ opportunity to buy new servers for the company.
         effort 2h
     }
     task put_away_spare_parts "Toss spare parts in the corner to be dealt with later" {
+        depends unload_truck
         allocate harry, henrietta, sally
         effort 2h
     }
