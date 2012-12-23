@@ -1,4 +1,4 @@
-# Down and Dirty Log File Filtering with Perl
+# Day 23 - Down and Dirty Log File Filtering with Perl
 
 This was written by [Phil Hollenback](http://www.twitter.com/philiph) 
 ([www.hollenback.net](http://www.hollenback.net))
@@ -13,8 +13,8 @@ lines as being extra suspicious. It would also be nice if this was
 just one little self-contained script.  How are you going to do that?
 
 Sure, I know right now you are thinking "hey Phil just use a real tool
-like logstash, ok?"  Unfortunately, I'm not very good at following
-directions, so I decided to implement this little project with my
+like [logstash](http://logstash.net), ok?"  Unfortunately, I'm not very good at
+following directions, so I decided to implement this little project with my
 favorite tool: Perl.  This post will shed some light on how I designed the
 script and how you could do something similar yourself.
 
