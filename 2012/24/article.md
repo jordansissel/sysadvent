@@ -1,9 +1,28 @@
 # Day 24 - Twelve things you didn't know with Chef
 
+This was written by [Joshua Timberman](https://twitter.com/jtimberman).
+
 In this post, we will discuss a number of features that can be used in
 managing systems with Chef, but may be overlooked by some users. We'll
 also look at some features that are not so commonly used, and may
 prove helpful.
+
+Here's a table of contents:
+
+1. [Resources are first class citizens](#item_1)
+2. [In-place file editing](#item_2)
+3. [File Checksum comparisons](#item_3)
+4. [Version matching](#item_4)
+5. [Encrypting Data for Chef's Use](#item_5)
+6. [Chef has a REPL](#item_6)
+7. [Working with the Resource Collection](#item_7)
+8. [Extending the Recipe DSL with helpers](#item_8)
+9. [Load and execute a single recipe](#item_9)
+10. [Integrating Chef with Your Tools](#item_10)
+11. [Sending information to various places](#item_11)
+12. [Tagging nodes](#item_12)
+
+<a name="item_1"></a>
 
 # (1) Resources are first class citizens
 
@@ -154,6 +173,8 @@ for these cookbooks for examples.
 There's many more, and documentation for them is on the
 [Opscode Chef docs site](http://docs.opscode.com/lwrp.html).
 
+<a name="item_2"></a>
+
 # (2) In-place file editing
 
 For a number of reasons, people may need to manage the content of
@@ -192,6 +213,8 @@ For another example, [Sean OMeara](http://twitter.com/someara) has
 written a [line](http://ckbk.it/line) that includes a
 resource/provider to append a line in a file if it doesn't exist.
 
+<a name="item_3"></a>
+
 # (3) File Checksum comparisons
 
 In managing file content with the `file`, `template`, `cookbook_file`,
@@ -207,6 +230,8 @@ and the method is `#checksum_for_file`.
 
     require 'chef/checksum_cache'
     sha256 = Chef::ChecksumCache.checksum_for_file("/path/to/file")
+
+<a name="item_4"></a>
 
 # (4) Version matching
 
@@ -263,6 +288,8 @@ versions.
     if mac_service_supported
       # do mac service is supported so do these things
     end
+
+<a name="item_5"></a>
 
 # (5) Encrypting Data for Chef's Use
 
@@ -334,6 +361,8 @@ Hash. Example below:
     user_creds['user'] # => "joshua"
     user_creds['password'] # => "dirty_secrets"
 
+<a name="item_6"></a>
+
 # (6) Chef has a REPL
 
 Chef comes with a built-in "REPL" or shell, called `shef`. A REPL is
@@ -403,6 +432,8 @@ present for compatibility.
     require 'chef/shef/ext'
     Shef::Extensions.extend_context_object(self)
     nodes.all # => [node[doppelbock], node[cask], node[ipa]]
+
+<a name="item_7"></a>
 
 # (7) Working with the Resource Collection
 
@@ -487,6 +518,8 @@ This is a pattern that has become popular with the idea of "Library"
 vs. "Application" cookbooks, and Bryan Berry has a [RubyGem to provider
 a helper for it](https://rubygems.org/gems/chef-rewind).
 
+<a name="item_8"></a>
+
 # (8) Extending the Recipe DSL with helpers
 
 One of the features of a Chef cookbook is that it can contain a
@@ -547,6 +580,8 @@ Now, when I want to use it in a recipe, I can:
 
     user_creds = encrypted_data_bag_item("secrets", "credentials)
 
+<a name="item_9"></a>
+
 # (9) Load and execute a single recipe
 
 In default operation, Chef loads cookbooks and recipes from their
@@ -587,6 +622,8 @@ This functionality is quite useful for example purposes, and a
 [ticket (CHEF-3571)](http://tickets.opscode.com/browse/CHEF-3571) was
 created to track its addition for core Chef.
 
+<a name="item_10"></a>
+
 # (10) Integrating Chef with Your Tools
 
 There's a rising ecosystem of tools surrounding chef. Many of them use the Chef
@@ -604,6 +641,8 @@ top.
 has a chef component to let you use the Chef REST api from [Java and
 Clojure](https://github.com/jclouds/jclouds-chef). Learn more
 [here](https://github.com/jclouds/jclouds-chef/wiki/Quick-Start)
+
+<a name="item_11"></a>
 
 # (11) Sending information to various places
 
@@ -720,6 +759,8 @@ useful:
   includes a Chef report handler!
 - [chef-handler-graphite](https://github.com/imeyer/chef-handler-graphite):
   send Chef run report data to graphite.
+
+<a name="item_12"></a>
 
 # (12) Tagging nodes
 
