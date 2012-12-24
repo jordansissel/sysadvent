@@ -1,3 +1,5 @@
+# Day 24 - Twelve things you didn't know with Chef
+
 In this post, we will discuss a number of features that can be used in
 managing systems with Chef, but may be overlooked by some users. We'll
 also look at some features that are not so commonly used, and may
@@ -7,8 +9,8 @@ prove helpful.
 
 This is probably something most readers who are familiar with Chef
 already do know. However, we do encounter some uses of Chef that
-indicate that the author didn't know this. For example, this is from
-an **actual** recipe I have seen:
+indicate that the author didn't know this. For example, this is from an
+**actual** recipe I have seen:
 
     execute "yum install foo" do
       not_if "rpm -qa | grep '^foo'"
@@ -20,7 +22,7 @@ an **actual** recipe I have seen:
 
 This totally works, assuming that the grep doesn't turn up a false
 positive (someone reading the 'food' man page?). However, there are
-resources for this pattern kind of thing.
+resources for this pattern kind of thing, so it's best to use them instead:
 
     package "foo" do
       action :install
@@ -137,7 +139,7 @@ If you're building a custom lightweight resource/provider for an API
 service like a monitoring system, this could be a helpful primitive to
 build upon.
 
-#### Opscode Cookbooks
+## Opscode Cookbooks
 
 Aside from the resources built into Chef, Opscode publishes a number
 of cookbooks that contain custom resources, or "LWRPs". See the README
@@ -493,7 +495,7 @@ can be new Chef Resources/Providers, ways of interacting with third
 party services, or simply extending the
 [Chef Recipe DSL](http://docs.opscode.com/chef/dsl_recipe.html).
 
-First, let's just have a simple method that shortcuts the Chef version
+Let's just have a simple method that shortcuts the Chef version
 attribute so we don't have to type the whole thing in our recipes.
 
 First, create a cookbook named "my_helpers".
@@ -554,7 +556,7 @@ This is helpful for simple use cases or as a general example. Dan
 DeLeo of Opscode wrote this as a gist awhile back, which I've updated
 here:
 
-https://gist.github.com/
+<https://gist.github.com//4366061>
 
 It's only 45 lines counting whitespace. Simply save that to a file,
 and then create a recipe file, and run it with the filename as an
