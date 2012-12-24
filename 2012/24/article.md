@@ -635,7 +635,12 @@ top.
 [spice](https://github.com/danryan/spice) and
 [ridley](https://github.com/reset/ridley) provide ruby APIs that talk to Chef.
 
-## jclouds (java/clojure
+## pychef (python)
+
+[pychef](http://pychef.readthedocs.org/en/latest/index.html) gives you a nice
+api for hitting the Chef API from python.
+
+## jclouds (java/clojure)
 
 [jclouds](http://www.jclouds.org/documentation/gettingstarted/what-is-jclouds/)
 has a chef component to let you use the Chef REST api from [Java and
