@@ -587,11 +587,23 @@ This functionality is quite useful for example purposes, and a
 [ticket (CHEF-3571)](http://tickets.opscode.com/browse/CHEF-3571) was
 created to track its addition for core Chef.
 
-# (10) Use Chef as a Library
+# (10) Integrating Chef with Your Tools
 
-### spice and ridley (ruby)
-### jclouds (java/clojure
-### Interesting Chef objects
+There's a rising ecosystem of tools surrounding chef. Many of them use the Chef
+REST API to expose cool functionality and let you build your own tooling on
+top.
+
+## spice and ridley (ruby)
+
+[spice](https://github.com/danryan/spice) and
+[ridley](https://github.com/reset/ridley) provide ruby APIs that talk to Chef.
+
+## jclouds (java/clojure
+
+[jclouds](http://www.jclouds.org/documentation/gettingstarted/what-is-jclouds/)
+has a chef component to let you use the Chef REST api from [Java and
+Clojure](https://github.com/jclouds/jclouds-chef). Learn more
+[here](https://github.com/jclouds/jclouds-chef/wiki/Quick-Start)
 
 # (11) Sending information to various places
 
