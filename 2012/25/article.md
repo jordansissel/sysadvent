@@ -120,37 +120,37 @@ https://github.com/cfengine/design-center.git
 
 Let’s say we want to mirror the master branch to /tmp/design-center.
 
-  cf-sketch> configure  VCS::vcs_mirror
+    cf-sketch> configure  VCS::vcs_mirror
 
-  Entering interactive configuration for sketch VCS::vcs_mirror.
-  Please enter the requested parameters (enter STOP to abort):
+    Entering interactive configuration for sketch VCS::vcs_mirror.
+    Please enter the requested parameters (enter STOP to abort):
 
-  Parameter 'vcs' must be a PATH.
-  Please enter vcs: /usr/bin/git
+    Parameter 'vcs' must be a PATH.
+    Please enter vcs: /usr/bin/git
 
-  Parameter 'path' must be a PATH.
-  Please enter path: /tmp/design-center
+    Parameter 'path' must be a PATH.
+    Please enter path: /tmp/design-center
 
-  Parameter 'origin' must be a HTTP_URL|PATH.
-  Please enter origin: https://github.com/cfengine/design-center.git
+    Parameter 'origin' must be a HTTP_URL|PATH.
+    Please enter origin: https://github.com/cfengine/design-center.git
 
-  Parameter 'branch' must be a NON_EMPTY_STRING.
-  Please enter branch [master]: master
+    Parameter 'branch' must be a NON_EMPTY_STRING.
+    Please enter branch [master]: master
 
-  Parameter 'runas' must be a NON_EMPTY_STRING.
-  Please enter runas [getenv("USER", "128"): cfengine
+    Parameter 'runas' must be a NON_EMPTY_STRING.
+    Please enter runas [getenv("USER", "128"): cfengine
 
-  Parameter 'umask' must be a OCTAL.
-  Please enter umask [022]: 022
+    Parameter 'umask' must be a OCTAL.
+    Please enter umask [022]: 022
 
-  Parameter 'activated' must be a CONTEXT.
-  Please enter activated [any]: any
+    Parameter 'activated' must be a CONTEXT.
+    Please enter activated [any]: any
 
-  Parameter 'nowipe' must be a CONTEXT.
-  Please enter nowipe [!any]: !any
-  Configured: VCS::vcs_mirror #1
+    Parameter 'nowipe' must be a CONTEXT.
+    Please enter nowipe [!any]: !any
+    Configured: VCS::vcs_mirror #1
 
-  cf-sketch>
+    cf-sketch>
 
 The sketch is now configured and ready for use.  Note the “#1”, that means this
 an instance of the sketch - you can have more than one instance.
